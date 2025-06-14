@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Another Documents Chat AI</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>Another Documents Chat AI</h1>
+    <div id="status">
+      <span id="conn-status">Checking Ollama…</span>
+      <span id="engine-info"></span>
+      <span id="memory-info">Checking memory…</span>
+    </div>
+    <div id="model-control">
+      <div>
+        <label for="remote-select">Remote Models to Download:</label>
+        <select id="remote-select"></select>
+        <button id="pull-btn">Pull</button>
+        <span id="pull-msg"></span>
+      </div>
+      <div>
+        <label for="local-select">Local Models to Run:</label>
+        <select id="local-select"></select>
+        <button id="run-btn">Run</button>
+        <span id="run-msg"></span>
+      </div>
+    </div>
+  </header>
+
+  <section id="upload">
+    <h2>Upload Your Documents</h2>
+    <p>You can upload multiple files in <strong>.pdf, .docx, .txt</strong> format.</p>
+    
+    <!-- Show existing documents -->
+    <div id="existing-docs">
+      <h3>Current Documents:</h3>
+      <div id="docs-list">Loading documents...</div>
+    </div>
+    
+    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file"
+             name="files"
+             id="file-input"
+             multiple
+             accept=".pdf,.docx,.txt">
+      <button type="submit">Upload</button>
+    </form>
+    <div id="upload-msg"></div>
+    <div id="files-list"></div>
+  </section>
+
+  <section id="chat">
+    <h2>Chat</h2>
+    <form id="chat-form">
+      <input type="text" id="query" placeholder="Ask a question..." required>
+      <button type="submit">Send</button>
+    </form>
+    <div id="chat-msg"></div>
+    <pre id="response"></pre>
+  </section>
+
+  <script>
+    // 1) Check Ollama status
+    async function checkStatus() {
+      try {
+        const res = await fetch('/status');
+        const {connected, engine} = await res.json();
+        document.getElementById('conn-status').innerText =
+          connected ? '🟢 Ollama online' : '🔴 Ollama offline';
+        document.getElementById('engine-info').innerText =
+          connected && engine ? `(Engine: ${engine})` : '';
+      } catch {
+        document.getElementById('conn-status').innerText = '🔴 Error';
+      }
+    }
+    checkStatus();
+    setInterval(checkStatus, 15000);
+
+    // Check system memory
+    async function checkMemory() {
+      try {
+        const res = await fetch('/system/memory');
+        const memory = await res.json();
+        const memoryText = `💾 RAM: ${memory.used_gb}/${memory.total_gb}GB (${memory.percent_used.toFixed(1)}%)`;
+        document.getElementById('memory-info').innerText = memoryText;
+      } catch {
+        document.getElementById('memory-info').innerText = '💾 Memory: Error';
+      }
+    }
+    checkMemory();
+    setInterval(checkMemory, 30000);
+
+    // Load and display existing documents
+    async function loadExistingDocuments() {
+      try {
+        const res = await fetch('/documents');
+        const {documents} = await res.json();
+        const docsList = document.getElementById('docs-list');
+        
+        if (documents && documents.length > 0) {
+          docsList.innerHTML = documents.map(doc => 
+            `<div class="doc-item">
+              <span class="doc-name">${doc}</span>
+              <button class="delete-btn" onclick="deleteDocument('${doc}')">Delete</button>
+            </div>`
+          ).join('');
+        } else {
+          docsList.innerHTML = '<em>No documents uploaded yet</em>';
+        }
+      } catch (error) {
+        document.getElementById('docs-list').innerHTML = '<em>Error loading documents</em>';
+        console.error('Error loading documents:', error);
+      }
+    }
+
+    // Delete a document
+    async function deleteDocument(filename) {
+      if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/documents/${encodeURIComponent(filename)}`, {
+          method: 'DELETE'
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
+        await loadExistingDocuments(); // Refresh the list
+        document.getElementById('upload-msg').innerText = `Deleted "${filename}"`;
+        setTimeout(() => {
+          document.getElementById('upload-msg').innerText = '';
+        }, 3000);
+      } catch (error) {
+        alert(`Error deleting document: ${error.message}`);
+      }
+    }
+
+    // 2) Handle uploads
+    document.getElementById('upload-form').onsubmit = async e => {
+      e.preventDefault();
+      const files = document.getElementById('file-input').files;
+      if (!files.length) return;
+      
+      document.getElementById('upload-msg').innerText = 'Uploading…';
+      
+      // First, check for existing files
+      const form = new FormData(e.target);
+      const res = await fetch('/upload', { method: 'POST', body: form });
+      const data = await res.json();
+      
+      // Handle results
+      let message = '';
+      if (data.uploaded && data.uploaded.length > 0) {
+        message += `Uploaded: ${data.uploaded.join(', ')}`;
+      }
+      
+      if (data.existing && data.existing.length > 0) {
+        const overwrite = confirm(
+          `The following files already exist:\n${data.existing.join(', ')}\n\nDo you want to overwrite them?`
+        );
+        
+        if (overwrite) {
+          // Re-upload with overwrite flag
+          const overwriteForm = new FormData(e.target);
+          overwriteForm.append('overwrite', 'true');
+          const overwriteRes = await fetch('/upload', { method: 'POST', body: overwriteForm });
+          const overwriteData = await overwriteRes.json();
+          
+          if (overwriteData.uploaded) {
+            message += (message ? '\n' : '') + `Overwritten: ${overwriteData.uploaded.join(', ')}`;
+          }
+        } else {
+          message += (message ? '\n' : '') + `Skipped existing files: ${data.existing.join(', ')}`;
+        }
+      }
+      
+      if (data.errors && data.errors.length > 0) {
+        message += (message ? '\n' : '') + `Errors: ${data.errors.join(', ')}`;
+      }
+      
+      document.getElementById('upload-msg').innerText = message || 'Upload complete!';
+      await loadExistingDocuments(); // Refresh the document list
+      
+      // Clear the file input
+      document.getElementById('file-input').value = '';
+    };
+
+    // 3) Handle chat (Enter or button)
+    const chatForm = document.getElementById('chat-form');
+    const queryInput = document.getElementById('query');
+    chatForm.onsubmit = async e => {
+      e.preventDefault();
+      const q = queryInput.value.trim();
+      if (!q) return;
+      
+      document.getElementById('chat-msg').innerText = 'Thinking… (this may take a while)';
+      document.getElementById('response').innerText = '';
+      
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ query: q })
+        });
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          let errorMessage;
+          try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.detail || 'Unknown error';
+          } catch {
+            errorMessage = errorText || `HTTP ${res.status}`;
+          }
+          throw new Error(errorMessage);
+        }
+        
+        const data = await res.json();
+        document.getElementById('chat-msg').innerText = '';
+        document.getElementById('response').innerText = data.response || 'No response received';
+        
+      } catch (error) {
+        document.getElementById('chat-msg').innerText = `Error: ${error.message}`;
+        document.getElementById('response').innerText = '';
+        console.error('Chat error:', error);
+      }
+    };
+    queryInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatForm.requestSubmit();
+      }
+    });
+
+    // Helper function to group models by family
+    function groupModelsByFamily(models) {
+      const families = {};
+      
+      models.forEach(model => {
+        const baseName = model.split(':')[0];
+        if (!families[baseName]) {
+          families[baseName] = [];
+        }
+        families[baseName].push(model);
+      });
+      
+      return families;
+    }
+
+    // Helper function to create option groups for models with memory info
+    function createModelOptions(models) {
+      if (!models || models.length === 0) {
+        return '<option value="">-- None Available --</option>';
+      }
+      
+      // If models are objects with memory info, group them differently
+      if (typeof models[0] === 'object' && models[0].name) {
+        const families = {};
+        
+        models.forEach(model => {
+          const baseName = model.name.split(':')[0];
+          if (!families[baseName]) {
+            families[baseName] = [];
+          }
+          families[baseName].push(model);
+        });
+        
+        let html = '';
+        Object.keys(families).sort().forEach(family => {
+          if (families[family].length === 1) {
+            const model = families[family][0];
+            const memoryInfo = `${model.estimated_ram_gb}GB - ${model.category}`;
+            html += `<option value="${model.name}" title="${memoryInfo}">${model.name} (${model.estimated_ram_gb}GB)</option>`;
+          } else {
+            html += `<optgroup label="${family}">`;
+            families[family].sort((a, b) => a.estimated_ram_gb - b.estimated_ram_gb).forEach(model => {
+              const memoryInfo = `${model.estimated_ram_gb}GB - ${model.category}`;
+              html += `<option value="${model.name}" title="${memoryInfo}">${model.name} (${model.estimated_ram_gb}GB)</option>`;
+            });
+            html += '</optgroup>';
+          }
+        });
+        
+        return html;
+      } else {
+        // Fallback for simple string arrays
+        return models.map(m => `<option value="${m}">${m}</option>`).join('');
+      }
+    }
+
+    // 4) Load remote & local models
+    async function loadModels() {
+      const remoteSel = document.getElementById('remote-select');
+      const localSel = document.getElementById('local-select');
+      document.getElementById('pull-msg').innerText = '';
+      document.getElementById('run-msg').innerText = '';
+      try {
+        const res = await fetch('/models');
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        const data = await res.json();
+        const {remote, local, remote_error} = data;
+        
+        // Remote models with error handling
+        if (remote_error) {
+          remoteSel.innerHTML = `<option>-- Error: ${remote_error} --</option>`;
+          console.error('Remote models error:', remote_error);
+        } else if (remote && remote.length > 0) {
+          remoteSel.innerHTML = createModelOptions(remote);
+        } else {
+          remoteSel.innerHTML = '<option value="">-- None Available --</option>';
+        }
+        
+        // Local models with grouping
+        localSel.innerHTML = createModelOptions(local);
+        
+        // Always enable so user sees the state
+        remoteSel.disabled = false;
+        localSel.disabled = false;
+
+        // Preselect current engine in local-select
+        const match = document.getElementById('engine-info').innerText.match(/\(Engine: (.*)\)/);
+        if (match) {
+          // Check if we have model objects or simple strings
+          if (local && local.length > 0 && typeof local[0] === 'object') {
+            const localNames = local.map(m => m.name);
+            if (localNames.includes(match[1])) {
+              localSel.value = match[1];
+            }
+          } else if (local && local.includes(match[1])) {
+            localSel.value = match[1];
+          }
+        }
+      } catch (error) {
+        console.error('Error loading models:', error);
+        remoteSel.innerHTML = `<option>-- Error: ${error.message} --</option>`;
+        localSel.innerHTML = `<option>-- Error: ${error.message} --</option>`;
+        remoteSel.disabled = false;
+        localSel.disabled = false;
+      }
+    }
+
+    // 5) Pull a remote model
+    document.getElementById('pull-btn').addEventListener('click', async () => {
+      const name = document.getElementById('remote-select').value;
+      const pullMsg = document.getElementById('pull-msg');
+      const btn = document.getElementById('pull-btn');
+      btn.disabled = true; pullMsg.innerText = 'Pulling…';
+      try {
+        const res = await fetch('/models/pull', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        pullMsg.innerText = `Pulled ${name}`;
+        await loadModels(); await checkStatus();
+      } catch (e) {
+        pullMsg.innerText = `Error: ${e.message}`;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // 6) Run a local model
+    document.getElementById('run-btn').addEventListener('click', async () => {
+      const name = document.getElementById('local-select').value;
+      const runMsg = document.getElementById('run-msg');
+      const btn = document.getElementById('run-btn');
+      btn.disabled = true; runMsg.innerText = 'Switching…';
+      try {
+        const res = await fetch('/models/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        runMsg.innerText = `Using ${name}`;
+        await checkStatus(); await loadModels();
+      } catch (e) {
+        runMsg.innerText = `Error: ${e.message}`;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Initial load
+    loadModels();
+    loadExistingDocuments();
+  </script>
+</body>
+</html>

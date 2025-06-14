@@ -1,0 +1,25 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      disable: true
+
+  web:
+    build:
+      context: ./web
+      network: host
+    container_name: another-chat-web
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./web:/app
+    depends_on:
+      - ollama
+
+volumes:
+  ollama_data:

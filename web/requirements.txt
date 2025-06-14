@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+jinja2
+requests
+python-docx
+PyPDF2
+beautifulsoup4
+lxml
+psutil
