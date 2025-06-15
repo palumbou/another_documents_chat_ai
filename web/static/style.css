@@ -746,6 +746,29 @@ body {
   font-weight: 600;
 }
 
+.chunk-search {
+  margin: 1rem 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color)20;
+}
+
 .chunk-item {
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -760,6 +783,24 @@ body {
   align-items: center;
   margin-bottom: 0.75rem;
   color: var(--text-secondary);
+  gap: 1rem;
+}
+
+.expand-chunk {
+  background-color: var(--primary-color);
+  color: var(--background);
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.expand-chunk:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
 }
 
 .chunk-size {
@@ -773,11 +814,27 @@ body {
   border-radius: 6px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.875rem;
-  line-height: 1.5;
+  line-height: 1.6;
   white-space: pre-wrap;
-  max-height: 200px;
+  word-wrap: break-word;
+  max-height: 500px; /* Increased height for better viewing */
   overflow-y: auto;
   border: 1px solid var(--border-color);
+  transition: max-height 0.3s ease;
+}
+
+/* Search highlight */
+.search-highlight {
+  background-color: var(--warning-color);
+  color: var(--background);
+  padding: 0.1rem 0.2rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .search-highlight {
+  background-color: var(--warning-color);
+  color: var(--background);
 }
 
 /* Loading and status states */
@@ -1009,4 +1066,27 @@ textarea:focus {
 
 .hidden {
   display: none;
+}
+
+.chunk-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.copy-chunk {
+  background-color: var(--secondary-color);
+  color: var(--background);
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.copy-chunk:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-1px);
 }

@@ -156,7 +156,8 @@ def search_documents(documents_dict: Dict[str, str], query: str, max_results: in
                 "chunk_index": chunk["chunk_index"],
                 "total_chunks": chunk["total_chunks"],
                 "char_count": chunk["char_count"],
-                "preview": chunk["content"][:300] + "..." if len(chunk["content"]) > 300 else chunk["content"]
+                "preview": chunk["content"][:500] + "..." if len(chunk["content"]) > 500 else chunk["content"],
+                "full_content": chunk["content"]  # Include full content for complete viewing
             }
             for chunk in relevant_chunks
         ],
@@ -180,7 +181,8 @@ def get_document_chunks_info(documents_dict: Dict[str, str], filename: str) -> D
             {
                 "chunk_index": chunk["chunk_index"],
                 "char_count": chunk["char_count"],
-                "preview": chunk["content"][:200] + "..." if len(chunk["content"]) > 200 else chunk["content"]
+                "preview": chunk["content"][:500] + "..." if len(chunk["content"]) > 500 else chunk["content"],
+                "full_content": chunk["content"]  # Include full content for complete viewing
             }
             for chunk in chunks
         ]

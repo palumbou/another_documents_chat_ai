@@ -16,13 +16,13 @@ os.makedirs(DOCS_DIR, exist_ok=True)
 # Processing limits and settings
 MAX_FILE_SIZE_MB = 100  # Maximum file size in MB
 MAX_CHARS_PER_PAGE = 8000  # Maximum characters per page for PDF extraction
-MAX_TOTAL_CHARS = 1000000  # Maximum total characters per document
-MAX_PAGES_LARGE_FILES = 50  # Maximum pages to process for large files (>10MB)
-MAX_PAGES_OCR = 20  # Maximum pages to process with OCR for large files
+MAX_TOTAL_CHARS = 2000000  # Maximum total characters per document
+MAX_PAGES_LARGE_FILES = 100  # Maximum pages to process for large files (>10MB)
+MAX_PAGES_OCR = 30  # Maximum pages to process with OCR for large files
 
 # Chunking configuration
-DEFAULT_CHUNK_SIZE = 6000  # Default chunk size for document processing
-SEARCH_CHUNK_SIZE = 4000  # Chunk size for search operations
+DEFAULT_CHUNK_SIZE = 12000  # Default chunk size for document processing
+SEARCH_CHUNK_SIZE = 8000  # Chunk size for search operations
 MAX_CHUNKS_PER_QUERY = 5  # Maximum chunks to return per search query
 
 # Model and engine configuration

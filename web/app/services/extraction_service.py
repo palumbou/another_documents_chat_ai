@@ -49,7 +49,7 @@ def extract_docx_text_optimized(path: str, file_size: int) -> str:
     """
     try:
         doc = Document(path)
-        max_chars = 100000 if file_size > 5 * 1024 * 1024 else 500000  # 5MB limit
+        max_chars = 200000 if file_size > 5 * 1024 * 1024 else 1000000
         
         texts = []
         total_chars = 0
@@ -80,7 +80,7 @@ def extract_doc_text_optimized(path: str, file_size: int) -> str:
     """
     try:
         import docx2txt
-        max_chars = 100000 if file_size > 5 * 1024 * 1024 else 500000  # 5MB limit
+        max_chars = 200000 if file_size > 5 * 1024 * 1024 else 1000000
         
         # Extract text from DOC file
         text = docx2txt.process(path)
@@ -99,7 +99,7 @@ def extract_doc_text_optimized(path: str, file_size: int) -> str:
         try:
             with open(path, 'r', encoding='utf-8', errors='ignore') as file:
                 text = file.read()
-                max_chars = 100000 if file_size > 5 * 1024 * 1024 else 500000
+                max_chars = 200000 if file_size > 5 * 1024 * 1024 else 1000000
                 if len(text) > max_chars:
                     text = text[:max_chars] + "\n\n[Content truncated due to size limit]"
                 return clean_text(text)
@@ -114,7 +114,7 @@ def extract_md_text_optimized(path: str, file_size: int) -> str:
     Optimized Markdown text extraction with limits.
     """
     try:
-        max_chars = 100000 if file_size > 5 * 1024 * 1024 else 500000  # 5MB limit
+        max_chars = 200000 if file_size > 5 * 1024 * 1024 else 1000000
         
         with open(path, 'r', encoding='utf-8', errors='ignore') as file:
             text = file.read()
@@ -138,7 +138,7 @@ def extract_txt_file_optimized(path: str, file_size: int) -> str:
     Optimized text file reading with size limits.
     """
     try:
-        max_chars = 100000 if file_size > 1 * 1024 * 1024 else 500000  # 1MB limit
+        max_chars = 200000 if file_size > 1 * 1024 * 1024 else 1000000
         
         with open(path, encoding="utf-8", errors="ignore") as f:
             content = f.read(max_chars)
