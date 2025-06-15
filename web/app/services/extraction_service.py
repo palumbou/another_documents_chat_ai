@@ -30,6 +30,14 @@ def extract_text(path: str) -> str:
         text = extract_docx_text_optimized(path, int(file_size_mb * 1024 * 1024))
         log_extraction_method(filename, "DOCX", len(text) > 10, len(text))
         return text
+    elif path.lower().endswith(".doc"):
+        text = extract_doc_text_optimized(path, int(file_size_mb * 1024 * 1024))
+        log_extraction_method(filename, "DOC", len(text) > 10, len(text))
+        return text
+    elif path.lower().endswith(".md"):
+        text = extract_md_text_optimized(path, int(file_size_mb * 1024 * 1024))
+        log_extraction_method(filename, "MD", len(text) > 10, len(text))
+        return text
     else:
         text = extract_txt_file_optimized(path, int(file_size_mb * 1024 * 1024))
         log_extraction_method(filename, "TXT", len(text) > 10, len(text))
@@ -64,6 +72,66 @@ def extract_docx_text_optimized(path: str, file_size: int) -> str:
     except Exception as e:
         print(f"Error reading DOCX {path}: {e}")
         return f"[Error reading DOCX: {str(e)}]"
+
+def extract_doc_text_optimized(path: str, file_size: int) -> str:
+    """
+    Optimized DOC text extraction with limits.
+    Uses python-docx2txt for legacy DOC files.
+    """
+    try:
+        import docx2txt
+        max_chars = 100000 if file_size > 5 * 1024 * 1024 else 500000  # 5MB limit
+        
+        # Extract text from DOC file
+        text = docx2txt.process(path)
+        
+        if not text:
+            return ""
+        
+        # Apply character limit
+        if len(text) > max_chars:
+            text = text[:max_chars] + "\n\n[Content truncated due to size limit]"
+        
+        return clean_text(text)
+    
+    except ImportError:
+        # Fallback: try to read as plain text (not ideal but better than nothing)
+        try:
+            with open(path, 'r', encoding='utf-8', errors='ignore') as file:
+                text = file.read()
+                max_chars = 100000 if file_size > 5 * 1024 * 1024 else 500000
+                if len(text) > max_chars:
+                    text = text[:max_chars] + "\n\n[Content truncated due to size limit]"
+                return clean_text(text)
+        except Exception as e:
+            return f"Error reading DOC file: {str(e)}"
+    
+    except Exception as e:
+        return f"Error extracting text from DOC file: {str(e)}"
+
+def extract_md_text_optimized(path: str, file_size: int) -> str:
+    """
+    Optimized Markdown text extraction with limits.
+    """
+    try:
+        max_chars = 100000 if file_size > 5 * 1024 * 1024 else 500000  # 5MB limit
+        
+        with open(path, 'r', encoding='utf-8', errors='ignore') as file:
+            text = file.read()
+        
+        if not text:
+            return ""
+        
+        # Apply character limit
+        if len(text) > max_chars:
+            text = text[:max_chars] + "\n\n[Content truncated due to size limit]"
+        
+        # For Markdown, we can optionally process it to remove markdown syntax
+        # or keep it as-is for better context. Let's keep the markdown syntax.
+        return clean_text(text)
+    
+    except Exception as e:
+        return f"Error reading Markdown file: {str(e)}"
 
 def extract_txt_file_optimized(path: str, file_size: int) -> str:
     """

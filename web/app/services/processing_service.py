@@ -107,6 +107,13 @@ def get_documents_overview(documents: Dict[str, str]) -> Dict[str, Any]:
     """Get overview of all documents with processing and chunk information."""
     from app.services.chunking_service import chunk_documents_for_processing
     
+    # First, sync with filesystem to remove any files that no longer exist
+    sync_documents_with_filesystem()
+    
+    # Refresh documents after sync (in case some were removed)
+    from app.shared_state import get_documents
+    documents = get_documents()
+    
     # Get all files that have been uploaded (including those still processing)
     all_files = set(documents.keys()) | set(document_status.keys())
     
@@ -168,3 +175,60 @@ def schedule_document_processing(filename: str, documents: Dict[str, str]) -> No
     processing_thread = threading.Thread(target=background_process, daemon=True)
     processing_thread.start()
     print(f"🔄 Started background processing for: {filename}")
+
+def sync_documents_with_filesystem() -> None:
+    """
+    Synchronize in-memory document state with actual files in the filesystem.
+    Remove documents from memory and status if their files no longer exist.
+    Add new files found in filesystem that aren't being tracked.
+    """
+    from app.utils.file_helpers import get_supported_files_in_dir
+    from app.shared_state import get_documents, remove_document, set_document
+    from app.config import DOCS_DIR
+    
+    # Get currently supported files in the docs directory
+    existing_files = set(get_supported_files_in_dir(DOCS_DIR))
+    
+    # Get documents currently in memory
+    documents = get_documents()
+    in_memory_files = set(documents.keys())
+    
+    # Get files in processing status
+    status_files = set(document_status.keys())
+    
+    # Files that are in memory or status but no longer exist on disk
+    files_to_remove = (in_memory_files | status_files) - existing_files
+    
+    # Files that exist on disk but are not tracked
+    files_to_add = existing_files - (in_memory_files | status_files)
+    
+    if files_to_remove:
+        print(f"🗑️  Removing {len(files_to_remove)} files that no longer exist on disk: {list(files_to_remove)}")
+        
+        for filename in files_to_remove:
+            # Remove from memory
+            if filename in in_memory_files:
+                remove_document(filename)
+                print(f"  📝 Removed from memory: {filename}")
+            
+            # Remove from processing status
+            if filename in document_status:
+                del document_status[filename]
+                print(f"  📊 Removed from status: {filename}")
+    
+    if files_to_add:
+        print(f"📁 Found {len(files_to_add)} new files to process: {list(files_to_add)}")
+        
+        for filename in files_to_add:
+            # Schedule for processing
+            document_status[filename] = {
+                "status": "pending",
+                "progress": 0,
+                "error": None,
+                "timestamp": None
+            }
+            set_document(filename, "")  # Empty content initially
+            print(f"  📋 Scheduled for processing: {filename}")
+            
+            # Start background processing
+            schedule_document_processing(filename, get_documents())

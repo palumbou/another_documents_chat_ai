@@ -2,6 +2,10 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
+FROM python:3.10-slim
+
+WORKDIR /app
+
 # Install system dependencies for OCR and PDF processing
 RUN apt-get update && apt-get install -y \
     poppler-utils \

@@ -4,6 +4,7 @@ python-multipart
 jinja2
 requests
 python-docx
+docx2txt
 PyPDF2
 pdfplumber
 beautifulsoup4

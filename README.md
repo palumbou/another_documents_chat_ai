@@ -13,6 +13,25 @@ This is an experimental project to understand how local AI works, specifically e
 - 💻 **Resource assessment**: testing computational requirements for local AI
 - 🔍 **PDF processing**: simple document analysis and chat functionality
 
+## 🚀 Quick Start
+
+**For detailed installation and usage instructions, please read:**
+- 📖 **[HOWTO.md](HOWTO.md)** - Complete English guide
+- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida completa in italiano
+- 🛠️ **[MANAGE.md](MANAGE.md)** - Management script quick reference
+
+**Quick installation:**
+```bash
+./manage.sh install
+```
+
+**Quick start:**
+```bash
+./manage.sh start
+```
+
+Then open http://localhost:8000 in your browser.
+
 ## Features
 
 ### Core features
@@ -67,7 +86,7 @@ The interface features a beautiful **Rosé Pine** color scheme with two modes:
 
 #### File size and processing limits
 - **Maximum file size**: 50MB per file
-- **Supported formats**: PDF, DOCX, TXT
+- **Supported formats**: PDF, DOCX, DOC, TXT, MD
 - **OCR page limit**: 20 pages for files >10MB (to manage processing time)
 - **Character extraction limits**:
   - PyPDF2: 500,000 characters per document
@@ -582,7 +601,7 @@ This project is designed to explore and understand:
 - **Maximum file size**: 35MB+ supported with optimizations
 - **Large file handling**: 50 pages max for files >10MB
 - **Character limit**: 500,000 characters per document
-- **Supported formats**: PDF, DOCX, TXT
+- **Supported formats**: PDF, DOCX, DOC, TXT, MD
 
 ### Chunking system parameters
 - **Chunk size**: 6,000 characters (optimal for 8K context window)

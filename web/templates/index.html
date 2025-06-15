@@ -18,22 +18,23 @@
         </div>
       </header>
       
-      <!-- System Status -->
-      <section class="status-section">
-        <h3>System Status</h3>
-        <div id="status">
-          <div class="status-item">
-            <span class="status-label">Ollama:</span>
-            <span id="conn-status">Checking…</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">Engine:</span>
-            <span id="engine-info">Loading…</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">Memory:</span>
-            <span id="memory-info">Checking…</span>
-          </div>
+      <!-- Documents Management -->
+      <section class="documents-section">
+        <h3>Documents</h3>
+        <div id="existing-docs">
+          <div id="docs-list">Loading documents...</div>
+        </div>
+        <div class="upload-area">
+          <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file"
+                   name="files"
+                   id="file-input"
+                   multiple
+                   accept=".pdf,.docx,.txt"
+                   class="file-input">
+            <button type="submit" class="btn-primary">Upload Files</button>
+          </form>
+          <div id="upload-msg" class="status-msg"></div>
         </div>
       </section>
 
@@ -54,23 +55,22 @@
         </div>
       </section>
 
-      <!-- Documents Management -->
-      <section class="documents-section">
-        <h3>Documents</h3>
-        <div id="existing-docs">
-          <div id="docs-list">Loading documents...</div>
-        </div>
-        <div class="upload-area">
-          <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file"
-                   name="files"
-                   id="file-input"
-                   multiple
-                   accept=".pdf,.docx,.txt"
-                   class="file-input">
-            <button type="submit" class="btn-primary">Upload Files</button>
-          </form>
-          <div id="upload-msg" class="status-msg"></div>
+      <!-- System Status -->
+      <section class="status-section">
+        <h3>System Status</h3>
+        <div id="status">
+          <div class="status-item">
+            <span class="status-label">Ollama:</span>
+            <span id="conn-status">Checking…</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Engine:</span>
+            <span id="engine-info">Loading…</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Memory:</span>
+            <span id="memory-info">Checking…</span>
+          </div>
         </div>
       </section>
     </aside>
@@ -227,18 +227,18 @@
             
             html += `
               <div class="doc-item ${statusClass}">
-                <div class="doc-main">
-                  <span class="doc-name">${doc}</span>
-                  <div class="doc-status">
-                    <span class="status-icon">${statusIcon}</span>
-                    <span class="status-text">${statusText}</span>
-                  </div>
+                <div class="doc-header">
+                  <span class="doc-name" title="${doc}">${doc.length > 20 ? doc.substring(0, 20) + '...' : doc}</span>
+                  <span class="status-icon">${statusIcon}</span>
+                </div>
+                <div class="doc-info">
+                  <span class="status-text">${statusText}</span>
                   ${status === 'processing' ? `<div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>` : ''}
                 </div>
                 <div class="doc-actions">
-                  ${isProcessed ? `<button class="view-chunks-btn" onclick="viewDocumentChunks('${doc}')">View Chunks</button>` : ''}
-                  <button class="delete-btn" onclick="deleteDocument('${doc}')">Delete</button>
-                  ${status === 'error' ? `<button class="retry-btn" onclick="retryProcessing('${doc}')">Retry</button>` : ''}
+                  ${isProcessed ? `<button class="btn-xs" onclick="viewDocumentChunks('${doc}')" title="View Chunks">📊</button>` : ''}
+                  <button class="btn-xs delete" onclick="deleteDocument('${doc}')" title="Delete">🗑️</button>
+                  ${status === 'error' ? `<button class="btn-xs retry" onclick="retryProcessing('${doc}')" title="Retry">🔄</button>` : ''}
                 </div>
               </div>`;
           });

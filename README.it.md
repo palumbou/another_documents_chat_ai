@@ -13,6 +13,25 @@ Questo è un progetto sperimentale per capire come funzionano le IA in locale, e
 - 💻 **Valutazione risorse**: testare i requisiti computazionali per IA locale
 - 🔍 **Elaborazione PDF**: semplice analisi documenti e funzionalità chat
 
+## 🚀 Avvio Rapido
+
+**Per istruzioni dettagliate di installazione e utilizzo, leggi:**
+- 📖 **[HOWTO.md](HOWTO.md)** - Guida completa in inglese
+- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida completa in italiano
+- 🛠️ **[MANAGE.md](MANAGE.md)** - Riferimento rapido script di gestione
+
+**Installazione rapida:**
+```bash
+./manage.sh install
+```
+
+**Avvio rapido:**
+```bash
+./manage.sh start
+```
+
+Poi apri http://localhost:8000 nel tuo browser.
+
 ## Funzionalità
 
 ### Funzionalità principali

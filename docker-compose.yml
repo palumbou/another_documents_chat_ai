@@ -1,11 +1,18 @@
+networks:
+  another-chat-network:
+    driver: bridge
+
 services:
   ollama:
     image: ollama/ollama:latest
-    container_name: ollama
+    container_name: ${OLLAMA_CONTAINER_NAME:-ollama}
+    restart: ${RESTART_POLICY:-unless-stopped}
     ports:
-      - "11434:11434"
+      - "${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama_data:/root/.ollama
+    networks:
+      - another-chat-network
     healthcheck:
       disable: true
 
@@ -13,13 +20,23 @@ services:
     build:
       context: ./web
       network: host
-    container_name: another-chat-web
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    container_name: ${WEB_CONTAINER_NAME:-another-chat-web}
+    restart: ${RESTART_POLICY:-unless-stopped}
     ports:
-      - "8000:8000"
+      - "${WEB_PORT:-8000}:8000"
     volumes:
       - ./web:/app
+      - ${DOCS_VOLUME:-./web/docs}:/app/docs
     depends_on:
       - ollama
+    networks:
+      - another-chat-network
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-ollama}
+      - OLLAMA_PORT=${OLLAMA_PORT:-11434}
 
 volumes:
   ollama_data:
+  documents_data:
