@@ -2,7 +2,15 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install dependencies
+# Install system dependencies for OCR and PDF processing
+RUN apt-get update && apt-get install -y \
+    poppler-utils \
+    tesseract-ocr \
+    tesseract-ocr-ita \
+    tesseract-ocr-eng \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

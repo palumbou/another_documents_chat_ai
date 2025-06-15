@@ -5,6 +5,10 @@ jinja2
 requests
 python-docx
 PyPDF2
+pdfplumber
 beautifulsoup4
 lxml
 psutil
+pytesseract
+Pillow
+pdf2image

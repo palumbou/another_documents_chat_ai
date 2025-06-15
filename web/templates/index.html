@@ -6,60 +6,133 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header>
-    <h1>Another Documents Chat AI</h1>
-    <div id="status">
-      <span id="conn-status">Checking Ollama…</span>
-      <span id="engine-info"></span>
-      <span id="memory-info">Checking memory…</span>
-    </div>
-    <div id="model-control">
-      <div>
-        <label for="remote-select">Remote Models to Download:</label>
-        <select id="remote-select"></select>
-        <button id="pull-btn">Pull</button>
-        <span id="pull-msg"></span>
-      </div>
-      <div>
-        <label for="local-select">Local Models to Run:</label>
-        <select id="local-select"></select>
-        <button id="run-btn">Run</button>
-        <span id="run-msg"></span>
-      </div>
-    </div>
-  </header>
+  <div class="app-container">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <header class="sidebar-header">
+        <div class="header-content">
+          <h1>Documents Chat AI</h1>
+          <button id="theme-toggle" class="theme-toggle" title="Switch between Dawn and Moon themes">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
+      </header>
+      
+      <!-- System Status -->
+      <section class="status-section">
+        <h3>System Status</h3>
+        <div id="status">
+          <div class="status-item">
+            <span class="status-label">Ollama:</span>
+            <span id="conn-status">Checking…</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Engine:</span>
+            <span id="engine-info">Loading…</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Memory:</span>
+            <span id="memory-info">Checking…</span>
+          </div>
+        </div>
+      </section>
 
-  <section id="upload">
-    <h2>Upload Your Documents</h2>
-    <p>You can upload multiple files in <strong>.pdf, .docx, .txt</strong> format.</p>
-    
-    <!-- Show existing documents -->
-    <div id="existing-docs">
-      <h3>Current Documents:</h3>
-      <div id="docs-list">Loading documents...</div>
-    </div>
-    
-    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-      <input type="file"
-             name="files"
-             id="file-input"
-             multiple
-             accept=".pdf,.docx,.txt">
-      <button type="submit">Upload</button>
-    </form>
-    <div id="upload-msg"></div>
-    <div id="files-list"></div>
-  </section>
+      <!-- Models Management -->
+      <section class="models-section">
+        <h3>Models</h3>
+        <div class="model-group">
+          <label for="remote-select">Available Models:</label>
+          <select id="remote-select"></select>
+          <button id="pull-btn" class="btn-secondary">Download</button>
+          <span id="pull-msg" class="status-msg"></span>
+        </div>
+        <div class="model-group">
+          <label for="local-select">Active Model:</label>
+          <select id="local-select"></select>
+          <button id="run-btn" class="btn-primary">Use</button>
+          <span id="run-msg" class="status-msg"></span>
+        </div>
+      </section>
 
-  <section id="chat">
-    <h2>Chat</h2>
-    <form id="chat-form">
-      <input type="text" id="query" placeholder="Ask a question..." required>
-      <button type="submit">Send</button>
-    </form>
-    <div id="chat-msg"></div>
-    <pre id="response"></pre>
-  </section>
+      <!-- Documents Management -->
+      <section class="documents-section">
+        <h3>Documents</h3>
+        <div id="existing-docs">
+          <div id="docs-list">Loading documents...</div>
+        </div>
+        <div class="upload-area">
+          <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file"
+                   name="files"
+                   id="file-input"
+                   multiple
+                   accept=".pdf,.docx,.txt"
+                   class="file-input">
+            <button type="submit" class="btn-primary">Upload Files</button>
+          </form>
+          <div id="upload-msg" class="status-msg"></div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="chat-container">
+      <div class="chat-messages" id="chat-messages">
+        <div class="welcome-message">
+          <h2>🤖 Welcome to Documents Chat AI</h2>
+          <p>Your intelligent document assistant powered by Ollama</p>
+          <div class="welcome-features">
+            <div class="feature-grid">
+              <div class="feature-item">
+                <span class="feature-icon">📁</span>
+                <span>Upload PDFs, DOCX, TXT files</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">🔍</span>
+                <span>Advanced OCR for scanned documents</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">🧠</span>
+                <span>Intelligent document analysis</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">💬</span>
+                <span>Context-aware AI responses</span>
+              </div>
+            </div>
+          </div>
+          <div class="welcome-actions">
+            <p><strong>Get started:</strong></p>
+            <ol>
+              <li>Upload documents using the sidebar</li>
+              <li>Ask questions about your documents</li>
+              <li>Or just chat with the AI without documents!</li>
+            </ol>
+            <div class="theme-info">
+              <p>💡 <em>Try switching between Rosé Pine Dawn ☀️ and Moon 🌙 themes using the button above!</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chat-input-area">
+        <div class="input-container">
+          <textarea id="chat-input" 
+                    placeholder="Ask a question about your documents... (Enter to send, Shift+Enter for new line)"
+                    rows="3"></textarea>
+          <button id="send-btn" class="btn-send" title="Send message (Enter)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22,2 15,22 11,13 2,9"></polygon>
+            </svg>
+          </button>
+        </div>
+        <div class="input-help">
+          <small>Press <kbd>Enter</kbd> to send, <kbd>Shift+Enter</kbd> for new line</small>
+        </div>
+      </div>
+    </main>
+  </div>
 
   <script>
     // 1) Check Ollama status
@@ -69,8 +142,21 @@
         const {connected, engine} = await res.json();
         document.getElementById('conn-status').innerText =
           connected ? '🟢 Ollama online' : '🔴 Ollama offline';
-        document.getElementById('engine-info').innerText =
-          connected && engine ? `(Engine: ${engine})` : '';
+        
+        // Handle engine object properly
+        let engineText = '';
+        if (connected && engine && engine.name) {
+          let status = '';
+          if (engine.verified) {
+            status = '✅';
+          } else if (engine.available) {
+            status = '⏳';
+          } else {
+            status = '❌';
+          }
+          engineText = `(Engine: ${engine.name} ${status})`;
+        }
+        document.getElementById('engine-info').innerText = engineText;
       } catch {
         document.getElementById('conn-status').innerText = '🔴 Error';
       }
@@ -92,26 +178,139 @@
     checkMemory();
     setInterval(checkMemory, 30000);
 
-    // Load and display existing documents
+    // Load and display existing documents with processing status
     async function loadExistingDocuments() {
       try {
         const res = await fetch('/documents');
-        const {documents} = await res.json();
+        const data = await res.json();
         const docsList = document.getElementById('docs-list');
         
-        if (documents && documents.length > 0) {
-          docsList.innerHTML = documents.map(doc => 
-            `<div class="doc-item">
-              <span class="doc-name">${doc}</span>
-              <button class="delete-btn" onclick="deleteDocument('${doc}')">Delete</button>
-            </div>`
-          ).join('');
+        if (data.documents && data.documents.length > 0) {
+          let html = '';
+          
+          data.documents.forEach(doc => {
+            const info = data.document_info[doc] || {};
+            const status = info.processing_status || 'completed';
+            const progress = info.processing_progress || 100;
+            const isProcessed = info.is_processed || false;
+            const chunks = info.total_chunks || 0;
+            const chars = info.total_chars || 0;
+            const error = info.error;
+            
+            // Status icon and text
+            let statusIcon = '';
+            let statusText = '';
+            let statusClass = '';
+            
+            switch (status) {
+              case 'pending':
+                statusIcon = '⏳';
+                statusText = 'Waiting to process...';
+                statusClass = 'status-pending';
+                break;
+              case 'processing':
+                statusIcon = '🔄';
+                statusText = `Processing... ${progress}%`;
+                statusClass = 'status-processing';
+                break;
+              case 'completed':
+                statusIcon = '✅';
+                statusText = isProcessed ? `Ready (${chunks} chunks, ${(chars/1000).toFixed(1)}k chars)` : 'Uploaded';
+                statusClass = 'status-completed';
+                break;
+              case 'error':
+                statusIcon = '❌';
+                statusText = `Error: ${error || 'Processing failed'}`;
+                statusClass = 'status-error';
+                break;
+            }
+            
+            html += `
+              <div class="doc-item ${statusClass}">
+                <div class="doc-main">
+                  <span class="doc-name">${doc}</span>
+                  <div class="doc-status">
+                    <span class="status-icon">${statusIcon}</span>
+                    <span class="status-text">${statusText}</span>
+                  </div>
+                  ${status === 'processing' ? `<div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>` : ''}
+                </div>
+                <div class="doc-actions">
+                  ${isProcessed ? `<button class="view-chunks-btn" onclick="viewDocumentChunks('${doc}')">View Chunks</button>` : ''}
+                  <button class="delete-btn" onclick="deleteDocument('${doc}')">Delete</button>
+                  ${status === 'error' ? `<button class="retry-btn" onclick="retryProcessing('${doc}')">Retry</button>` : ''}
+                </div>
+              </div>`;
+          });
+          
+          // Summary with processing info
+          const summary = data.processing_summary || {};
+          let summaryText = `Total: ${data.total_chunks} chunks across ${data.documents.length} documents`;
+          if (summary.processing > 0 || summary.pending > 0) {
+            summaryText += ` (${summary.pending} pending, ${summary.processing} processing)`;
+          }
+          
+          html += `<div class="doc-summary">${summaryText}</div>`;
+          docsList.innerHTML = html;
         } else {
           docsList.innerHTML = '<em>No documents uploaded yet</em>';
         }
       } catch (error) {
         document.getElementById('docs-list').innerHTML = '<em>Error loading documents</em>';
         console.error('Error loading documents:', error);
+      }
+    }
+
+    // View chunks for a specific document
+    async function viewDocumentChunks(filename) {
+      try {
+        const res = await fetch(`/documents/${encodeURIComponent(filename)}/chunks`);
+        const data = await res.json();
+        
+        let html = `<h4>Chunks for "${filename}"</h4>`;
+        html += `<p>Total chunks: ${data.total_chunks}</p>`;
+        
+        data.chunks.forEach((chunk, index) => {
+          html += `
+            <div class="chunk-item">
+              <div class="chunk-header">
+                <strong>Chunk ${chunk.chunk_index}/${data.total_chunks}</strong>
+                <span class="chunk-size">(${chunk.char_count} characters)</span>
+              </div>
+              <div class="chunk-preview">${chunk.preview}</div>
+            </div>`;
+        });
+        
+        // Create modal or update a section to show chunks
+        const modal = document.createElement('div');
+        modal.className = 'chunks-modal';
+        modal.innerHTML = `
+          <div class="chunks-modal-content">
+            <span class="chunks-modal-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+            ${html}
+          </div>`;
+        
+        // Add ESC key listener to close modal
+        const handleEscKey = (event) => {
+          if (event.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscKey);
+          }
+        };
+        document.addEventListener('keydown', handleEscKey);
+        
+        // Add click outside to close modal
+        modal.addEventListener('click', (event) => {
+          if (event.target === modal) {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscKey);
+          }
+        });
+        
+        document.body.appendChild(modal);
+        
+      } catch (error) {
+        alert(`Error loading chunks: ${error.message}`);
       }
     }
 
@@ -140,7 +339,57 @@
       }
     }
 
-    // 2) Handle uploads
+    // Retry processing for a failed document
+    async function retryProcessing(filename) {
+      try {
+        // Create a new FormData with the file
+        const response = await fetch(`/documents/${encodeURIComponent(filename)}/retry`, {
+          method: 'POST'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        await loadExistingDocuments(); // Refresh the list
+      } catch (error) {
+        alert(`Error retrying processing: ${error.message}`);
+      }
+    }
+    
+    // Auto-refresh documents list every 5 seconds if there are documents being processed
+    let autoRefreshInterval;
+    
+    function startAutoRefresh() {
+      if (autoRefreshInterval) return; // Already running
+      
+      autoRefreshInterval = setInterval(async () => {
+        try {
+          const res = await fetch('/documents');
+          const data = await res.json();
+          const summary = data.processing_summary || {};
+          
+          // Check if there are documents still processing
+          if (summary.pending > 0 || summary.processing > 0) {
+            await loadExistingDocuments();
+          } else {
+            // Stop auto-refresh when all processing is complete
+            stopAutoRefresh();
+          }
+        } catch (error) {
+          console.error('Auto-refresh error:', error);
+        }
+      }, 3000); // Refresh every 3 seconds
+    }
+    
+    function stopAutoRefresh() {
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
+    }
+
+    // 2) Handle uploads with background processing
     document.getElementById('upload-form').onsubmit = async e => {
       e.preventDefault();
       const files = document.getElementById('file-input').files;
@@ -157,6 +406,9 @@
       let message = '';
       if (data.uploaded && data.uploaded.length > 0) {
         message += `Uploaded: ${data.uploaded.join(', ')}`;
+        if (data.processing && data.processing.length > 0) {
+          message += ` (processing in background...)`;
+        }
       }
       
       if (data.existing && data.existing.length > 0) {
@@ -173,6 +425,9 @@
           
           if (overwriteData.uploaded) {
             message += (message ? '\n' : '') + `Overwritten: ${overwriteData.uploaded.join(', ')}`;
+            if (overwriteData.processing && overwriteData.processing.length > 0) {
+              message += ` (processing in background...)`;
+            }
           }
         } else {
           message += (message ? '\n' : '') + `Skipped existing files: ${data.existing.join(', ')}`;
@@ -186,26 +441,40 @@
       document.getElementById('upload-msg').innerText = message || 'Upload complete!';
       await loadExistingDocuments(); // Refresh the document list
       
+      // Start auto-refresh if there are documents being processed
+      if ((data.processing && data.processing.length > 0) || (data.uploaded && data.uploaded.length > 0)) {
+        startAutoRefresh();
+      }
+      
       // Clear the file input
       document.getElementById('file-input').value = '';
     };
 
-    // 3) Handle chat (Enter or button)
-    const chatForm = document.getElementById('chat-form');
-    const queryInput = document.getElementById('query');
-    chatForm.onsubmit = async e => {
-      e.preventDefault();
-      const q = queryInput.value.trim();
-      if (!q) return;
+    // 3) Handle new chat interface
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Send message function
+    async function sendMessage() {
+      const query = chatInput.value.trim();
+      if (!query) return;
+
+      // Add user message to chat
+      addMessageToChat('user', query);
       
-      document.getElementById('chat-msg').innerText = 'Thinking… (this may take a while)';
-      document.getElementById('response').innerText = '';
+      // Clear input and disable send button
+      chatInput.value = '';
+      sendBtn.disabled = true;
+      
+      // Add thinking message
+      const thinkingId = addMessageToChat('ai', 'Thinking... (this may take a while)', true);
       
       try {
         const res = await fetch('/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ query: q })
+          body: new URLSearchParams({ query })
         });
         
         if (!res.ok) {
@@ -221,20 +490,66 @@
         }
         
         const data = await res.json();
-        document.getElementById('chat-msg').innerText = '';
-        document.getElementById('response').innerText = data.response || 'No response received';
+        
+        // Replace thinking message with actual response
+        const thinkingMsg = document.getElementById(thinkingId);
+        if (thinkingMsg) {
+          thinkingMsg.querySelector('.message-content').textContent = data.response || 'No response received';
+        }
         
       } catch (error) {
-        document.getElementById('chat-msg').innerText = `Error: ${error.message}`;
-        document.getElementById('response').innerText = '';
+        // Replace thinking message with error
+        const thinkingMsg = document.getElementById(thinkingId);
+        if (thinkingMsg) {
+          thinkingMsg.querySelector('.message-content').textContent = `Error: ${error.message}`;
+          thinkingMsg.querySelector('.message-content').style.color = 'var(--danger-color)';
+        }
         console.error('Chat error:', error);
+      } finally {
+        sendBtn.disabled = false;
+        chatInput.focus();
       }
-    };
-    queryInput.addEventListener('keydown', e => {
+    }
+
+    // Add message to chat function
+    function addMessageToChat(sender, content, isTemporary = false) {
+      const messageId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message message-${sender}`;
+      messageDiv.id = messageId;
+      
+      messageDiv.innerHTML = `
+        <div class="message-content">${content}</div>
+      `;
+      
+      // Remove welcome message if it exists
+      const welcomeMsg = chatMessages.querySelector('.welcome-message');
+      if (welcomeMsg) {
+        welcomeMsg.remove();
+      }
+      
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+      return messageId;
+    }
+
+    // Send button click handler
+    sendBtn.addEventListener('click', sendMessage);
+
+    // Textarea key handlers
+    chatInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        chatForm.requestSubmit();
+        sendMessage();
       }
+      // Shift+Enter adds new line (default behavior when we don't prevent it)
+    });
+
+    // Auto-resize textarea
+    chatInput.addEventListener('input', () => {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
     });
 
     // Helper function to group models by family
@@ -325,16 +640,18 @@
         localSel.disabled = false;
 
         // Preselect current engine in local-select
-        const match = document.getElementById('engine-info').innerText.match(/\(Engine: (.*)\)/);
+        const engineInfoText = document.getElementById('engine-info').innerText;
+        const match = engineInfoText.match(/\(Engine: ([^\s]+)/); // Match engine name before any status icons
         if (match) {
+          const engineName = match[1];
           // Check if we have model objects or simple strings
           if (local && local.length > 0 && typeof local[0] === 'object') {
             const localNames = local.map(m => m.name);
-            if (localNames.includes(match[1])) {
-              localSel.value = match[1];
+            if (localNames.includes(engineName)) {
+              localSel.value = engineName;
             }
-          } else if (local && local.includes(match[1])) {
-            localSel.value = match[1];
+          } else if (local && local.includes(engineName)) {
+            localSel.value = engineName;
           }
         }
       } catch (error) {
@@ -393,6 +710,34 @@
     // Initial load
     loadModels();
     loadExistingDocuments();
+
+    // Theme switcher functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = themeToggle.querySelector('.theme-icon');
+    
+    // Load saved theme or default to light
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+    
+    function updateThemeIcon(theme) {
+      if (theme === 'dark') {
+        themeIcon.textContent = '☀️';
+        themeToggle.title = 'Switch to Dawn theme (light)';
+      } else {
+        themeIcon.textContent = '🌙';
+        themeToggle.title = 'Switch to Moon theme (dark)';
+      }
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    });
   </script>
 </body>
 </html>

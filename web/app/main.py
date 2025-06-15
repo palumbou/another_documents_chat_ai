@@ -10,9 +10,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import STATIC_DIR, TEMPLATES_DIR
 from app.routers import documents, search, system, engine, models, debug, chat
-from app.services.extraction_service import load_existing_documents_async
+from app.services.extraction_service import load_existing_documents
 from app.services.engine_manager import engine_manager
-from app.shared_state import get_documents, set_document
 from app.utils.logging import app_logger
 
 # Create FastAPI application
@@ -45,16 +44,11 @@ async def startup_event():
     """Initialize the application on startup."""
     app_logger.info("🚀 Starting Documents Chat AI v2.0.0")
     
-    # Load existing documents asynchronously
-    app_logger.info("📂 Initializing existing documents for background processing...")
-    loaded_docs = load_existing_documents_async()
-    for filename, content in loaded_docs.items():
-        set_document(filename, content)
-    
-    if loaded_docs:
-        app_logger.info(f"� Scheduled {len(loaded_docs)} documents for background processing")
-    else:
-        app_logger.info("📁 No existing documents found")
+    # Load existing documents
+    app_logger.info("📂 Loading existing documents...")
+    loaded_docs = load_existing_documents()
+    documents.documents.update(loaded_docs)  # Update the documents dict in the router
+    app_logger.info(f"📚 Loaded {len(loaded_docs)} existing documents")
     
     # Verify engine at startup
     app_logger.info("🤖 Verifying AI engine availability...")
