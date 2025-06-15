@@ -21,6 +21,32 @@
       <!-- Documents Management -->
       <section class="documents-section">
         <h3>Documents</h3>
+        
+        <!-- Project Management -->
+        <div class="project-management">
+          <div class="project-header">
+            <label for="project-select">Project:</label>
+            <select id="project-select" class="project-select">
+              <option value="global">Global Documents</option>
+            </select>
+            <button id="new-project-btn" class="btn-small" title="Create new project">+</button>
+            <button id="delete-project-btn" class="btn-small btn-danger" title="Delete current project">🗑️</button>
+          </div>
+          
+          <!-- New Project Modal -->
+          <div id="new-project-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+              <h4>Create New Project</h4>
+              <input type="text" id="new-project-name" placeholder="Project name" maxlength="50">
+              <div class="modal-buttons">
+                <button id="create-project-btn" class="btn-primary">Create</button>
+                <button id="cancel-project-btn" class="btn-secondary">Cancel</button>
+              </div>
+              <div id="project-msg" class="status-msg"></div>
+            </div>
+          </div>
+        </div>
+        
         <div id="existing-docs">
           <div id="docs-list">Loading documents...</div>
         </div>
@@ -32,6 +58,7 @@
                    multiple
                    accept=".pdf,.docx,.txt"
                    class="file-input">
+            <input type="hidden" name="project" id="upload-project" value="global">
             <button type="submit" class="btn-primary">Upload Files</button>
           </form>
           <div id="upload-msg" class="status-msg"></div>
@@ -188,7 +215,23 @@
         if (data.documents && data.documents.length > 0) {
           let html = '';
           
-          data.documents.forEach(doc => {
+          // Filter documents by current project
+          const filteredDocs = data.documents.filter(doc => {
+            if (currentProject === 'global') {
+              // Show global documents (no slash in filename)
+              return !doc.includes('/');
+            } else {
+              // Show documents belonging to current project
+              return doc.startsWith(currentProject + '/');
+            }
+          });
+          
+          if (filteredDocs.length === 0) {
+            docsList.innerHTML = '<em>No documents in this project</em>';
+            return;
+          }
+          
+          filteredDocs.forEach(doc => {
             const info = data.document_info[doc] || {};
             const status = info.processing_status || 'completed';
             const progress = info.processing_progress || 100;
@@ -196,6 +239,9 @@
             const chunks = info.total_chunks || 0;
             const chars = info.total_chars || 0;
             const error = info.error;
+            
+            // Display name without project prefix
+            const displayName = currentProject === 'global' ? doc : doc.substring(currentProject.length + 1);
             
             // Status icon and text
             let statusIcon = '';
@@ -215,7 +261,7 @@
                 break;
               case 'completed':
                 statusIcon = '✅';
-                statusText = isProcessed ? `Ready (${chunks} chunks, ${(chars/1000).toFixed(1)}k chars)` : 'Uploaded';
+                statusText = isProcessed ? `${chunks} chunks, ${(chars/1000).toFixed(1)}k chars` : 'Uploaded';
                 statusClass = 'status-completed';
                 break;
               case 'error':
@@ -228,7 +274,7 @@
             html += `
               <div class="doc-item ${statusClass}">
                 <div class="doc-header">
-                  <span class="doc-name" title="${doc}">${doc.length > 20 ? doc.substring(0, 20) + '...' : doc}</span>
+                  <span class="doc-name" title="${displayName}">${displayName.length > 25 ? displayName.substring(0, 25) + '...' : displayName}</span>
                   <span class="status-icon">${statusIcon}</span>
                 </div>
                 <div class="doc-info">
@@ -243,11 +289,19 @@
               </div>`;
           });
           
-          // Summary with processing info
+          // Summary with processing info for current project
           const summary = data.processing_summary || {};
-          let summaryText = `Total: ${data.total_chunks} chunks across ${data.documents.length} documents`;
-          if (summary.processing > 0 || summary.pending > 0) {
-            summaryText += ` (${summary.pending} pending, ${summary.processing} processing)`;
+          const totalChunksInProject = filteredDocs.reduce((sum, doc) => {
+            const info = data.document_info[doc] || {};
+            return sum + (info.total_chunks || 0);
+          }, 0);
+          
+          let summaryText = `${filteredDocs.length} documents, ${totalChunksInProject} chunks`;
+          const pendingInProject = filteredDocs.filter(doc => data.document_info[doc]?.processing_status === 'pending').length;
+          const processingInProject = filteredDocs.filter(doc => data.document_info[doc]?.processing_status === 'processing').length;
+          
+          if (processingInProject > 0 || pendingInProject > 0) {
+            summaryText += ` (${pendingInProject} pending, ${processingInProject} processing)`;
           }
           
           html += `<div class="doc-summary">${summaryText}</div>`;
@@ -329,6 +383,7 @@
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
         
+        await loadProjects(); // Refresh projects to update document counts
         await loadExistingDocuments(); // Refresh the list
         document.getElementById('upload-msg').innerText = `Deleted "${filename}"`;
         setTimeout(() => {
@@ -389,6 +444,143 @@
       }
     }
 
+    // Project Management Functions
+    let currentProject = 'global';
+    
+    async function loadProjects() {
+      try {
+        const res = await fetch('/projects');
+        const data = await res.json();
+        const projectSelect = document.getElementById('project-select');
+        
+        projectSelect.innerHTML = '';
+        data.projects.forEach(project => {
+          const option = document.createElement('option');
+          option.value = project.name;
+          option.textContent = project.is_global ? 'Global Documents' : project.name;
+          if (project.document_count > 0) {
+            option.textContent += ` (${project.document_count})`;
+          }
+          projectSelect.appendChild(option);
+        });
+        
+        // Set current project
+        projectSelect.value = currentProject;
+        document.getElementById('upload-project').value = currentProject;
+        
+        // Update delete button state
+        const deleteBtn = document.getElementById('delete-project-btn');
+        deleteBtn.style.display = currentProject === 'global' ? 'none' : 'inline-flex';
+        
+      } catch (error) {
+        console.error('Error loading projects:', error);
+      }
+    }
+    
+    async function createProject() {
+      const name = document.getElementById('new-project-name').value.trim();
+      if (!name) {
+        document.getElementById('project-msg').textContent = 'Please enter a project name';
+        return;
+      }
+      
+      if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+        document.getElementById('project-msg').textContent = 'Use only letters, numbers, underscore and dash';
+        return;
+      }
+      
+      try {
+        const res = await fetch('/projects', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({name: name})
+        });
+        
+        if (res.ok) {
+          document.getElementById('new-project-modal').style.display = 'none';
+          document.getElementById('new-project-name').value = '';
+          document.getElementById('project-msg').textContent = '';
+          currentProject = name;
+          await loadProjects();
+          await loadExistingDocuments();
+        } else {
+          const error = await res.json();
+          document.getElementById('project-msg').textContent = error.detail || 'Error creating project';
+        }
+      } catch (error) {
+        document.getElementById('project-msg').textContent = 'Error creating project';
+        console.error('Error creating project:', error);
+      }
+    }
+    
+    async function deleteCurrentProject() {
+      if (currentProject === 'global') return;
+      
+      if (!confirm(`Are you sure you want to delete project "${currentProject}"? This will delete all documents in the project.`)) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/projects/${encodeURIComponent(currentProject)}?force=true`, {
+          method: 'DELETE'
+        });
+        
+        if (res.ok) {
+          currentProject = 'global';
+          await loadProjects();
+          await loadExistingDocuments();
+        } else {
+          const error = await res.json();
+          alert(error.detail || 'Error deleting project');
+        }
+      } catch (error) {
+        alert('Error deleting project');
+        console.error('Error deleting project:', error);
+      }
+    }
+    
+    // Event listeners for project management
+    document.getElementById('project-select').addEventListener('change', async function() {
+      currentProject = this.value;
+      document.getElementById('upload-project').value = currentProject;
+      
+      // Update delete button state
+      const deleteBtn = document.getElementById('delete-project-btn');
+      deleteBtn.style.display = currentProject === 'global' ? 'none' : 'inline-flex';
+      
+      await loadExistingDocuments();
+    });
+    
+    document.getElementById('new-project-btn').addEventListener('click', function() {
+      document.getElementById('new-project-modal').style.display = 'flex';
+      document.getElementById('new-project-name').focus();
+    });
+    
+    document.getElementById('cancel-project-btn').addEventListener('click', function() {
+      document.getElementById('new-project-modal').style.display = 'none';
+      document.getElementById('new-project-name').value = '';
+      document.getElementById('project-msg').textContent = '';
+    });
+    
+    document.getElementById('create-project-btn').addEventListener('click', createProject);
+    
+    document.getElementById('new-project-name').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        createProject();
+      }
+    });
+    
+    document.getElementById('delete-project-btn').addEventListener('click', deleteCurrentProject);
+    
+    // Close modal when clicking outside
+    document.getElementById('new-project-modal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+        document.getElementById('new-project-name').value = '';
+        document.getElementById('project-msg').textContent = '';
+      }
+    });
+
     // 2) Handle uploads with background processing
     document.getElementById('upload-form').onsubmit = async e => {
       e.preventDefault();
@@ -439,6 +631,7 @@
       }
       
       document.getElementById('upload-msg').innerText = message || 'Upload complete!';
+      await loadProjects(); // Refresh projects to update document counts
       await loadExistingDocuments(); // Refresh the document list
       
       // Start auto-refresh if there are documents being processed
@@ -709,7 +902,7 @@
 
     // Initial load
     loadModels();
-    loadExistingDocuments();
+    loadProjects().then(() => loadExistingDocuments());
 
     // Theme switcher functionality
     const themeToggle = document.getElementById('theme-toggle');

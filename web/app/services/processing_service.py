@@ -15,47 +15,67 @@ from app.utils.logging import log_processing_start, log_processing_complete, log
 # Document processing status tracking
 document_status: Dict[str, Dict[str, Any]] = {}  # filename -> {"status": "pending|processing|completed|error", "progress": 0-100, "error": "..."}
 
-def process_document_async(filename: str, documents: Dict[str, str]) -> None:
+def process_document_async(doc_key: str, documents: Dict[str, str], file_path: str = None) -> None:
     """
     Process a document in the background: extract text, OCR if needed, and create chunks.
     Updates the document_status dictionary with progress.
+    
+    Args:
+        doc_key: Document key (filename or project/filename)
+        documents: Documents dictionary
+        file_path: Optional file path, if None will be constructed from doc_key
     """
     from app.shared_state import set_document
     import time
     
-    filepath = os.path.join(DOCS_DIR, filename)
+    if file_path is None:
+        # Legacy behavior: construct path from DOCS_DIR and doc_key
+        filepath = os.path.join(DOCS_DIR, doc_key)
+    else:
+        # Use provided file path
+        filepath = file_path
+    
     start_time = time.time()
+    
+    # Initialize status if not exists (for existing documents)
+    if doc_key not in document_status:
+        initialize_document_processing_status(doc_key)
     
     try:
         # Update status to processing
-        document_status[filename]["status"] = "processing"
-        document_status[filename]["progress"] = 10
-        document_status[filename]["timestamp"] = start_time
+        document_status[doc_key]["status"] = "processing"
+        document_status[doc_key]["progress"] = 10
+        document_status[doc_key]["timestamp"] = start_time
         
         # Extract text from the document
         text_content = extract_text(filepath)
-        document_status[filename]["progress"] = 80
+        document_status[doc_key]["progress"] = 80
         
         # Store the extracted text using shared state
-        set_document(filename, text_content)
-        document_status[filename]["progress"] = 100
-        document_status[filename]["status"] = "completed"
+        set_document(doc_key, text_content)
+        document_status[doc_key]["progress"] = 100
+        document_status[doc_key]["status"] = "completed"
         
         duration = time.time() - start_time
-        log_processing_complete(filename, len(text_content), duration)
-        print(f"✅ Document '{filename}' processed successfully ({len(text_content)} characters)")
+        log_processing_complete(doc_key, len(text_content), duration)
+        print(f"✅ Document '{doc_key}' processed successfully ({len(text_content)} characters)")
         
     except Exception as e:
         error_msg = str(e)
-        log_processing_error(filename, error_msg)
-        print(f"❌ Error processing document '{filename}': {error_msg}")
-        document_status[filename]["status"] = "error"
-        document_status[filename]["error"] = error_msg
-        document_status[filename]["progress"] = 0
+        log_processing_error(doc_key, error_msg)
+        print(f"❌ Error processing document '{doc_key}': {error_msg}")
+        
+        # Initialize status if not exists (for existing documents)
+        if doc_key not in document_status:
+            initialize_document_processing_status(doc_key)
+            
+        document_status[doc_key]["status"] = "error"
+        document_status[doc_key]["error"] = error_msg
+        document_status[doc_key]["progress"] = 0
 
-def initialize_document_processing_status(filename: str) -> None:
+def initialize_document_processing_status(doc_key: str) -> None:
     """Initialize processing status for a new document."""
-    document_status[filename] = {
+    document_status[doc_key] = {
         "status": "pending",
         "progress": 0,
         "uploaded_at": time.time()
@@ -104,18 +124,24 @@ def retry_document_processing(filename: str) -> Dict[str, Any]:
     }
 
 def get_documents_overview(documents: Dict[str, str]) -> Dict[str, Any]:
-    """Get overview of all documents with processing and chunk information."""
+    """Get overview of documents with processing and chunk information."""
     from app.services.chunking_service import chunk_documents_for_processing
     
-    # First, sync with filesystem to remove any files that no longer exist
-    sync_documents_with_filesystem()
+    # If no documents passed, get all documents and sync with filesystem
+    if not documents:
+        # First, sync with filesystem to remove any files that no longer exist
+        sync_documents_with_filesystem()
+        
+        # Refresh documents after sync (in case some were removed)
+        from app.shared_state import get_documents
+        documents = get_documents()
     
-    # Refresh documents after sync (in case some were removed)
-    from app.shared_state import get_documents
-    documents = get_documents()
-    
-    # Get all files that have been uploaded (including those still processing)
-    all_files = set(documents.keys()) | set(document_status.keys())
+    # Get all files from the provided documents dict and status for the same files
+    # (only include status for files that are in the provided documents dict)
+    all_files = set(documents.keys())
+    for filename in list(document_status.keys()):
+        if filename in documents:
+            all_files.add(filename)
     
     # Get chunk information for processed documents
     all_chunks = chunk_documents_for_processing(documents, chunk_size=6000)
@@ -147,7 +173,7 @@ def get_documents_overview(documents: Dict[str, str]) -> Dict[str, Any]:
         "document_info": doc_info,
         "total_chunks": len(all_chunks),
         "processing_summary": {
-            "pending": len([f for f, s in document_status.items() if s["status"] == "pending"]),
+            "pending": len([f for f, s in document_status.items() if s["status"] == "pending" and f in all_files]),
             "processing": len([f for f, s in document_status.items() if s["status"] == "processing"]),
             "completed": len([f for f, s in document_status.items() if s["status"] == "completed"]),
             "error": len([f for f, s in document_status.items() if s["status"] == "error"])
@@ -185,9 +211,25 @@ def sync_documents_with_filesystem() -> None:
     from app.utils.file_helpers import get_supported_files_in_dir
     from app.shared_state import get_documents, remove_document, set_document
     from app.config import DOCS_DIR
+    import os
     
-    # Get currently supported files in the docs directory
-    existing_files = set(get_supported_files_in_dir(DOCS_DIR))
+    # Get currently supported files in the docs directory and project subdirectories
+    existing_files = set()
+    
+    # Add files from main docs directory
+    main_files = get_supported_files_in_dir(DOCS_DIR)
+    existing_files.update(main_files)
+    
+    # Add files from project directories
+    projects_dir = os.path.join(DOCS_DIR, "projects")
+    if os.path.exists(projects_dir):
+        for project_name in os.listdir(projects_dir):
+            project_path = os.path.join(projects_dir, project_name)
+            if os.path.isdir(project_path):
+                project_files = get_supported_files_in_dir(project_path)
+                for filename in project_files:
+                    doc_key = f"{project_name}/{filename}"
+                    existing_files.add(doc_key)
     
     # Get documents currently in memory
     documents = get_documents()

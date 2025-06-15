@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import STATIC_DIR, TEMPLATES_DIR
-from app.routers import documents, search, system, engine, models, debug, chat
+from app.routers import documents, search, system, engine, models, debug, chat, projects
 from app.services.extraction_service import load_existing_documents
 from app.services.engine_manager import engine_manager
 from app.utils.logging import app_logger
@@ -26,6 +26,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Include routers
 app.include_router(documents.router, tags=["Documents"])
+app.include_router(projects.router, tags=["Projects"])
 app.include_router(search.router, tags=["Search"])
 app.include_router(system.router, tags=["System"])
 app.include_router(engine.router, tags=["Engine"])
@@ -47,7 +48,9 @@ async def startup_event():
     # Load existing documents
     app_logger.info("📂 Loading existing documents...")
     loaded_docs = load_existing_documents()
-    documents.documents.update(loaded_docs)  # Update the documents dict in the router
+    from app.shared_state import get_documents
+    documents_dict = get_documents()
+    documents_dict.update(loaded_docs)  # Update the documents dict in shared state
     app_logger.info(f"📚 Loaded {len(loaded_docs)} existing documents")
     
     # Verify engine at startup
