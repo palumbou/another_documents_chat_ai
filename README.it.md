@@ -36,7 +36,8 @@ Poi apri http://localhost:8000 nel tuo browser.
 ## Funzionalità
 
 ### Funzionalità principali
-- 📄 **Caricamento documenti**: supporto per file PDF, DOCX e TXT con gestione intelligente delle dimensioni
+- 📄 **Caricamento documenti**: supporto per file PDF, DOCX, DOC, TXT e MD con gestione intelligente delle dimensioni
+- 🗂️ **Gestione progetti**: organizza documenti in progetti isolati con gestione priorità e condivisione documenti globali
 - 🤖 **Chat AI**: chat interattiva con documenti usando chunking avanzato e scoring di rilevanza
 - 💾 **Monitoraggio memoria**: tracciamento RAM in tempo reale e stima requisiti modelli
 - 🌐 **Gestione modelli**: scarica ed esegui diversi modelli AI localmente con scoperta automatica
@@ -44,6 +45,22 @@ Poi apri http://localhost:8000 nel tuo browser.
 - 📊 **Gestione documenti**: visualizza chunk documenti, elimina documenti, conferma sovrascrittura
 - ⚡ **Ottimizzazione prestazioni**: timeout 5 minuti, chunking intelligente, gestione file grandi
 - 🎨 **Interfaccia elegante**: design Rosé Pine con cambio modalità Dawn/Moon
+
+### 🗂️ Sistema di Gestione Progetti
+L'applicazione include un potente sistema di gestione progetti che ti permette di organizzare i tuoi documenti:
+
+- **📁 Isolamento Progetti**: Ogni progetto mantiene la propria collezione di documenti
+- **🌍 Documenti Globali**: I documenti caricati in "Documenti Globali" sono accessibili da tutti i progetti
+- **⚡ Priorità Intelligente**: Quando un progetto ha un documento con lo stesso nome di un documento globale, la versione del progetto ha priorità
+- **🔄 Cambio Rapido**: Cambia tra progetti istantaneamente usando il selettore progetti
+- **➕ Creazione Veloce**: Crea nuovi progetti con un singolo click
+- **🗑️ Eliminazione Sicura**: Elimina progetti con conferma e preservazione opzionale dei documenti
+
+**Casi d'Uso**:
+- 🏢 **Business**: Separa documenti per diversi clienti o dipartimenti
+- 📚 **Ricerca**: Organizza articoli e risorse per argomento o studio
+- 💼 **Personale**: Mantieni separati documenti di lavoro e personali
+- 🎯 **Focus Contestuale**: Chatta con l'AI usando solo documenti del progetto rilevante
 
 ### Design UI e Tematizzazione
 L'interfaccia presenta una bellissima palette di colori **Rosé Pine** con due modalità:

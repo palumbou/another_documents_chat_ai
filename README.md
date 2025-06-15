@@ -34,7 +34,8 @@ Then open http://localhost:8000 in your browser.
 ## Features
 
 ### Core features
-- 📄 **Document upload**: support for PDF, DOCX, and TXT files with intelligent size handling
+- 📄 **Document upload**: support for PDF, DOCX, DOC, TXT, and MD files with intelligent size handling
+- 🗂️ **Project management**: organize documents in isolated projects with priority handling and global document sharing
 - 🤖 **AI chat**: interactive chat with documents using advanced chunking and relevance scoring
 - 💾 **Memory monitoring**: real-time RAM usage tracking and model requirements estimation
 - 🌐 **Model management**: download and run different AI models locally with automated discovery
@@ -42,6 +43,22 @@ Then open http://localhost:8000 in your browser.
 - 📊 **Document management**: view document chunks, delete documents, overwrite confirmation
 - ⚡ **Performance optimization**: 5-minute timeout, intelligent chunking, large file handling
 - 🎨 **Beautiful UI**: rosé Pine themed interface with Dawn/Moon mode switcher
+
+### 🗂️ Project Management System
+The application includes a powerful project management system that allows you to organize your documents:
+
+- **📁 Project Isolation**: Each project maintains its own document collection
+- **🌍 Global Documents**: Documents uploaded to "Global Documents" are accessible from all projects
+- **⚡ Smart Priority**: When a project has a document with the same name as a global document, the project version takes priority
+- **🔄 Easy Switching**: Switch between projects instantly using the project selector
+- **➕ Quick Creation**: Create new projects with a single click
+- **🗑️ Safe Deletion**: Delete projects with confirmation and optional document preservation
+
+**Use Cases**:
+- 🏢 **Business**: Separate documents for different clients or departments
+- 📚 **Research**: Organize papers and resources by topic or study
+- 💼 **Personal**: Keep work and personal documents separate
+- 🎯 **Context Focus**: Chat with AI using only relevant project documents
 
 ### UI Design & Theming
 The interface features a beautiful **Rosé Pine** color scheme with two modes:

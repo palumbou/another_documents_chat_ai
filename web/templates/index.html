@@ -828,10 +828,16 @@
       const thinkingId = addMessageToChat('ai', 'Thinking... (this may take a while)', true);
       
       try {
+        // Include current project in the request
+        const formData = new URLSearchParams({ 
+          query: query,
+          project: currentProject
+        });
+        
         const res = await fetch('/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ query })
+          body: formData
         });
         
         if (!res.ok) {

@@ -116,6 +116,84 @@ Se preferisci installare manualmente:
    - Elimina i file dalla cartella docs
    - Scompaiono automaticamente dall'interfaccia
 
+## Gestione Progetti
+
+L'applicazione ora supporta **l'organizzazione dei documenti basata su progetti** con gestione intelligente delle priorità.
+
+### Creare e Gestire Progetti
+
+1. **Creare un Nuovo Progetto**
+   - Usa il menu a tendina dei progetti nell'interfaccia web
+   - Digita il nome di un nuovo progetto e premi Invio
+   - I progetti vengono creati automaticamente quando carichi per la prima volta documenti in essi
+
+2. **Passare tra Progetti**
+   - Usa il selettore di progetti nel menu a tendina
+   - Seleziona "Global" per lavorare con documenti al di fuori di qualsiasi progetto
+   - Seleziona qualsiasi progetto esistente per lavorare nell'ambito di quel progetto
+
+3. **Caricare Documenti nei Progetti**
+   - Seleziona il progetto di destinazione dal menu a tendina
+   - Carica i documenti come al solito - saranno archiviati in quel progetto
+   - Ogni progetto mantiene la propria collezione di documenti isolata
+
+### Sistema di Priorità Documenti
+
+L'applicazione implementa un sistema di priorità intelligente durante la ricerca e la chat:
+
+**Ordine di Priorità:**
+1. **Prima i Documenti del Progetto**: Se stai lavorando in un progetto e contiene un documento con lo stesso nome di un documento globale, la versione del progetto ha la priorità
+2. **Secondi i Documenti Globali**: I documenti globali vengono usati quando non esiste un documento corrispondente nel progetto corrente
+
+**Scenari di Esempio:**
+- Il progetto "ClienteA" ha `report.pdf` e Global ha `report.pdf` → Quando sei in "ClienteA", viene usato il `report.pdf` del progetto
+- Il progetto "ClienteA" ha `contratto.pdf` ma Global no → Viene usato il `contratto.pdf` del progetto
+- Il progetto "ClienteA" non ha `manuale.pdf` ma Global sì → Viene usato il `manuale.pdf` globale
+- Lavorando nell'ambito Global → Vengono considerati solo i documenti globali
+
+### Casi d'Uso dei Progetti
+
+**1. Isolamento Clienti**
+```
+Progetti/
+├── ClienteA/          # Documenti del Cliente A
+│   ├── contratto.pdf
+│   └── requisiti.docx
+├── ClienteB/          # Documenti del Cliente B
+│   ├── contratto.pdf  # Contratto diverso da ClienteA
+│   └── specifiche.pdf
+└── Global/            # Documenti condivisi/generali
+    ├── politiche_aziendali.pdf
+    └── modelli.docx
+```
+
+**2. Gestione Versioni**
+```
+Progetti/
+├── ProgettoV1/        # Documenti versione 1
+│   └── design.pdf
+├── ProgettoV2/        # Documenti versione 2 (design aggiornato)
+│   └── design.pdf     # Ha priorità quando sei in ProgettoV2
+└── Global/
+    └── risorse_condivise.pdf
+```
+
+**3. Separazione Dipartimenti**
+```
+Progetti/
+├── Ingegneria/        # Documenti tecnici
+├── Marketing/         # Materiali marketing
+├── Legale/           # Documenti legali
+└── Global/           # Documenti aziendali
+```
+
+### Migliori Pratiche
+
+1. **Usa Global per Risorse Condivise**: Archivia politiche aziendali, modelli e riferimenti generali in Global
+2. **Isola Dati Cliente/Progetto**: Mantieni i documenti di ogni cliente o progetto in progetti separati
+3. **Naming Consistente**: Usa denominazioni chiare e consistenti per i progetti
+4. **Pulizia Regolare**: Rimuovi periodicamente progetti e documenti obsoleti
+
 ## Manutenzione
 
 ### Aggiornare il Servizio

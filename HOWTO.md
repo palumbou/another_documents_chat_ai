@@ -116,6 +116,84 @@ If you prefer to install manually:
    - Delete files from the docs folder
    - They automatically disappear from the interface
 
+## Project Management
+
+The application now supports **project-based document organization** with intelligent priority handling.
+
+### Creating and Managing Projects
+
+1. **Creating a New Project**
+   - Use the project dropdown in the web interface
+   - Type the name of a new project and press Enter
+   - Projects are automatically created when you first upload documents to them
+
+2. **Switching Between Projects**
+   - Use the project selector dropdown
+   - Select "Global" to work with documents outside any project
+   - Select any existing project to work within that project's scope
+
+3. **Uploading Documents to Projects**
+   - Select the target project from the dropdown
+   - Upload documents as usual - they will be stored in that project
+   - Each project maintains its own isolated document collection
+
+### Document Priority System
+
+The application implements an intelligent priority system when searching and chatting:
+
+**Priority Order:**
+1. **Project Documents First**: If you're working in a project and it contains a document with the same name as a global document, the project version takes priority
+2. **Global Documents Second**: Global documents are used when no matching document exists in the current project
+
+**Example Scenarios:**
+- Project "ClientA" has `report.pdf` and Global has `report.pdf` → When in "ClientA", the project's `report.pdf` is used
+- Project "ClientA" has `contract.pdf` but Global doesn't → The project's `contract.pdf` is used
+- Project "ClientA" doesn't have `manual.pdf` but Global does → The global `manual.pdf` is used
+- Working in Global scope → Only global documents are considered
+
+### Project Use Cases
+
+**1. Client Isolation**
+```
+Projects/
+├── ClientA/           # Client A's documents
+│   ├── contract.pdf
+│   └── requirements.docx
+├── ClientB/           # Client B's documents  
+│   ├── contract.pdf   # Different contract than ClientA
+│   └── specifications.pdf
+└── Global/            # Shared/general documents
+    ├── company_policies.pdf
+    └── templates.docx
+```
+
+**2. Version Management**
+```
+Projects/
+├── ProjectV1/         # Version 1 documents
+│   └── design.pdf
+├── ProjectV2/         # Version 2 documents (updated design)
+│   └── design.pdf     # Takes priority when in ProjectV2
+└── Global/
+    └── shared_resources.pdf
+```
+
+**3. Department Separation**
+```
+Projects/
+├── Engineering/       # Technical documents
+├── Marketing/         # Marketing materials
+├── Legal/            # Legal documents
+└── Global/           # Company-wide documents
+```
+
+### Best Practices
+
+1. **Use Global for Shared Resources**: Store company policies, templates, and general references in Global
+2. **Isolate Client/Project Data**: Keep each client's or project's documents in separate projects
+3. **Consistent Naming**: Use clear, consistent naming for projects
+4. **Regular Cleanup**: Remove obsolete projects and documents periodically
+
 ## Maintenance
 
 ### Updating the Service
