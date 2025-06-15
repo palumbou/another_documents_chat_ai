@@ -50,9 +50,8 @@ class SearchChunk(BaseModel):
 
 class SearchResponse(BaseModel):
     query: str
+    chunks_found: int
     chunks: List[SearchChunk]
-    total_found: int
-    total_available: int
 
 class UploadResponse(BaseModel):
     uploaded: List[str]
@@ -151,3 +150,36 @@ class ReprocessResponse(BaseModel):
     reprocessed: bool
     text_length: int
     has_content: bool
+
+# Project schemas
+class ProjectInfo(BaseModel):
+    name: str
+    document_count: int
+    is_global: bool
+    documents: List[str]
+
+class ProjectsResponse(BaseModel):
+    projects: List[ProjectInfo]
+    total_projects: int
+    total_documents: int
+
+class CreateProjectRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50, description="Project name")
+
+class CreateProjectResponse(BaseModel):
+    message: str
+    project_name: str
+    project_path: str
+
+class DeleteProjectResponse(BaseModel):
+    message: str
+    deleted_documents: int
+
+class MoveDocumentRequest(BaseModel):
+    filename: str = Field(..., description="Document filename to move")
+    target_project: str = Field(..., description="Target project name")
+
+class MoveDocumentResponse(BaseModel):
+    message: str
+    old_project: str
+    new_project: str

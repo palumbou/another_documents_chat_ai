@@ -7,11 +7,13 @@ import os
 
 # Directory configuration
 DOCS_DIR = "docs"
+PROJECTS_DIR = "docs/projects"  # Directory for project-specific documents
 STATIC_DIR = "static"
 TEMPLATES_DIR = "templates"
 
 # Ensure directories exist
 os.makedirs(DOCS_DIR, exist_ok=True)
+os.makedirs(PROJECTS_DIR, exist_ok=True)
 
 # Processing limits and settings
 MAX_FILE_SIZE_MB = 100  # Maximum file size in MB
@@ -56,3 +58,8 @@ PROCESSING_RETRY_DELAY = 5  # Seconds to wait before retrying failed processing
 MEMORY_THRESHOLD_SMALL = 4  # GB - recommend small models
 MEMORY_THRESHOLD_MEDIUM = 16  # GB - recommend medium models
 MEMORY_THRESHOLD_LARGE = 64  # GB - recommend large models
+
+# Project configuration
+DEFAULT_PROJECT_NAME = "global"  # Name for global documents (in root docs folder)
+MAX_PROJECT_NAME_LENGTH = 50
+ALLOWED_PROJECT_NAME_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"

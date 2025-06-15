@@ -154,19 +154,57 @@ def extract_txt_file_optimized(path: str, file_size: int) -> str:
         return f"[Error reading text file: {str(e)}]"
 
 def load_existing_documents() -> dict:
-    """Load documents that are already in the docs folder."""
+    """Load documents that are already in the docs folder, including project subfolders."""
     from app.utils.file_helpers import get_supported_files_in_dir
+    from app.services.processing_service import initialize_document_processing_status, document_status
     
     documents = {}
-    supported_files = get_supported_files_in_dir(DOCS_DIR)
     
+    # Load documents from main docs folder (global documents)
+    supported_files = get_supported_files_in_dir(DOCS_DIR)
     for filename in supported_files:
         file_path = os.path.join(DOCS_DIR, filename)
         try:
             documents[filename] = extract_text(file_path)
+            
+            # Initialize processing status as completed
+            initialize_document_processing_status(filename)
+            document_status[filename]["status"] = "completed"
+            document_status[filename]["progress"] = 100
+            
             print(f"Loaded existing document: {filename}")
         except Exception as e:
             print(f"Error loading {filename}: {e}")
+            # Initialize status as error if loading failed
+            initialize_document_processing_status(filename)
+            document_status[filename]["status"] = "error"
+            document_status[filename]["error"] = str(e)
+    
+    # Load documents from project folders
+    projects_dir = os.path.join(DOCS_DIR, "projects")
+    if os.path.exists(projects_dir):
+        for project_name in os.listdir(projects_dir):
+            project_path = os.path.join(projects_dir, project_name)
+            if os.path.isdir(project_path):
+                project_files = get_supported_files_in_dir(project_path)
+                for filename in project_files:
+                    file_path = os.path.join(project_path, filename)
+                    doc_key = f"{project_name}/{filename}"
+                    try:
+                        documents[doc_key] = extract_text(file_path)
+                        
+                        # Initialize processing status as completed
+                        initialize_document_processing_status(doc_key)
+                        document_status[doc_key]["status"] = "completed"
+                        document_status[doc_key]["progress"] = 100
+                        
+                        print(f"Loaded existing project document: {doc_key}")
+                    except Exception as e:
+                        print(f"Error loading {doc_key}: {e}")
+                        # Initialize status as error if loading failed
+                        initialize_document_processing_status(doc_key)
+                        document_status[doc_key]["status"] = "error"
+                        document_status[doc_key]["error"] = str(e)
     
     return documents
 
