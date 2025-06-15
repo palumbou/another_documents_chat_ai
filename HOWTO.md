@@ -7,7 +7,7 @@ This guide explains how to install, use, and manage the Another Documents Chat A
 The easiest way to manage the service is using the included management script:
 
 ```bash
-./manage.sh
+./tools/manage.sh
 ```
 
 This will show an interactive menu with all available options.
@@ -17,7 +17,7 @@ This will show an interactive menu with all available options.
 ### Automatic Installation (Recommended)
 
 ```bash
-./manage.sh install
+./tools/manage.sh install
 ```
 
 The script will:
@@ -71,25 +71,25 @@ If you prefer to install manually:
 
 ### Starting the Service
 ```bash
-./manage.sh start
+./tools/manage.sh start
 # or manually: docker compose up -d
 ```
 
 ### Stopping the Service
 ```bash
-./manage.sh stop
+./tools/manage.sh stop
 # or manually: docker compose down
 ```
 
 ### Viewing Logs
 ```bash
-./manage.sh logs
+./tools/manage.sh logs
 # or manually: docker compose logs -f
 ```
 
 ### Checking Status
 ```bash
-./manage.sh status
+./tools/manage.sh status
 # or manually: docker compose ps
 ```
 
@@ -120,7 +120,7 @@ If you prefer to install manually:
 
 ### Updating the Service
 ```bash
-./manage.sh update
+./tools/manage.sh update
 ```
 This will:
 - Pull latest code from repository
@@ -129,7 +129,7 @@ This will:
 
 ### Resetting the Service
 ```bash
-./manage.sh reset
+./tools/manage.sh reset
 ```
 This will:
 - Stop all containers
@@ -139,7 +139,7 @@ This will:
 
 ### Complete Removal
 ```bash
-./manage.sh remove
+./tools/manage.sh remove
 ```
 ⚠️ **WARNING**: This will delete EVERYTHING including your documents!
 
@@ -148,7 +148,7 @@ This will:
 ### Service Won't Start
 1. Check Docker is running: `docker info`
 2. Check port availability: `netstat -tlnp | grep :8000`
-3. View logs: `./manage.sh logs`
+3. View logs: `./tools/manage.sh logs`
 
 ### Documents Not Processing
 1. Check file format is supported
@@ -199,7 +199,7 @@ docker exec -it ollama ollama pull your-model
 ### Backup and Restore
 1. **Backup documents**: Copy the docs folder or export Docker volume
 2. **Backup configuration**: Save your docker-compose.yml modifications
-3. **Restore**: Copy files back and run `./manage.sh start`
+3. **Restore**: Copy files back and run `./tools/manage.sh start`
 
 ## Security Considerations
 
@@ -213,8 +213,8 @@ docker exec -it ollama ollama pull your-model
 ## Getting Help
 
 - Check this documentation first
-- View application logs: `./manage.sh logs`
-- Check container status: `./manage.sh status`
+- View application logs: `./tools/manage.sh logs`
+- Check container status: `./tools/manage.sh status`
 - For issues, check the project repository
 
 ---

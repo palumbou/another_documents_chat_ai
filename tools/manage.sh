@@ -10,11 +10,14 @@ DOCKER_COMPOSE_FILE="docker-compose.yml"
 REPO_URL="https://github.com/your-username/another_documents_chat_ai.git"  # Update with actual repo URL
 DOCKER_INSTALL_SCRIPT="tools/install_docker.sh"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
+# Colors for output - Rosé Pine Dawn palette
+LOVE='\033[38;2;180;99;122m'    # #b4637a (red/pink)
+GOLD='\033[38;2;234;157;52m'    # #ea9d34 (yellow/gold)
+ROSE='\033[38;2;215;130;126m'   # #d7827e (light pink)
+PINE='\033[38;2;40;105;131m'    # #286983 (blue/green)
+FOAM='\033[38;2;86;148;159m'    # #56949f (teal)
+IRIS='\033[38;2;144;122;169m'   # #907aa9 (purple)
+TEXT='\033[38;2;87;82;121m'     # #575279 (main text)
 NC='\033[0m' # No Color
 
 # Function to print colored output
@@ -24,26 +27,26 @@ print_color() {
 
 print_header() {
     echo
-    print_color "$BLUE" "=================================="
-    print_color "$BLUE" "  Another Documents Chat AI"
-    print_color "$BLUE" "  Project Management Script"
-    print_color "$BLUE" "=================================="
+    print_color "$PINE" "=================================="
+    print_color "$PINE" "  Another Documents Chat AI"
+    print_color "$PINE" "  Project Management Script"
+    print_color "$PINE" "=================================="
     echo
 }
 
 check_docker() {
     if ! command -v docker &> /dev/null; then
-        print_color "$YELLOW" "Docker is not installed on this system."
+        print_color "$GOLD" "Docker is not installed on this system."
         return 1
     fi
     
     if ! docker info &> /dev/null; then
-        print_color "$YELLOW" "Docker is installed but not running or accessible."
+        print_color "$GOLD" "Docker is installed but not running or accessible."
         return 2
     fi
     
     if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-        print_color "$YELLOW" "Docker Compose is not available."
+        print_color "$GOLD" "Docker Compose is not available."
         return 3
     fi
     
@@ -51,7 +54,7 @@ check_docker() {
 }
 
 install_docker() {
-    print_color "$YELLOW" "Docker installation required."
+    print_color "$GOLD" "Docker installation required."
     echo "This script will install Docker using the provided installation script."
     echo "Administrator privileges will be required."
     echo
@@ -59,27 +62,27 @@ install_docker() {
     echo
     
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_color "$RED" "Docker installation cancelled. Cannot proceed without Docker."
+        print_color "$LOVE" "Docker installation cancelled. Cannot proceed without Docker."
         exit 1
     fi
     
     if [ ! -f "$DOCKER_INSTALL_SCRIPT" ]; then
-        print_color "$RED" "Docker installation script not found at: $DOCKER_INSTALL_SCRIPT"
+        print_color "$LOVE" "Docker installation script not found at: $DOCKER_INSTALL_SCRIPT"
         exit 1
     fi
     
-    print_color "$BLUE" "Installing Docker..."
+    print_color "$PINE" "Installing Docker..."
     chmod +x "$DOCKER_INSTALL_SCRIPT"
     sudo bash "$DOCKER_INSTALL_SCRIPT"
     
-    print_color "$GREEN" "Docker installation completed. Please log out and log back in, or restart your system."
-    print_color "$YELLOW" "After restarting, run this script again to continue with the installation."
+    print_color "$FOAM" "Docker installation completed. Please log out and log back in, or restart your system."
+    print_color "$GOLD" "After restarting, run this script again to continue with the installation."
     exit 0
 }
 
 setup_documents_storage() {
     echo
-    print_color "$BLUE" "Choose documents storage location:"
+    print_color "$PINE" "Choose documents storage location:"
     echo "1) Project docs folder (./web/docs)"
     echo "2) Custom path on host"
     echo "3) Docker volume (recommended for production)"
@@ -89,25 +92,25 @@ setup_documents_storage() {
     case $choice in
         1)
             DOCS_PATH="./web/docs"
-            print_color "$GREEN" "Using project docs folder: ./web/docs"
+            print_color "$FOAM" "Using project docs folder: ./web/docs"
             ;;
         2)
             read -p "Enter custom path for documents: " custom_path
             if [ ! -d "$custom_path" ]; then
-                print_color "$YELLOW" "Creating directory: $custom_path"
+                print_color "$GOLD" "Creating directory: $custom_path"
                 mkdir -p "$custom_path"
             fi
             DOCS_PATH="$custom_path"
-            print_color "$GREEN" "Using custom path: $custom_path"
+            print_color "$FOAM" "Using custom path: $custom_path"
             ;;
         3)
             DOCS_PATH="documents_data"
-            print_color "$GREEN" "Using Docker volume: documents_data"
+            print_color "$FOAM" "Using Docker volume: documents_data"
             # Create volume if it doesn't exist
             docker volume create documents_data 2>/dev/null || true
             ;;
         *)
-            print_color "$RED" "Invalid choice. Using default (project docs folder)."
+            print_color "$LOVE" "Invalid choice. Using default (project docs folder)."
             DOCS_PATH="./web/docs"
             ;;
     esac
@@ -162,7 +165,7 @@ EOF
         ln -sf env.conf .env
     fi
     
-    print_color "$BLUE" "Updated env.conf file with DOCS_VOLUME=$DOCS_PATH"
+    print_color "$PINE" "Updated env.conf file with DOCS_VOLUME=$DOCS_PATH"
 }
 
 run_compose() {
@@ -171,14 +174,14 @@ run_compose() {
     elif docker compose version &> /dev/null 2>&1; then
         docker compose "$@"
     else
-        print_color "$RED" "Error: Neither docker-compose nor docker compose is available."
+        print_color "$LOVE" "Error: Neither docker-compose nor docker compose is available."
         return 1
     fi
 }
 
 install_service() {
     print_header
-    print_color "$GREEN" "Starting installation of Another Documents Chat AI..."
+    print_color "$FOAM" "Starting installation of Another Documents Chat AI..."
     
     # Check Docker installation
     check_docker_result=$?
@@ -186,22 +189,22 @@ install_service() {
         install_docker
     fi
     
-    print_color "$GREEN" "Docker is available."
+    print_color "$FOAM" "Docker is available."
     
     # Setup documents storage
     setup_documents_storage
     
     # Build and start services
-    print_color "$BLUE" "Building and starting services..."
+    print_color "$PINE" "Building and starting services..."
     run_compose build --no-cache
     run_compose up -d
     
     echo
-    print_color "$GREEN" "Installation completed successfully!"
-    print_color "$BLUE" "Access the application at: http://localhost:8000"
-    print_color "$YELLOW" "Documents will be stored in: $DOCS_PATH"
+    print_color "$FOAM" "Installation completed successfully!"
+    print_color "$PINE" "Access the application at: http://localhost:8000"
+    print_color "$GOLD" "Documents will be stored in: $DOCS_PATH"
     echo
-    print_color "$BLUE" "Useful commands:"
+    print_color "$PINE" "Useful commands:"
     echo "  - View logs: ./manage.sh logs"
     echo "  - Stop services: ./manage.sh stop"
     echo "  - Update services: ./manage.sh update"
@@ -209,33 +212,33 @@ install_service() {
 
 update_service() {
     print_header
-    print_color "$GREEN" "Updating Another Documents Chat AI..."
+    print_color "$FOAM" "Updating Another Documents Chat AI..."
     
     # Pull latest changes from repository
-    print_color "$BLUE" "Pulling latest changes from repository..."
+    print_color "$PINE" "Pulling latest changes from repository..."
     git pull origin main || {
-        print_color "$YELLOW" "Warning: Could not pull from git. Continuing with local version."
+        print_color "$GOLD" "Warning: Could not pull from git. Continuing with local version."
     }
     
     # Stop current services
-    print_color "$BLUE" "Stopping current services..."
+    print_color "$PINE" "Stopping current services..."
     run_compose down
     
     # Build new images
-    print_color "$BLUE" "Building updated images..."
+    print_color "$PINE" "Building updated images..."
     run_compose build --no-cache
     
     # Start updated services
-    print_color "$BLUE" "Starting updated services..."
+    print_color "$PINE" "Starting updated services..."
     run_compose up -d
     
-    print_color "$GREEN" "Update completed successfully!"
-    print_color "$BLUE" "Access the application at: http://localhost:8000"
+    print_color "$FOAM" "Update completed successfully!"
+    print_color "$PINE" "Access the application at: http://localhost:8000"
 }
 
 reset_service() {
     print_header
-    print_color "$YELLOW" "Resetting Another Documents Chat AI..."
+    print_color "$GOLD" "Resetting Another Documents Chat AI..."
     echo "This will:"
     echo "  - Stop all containers"
     echo "  - Remove all containers and images"
@@ -246,27 +249,27 @@ reset_service() {
     echo
     
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_color "$YELLOW" "Reset cancelled."
+        print_color "$GOLD" "Reset cancelled."
         return
     fi
     
-    print_color "$BLUE" "Stopping and removing containers..."
+    print_color "$PINE" "Stopping and removing containers..."
     run_compose down --rmi all --remove-orphans
     
-    print_color "$BLUE" "Removing project-specific networks..."
+    print_color "$PINE" "Removing project-specific networks..."
     docker network rm "${PROJECT_NAME}_default" 2>/dev/null || true
     
-    print_color "$BLUE" "Rebuilding and starting services..."
+    print_color "$PINE" "Rebuilding and starting services..."
     run_compose build --no-cache
     run_compose up -d
     
-    print_color "$GREEN" "Reset completed successfully!"
-    print_color "$BLUE" "Access the application at: http://localhost:8000"
+    print_color "$FOAM" "Reset completed successfully!"
+    print_color "$PINE" "Access the application at: http://localhost:8000"
 }
 
 remove_service() {
     print_header
-    print_color "$RED" "Removing Another Documents Chat AI..."
+    print_color "$LOVE" "Removing Another Documents Chat AI..."
     echo "This will:"
     echo "  - Stop and remove all containers"
     echo "  - Remove all images"
@@ -274,37 +277,37 @@ remove_service() {
     echo "  - Remove all volumes (YOUR DOCUMENTS WILL BE DELETED)"
     echo "  - Remove project files"
     echo
-    print_color "$RED" "THIS ACTION CANNOT BE UNDONE!"
+    print_color "$LOVE" "THIS ACTION CANNOT BE UNDONE!"
     echo
     read -p "Are you sure you want to completely remove the service? (y/N): " -n 1 -r
     echo
     
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_color "$YELLOW" "Removal cancelled."
+        print_color "$GOLD" "Removal cancelled."
         return
     fi
     
-    print_color "$RED" "Final confirmation - type 'DELETE' to proceed: "
+    print_color "$LOVE" "Final confirmation - type 'DELETE' to proceed: "
     read confirmation
     
     if [ "$confirmation" != "DELETE" ]; then
-        print_color "$YELLOW" "Removal cancelled."
+        print_color "$GOLD" "Removal cancelled."
         return
     fi
     
-    print_color "$BLUE" "Stopping and removing all containers, images, networks, and volumes..."
+    print_color "$PINE" "Stopping and removing all containers, images, networks, and volumes..."
     run_compose down --rmi all --volumes --remove-orphans
     
-    print_color "$BLUE" "Removing any remaining project resources..."
+    print_color "$PINE" "Removing any remaining project resources..."
     docker system prune -f
     docker volume rm documents_data 2>/dev/null || true
     docker network rm "${PROJECT_NAME}_default" 2>/dev/null || true
     
-    print_color "$BLUE" "Removing project files..."
+    print_color "$PINE" "Removing project files..."
     cd ..
     rm -rf "another_documents_chat_ai"
     
-    print_color "$GREEN" "Service completely removed."
+    print_color "$FOAM" "Service completely removed."
 }
 
 show_logs() {
@@ -312,20 +315,20 @@ show_logs() {
 }
 
 stop_service() {
-    print_color "$BLUE" "Stopping services..."
+    print_color "$PINE" "Stopping services..."
     run_compose down
-    print_color "$GREEN" "Services stopped."
+    print_color "$FOAM" "Services stopped."
 }
 
 start_service() {
-    print_color "$BLUE" "Starting services..."
+    print_color "$PINE" "Starting services..."
     run_compose up -d
-    print_color "$GREEN" "Services started."
-    print_color "$BLUE" "Access the application at: http://localhost:8000"
+    print_color "$FOAM" "Services started."
+    print_color "$PINE" "Access the application at: http://localhost:8000"
 }
 
 show_status() {
-    print_color "$BLUE" "Service Status:"
+    print_color "$PINE" "Service Status:"
     run_compose ps
 }
 
@@ -345,7 +348,7 @@ show_help() {
     echo "  logs       Show service logs"
     echo "  help       Show this help message"
     echo
-    echo "For detailed instructions, see HOWTO.md or HOWTO.it.md"
+    echo "For detailed instructions, see HOWTO.md (English) or HOWTO.it.md (Italiano)"
 }
 
 # Main script logic
@@ -406,11 +409,11 @@ case "${1:-}" in
             7) show_status ;;
             8) show_logs ;;
             9) show_help ;;
-            *) print_color "$RED" "Invalid choice." ;;
+            *) print_color "$LOVE" "Invalid choice." ;;
         esac
         ;;
     *)
-        print_color "$RED" "Unknown command: $1"
+        print_color "$LOVE" "Unknown command: $1"
         show_help
         exit 1
         ;;

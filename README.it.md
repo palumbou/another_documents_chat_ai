@@ -1,4 +1,6 @@
-# Another Documents Chat AI 🤖📄
+# Another Documen**Per le istruzioni dettagliate di installazione e utilizzo, leggi:**
+- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida all'utilizzo
+- 🛠️ **[tools/MANAGE.it.md](tools/MANAGE.it.md)** - Riferimento rapido script di gestioneChat AI 🤖📄
 
 > **Lingue disponibili**: [English](README.md) | [Italiano (corrente)](README.it.md)
 
@@ -16,18 +18,17 @@ Questo è un progetto sperimentale per capire come funzionano le IA in locale, e
 ## 🚀 Avvio Rapido
 
 **Per istruzioni dettagliate di installazione e utilizzo, leggi:**
-- 📖 **[HOWTO.md](HOWTO.md)** - Guida completa in inglese
-- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida completa in italiano
-- 🛠️ **[MANAGE.md](MANAGE.md)** - Riferimento rapido script di gestione
+- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida sull'utilizzo
+- 🛠️ **[MANAGE.it.md](tools/MANAGE.it.md)** - Riferimento rapido script di gestione
 
 **Installazione rapida:**
 ```bash
-./manage.sh install
+./tools/manage.sh install
 ```
 
 **Avvio rapido:**
 ```bash
-./manage.sh start
+./tools/manage.sh start
 ```
 
 Poi apri http://localhost:8000 nel tuo browser.

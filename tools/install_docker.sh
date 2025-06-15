@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Color definitions for output
-GREEN='\033[0;32m'
-RED='\033[0;31m'
+# Color definitions for output - Rosé Pine Dawn palette
+FOAM='\033[38;2;86;148;159m'    # #56949f (teal/green for success)
+LOVE='\033[38;2;180;99;122m'    # #b4637a (red/pink for errors)
+GOLD='\033[38;2;234;157;52m'    # #ea9d34 (yellow/gold for warnings)
+PINE='\033[38;2;40;105;131m'    # #286983 (blue/green for info)
 NC='\033[0m' # No Color
 
 # 1) Check for existing Docker
-echo -e "${GREEN}Checking for existing Docker installation...${NC}"
+echo -e "${FOAM}Checking for existing Docker installation...${NC}"
 if command -v docker &>/dev/null; then
-  echo -e "${GREEN}Docker is already installed: $(docker --version)${NC}"
+  echo -e "${FOAM}Docker is already installed: $(docker --version)${NC}"
   exit 0
 fi
-echo -e "${RED}Docker not found. Proceeding with installation...${NC}"
+echo -e "${LOVE}Docker not found. Proceeding with installation...${NC}"
 
 # 2) Detect OS
 OS=""
@@ -31,10 +33,10 @@ if [[ -f /etc/os-release ]]; then
 fi
 
 if [[ -z "$OS" ]]; then
-  echo -e "${RED}Unsupported or undetectable OS. Exiting.${NC}"
+  echo -e "${LOVE}Unsupported or undetectable OS. Exiting.${NC}"
   exit 1
 fi
-echo -e "${GREEN}Detected OS: $OS${NC}"
+echo -e "${FOAM}Detected OS: $OS${NC}"
 
 # 3) Install functions
 install_debian() {
@@ -84,24 +86,24 @@ case "$OS" in
 esac
 
 # 5) Enable & start Docker
-echo -e "${GREEN}Enabling and starting Docker service...${NC}"
+echo -e "${FOAM}Enabling and starting Docker service...${NC}"
 sudo systemctl enable docker
 sudo systemctl start docker
 
 # 6) Add user to docker group
-echo -e "${GREEN}Adding user '$USER' to docker group...${NC}"
+echo -e "${FOAM}Adding user '$USER' to docker group...${NC}"
 sudo usermod -aG docker "$USER"
 
 # 7) Reload session so group change takes effect
-echo -e "${GREEN}Reloading session to apply group changes...${NC}"
+echo -e "${FOAM}Reloading session to apply group changes...${NC}"
 # This will start a new shell with the docker group active
 exec newgrp docker
 
 # 8) Final verification (will only run if newgrp fails to replace shell)
-echo -e "${GREEN}Verifying Docker installation...${NC}"
+echo -e "${FOAM}Verifying Docker installation...${NC}"
 if docker --version &>/dev/null; then
-  echo -e "${GREEN}Docker was installed successfully!${NC}"
+  echo -e "${FOAM}Docker was installed successfully!${NC}"
 else
-  echo -e "${RED}Docker installation failed.${NC}"
+  echo -e "${LOVE}Docker installation failed.${NC}"
   exit 1
 fi

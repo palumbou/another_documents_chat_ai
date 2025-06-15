@@ -7,7 +7,7 @@ Questa guida spiega come installare, utilizzare e gestire il servizio Another Do
 Il modo più semplice per gestire il servizio è utilizzare lo script di gestione incluso:
 
 ```bash
-./manage.sh
+./tools/manage.sh
 ```
 
 Questo mostrerà un menu interattivo con tutte le opzioni disponibili.
@@ -17,7 +17,7 @@ Questo mostrerà un menu interattivo con tutte le opzioni disponibili.
 ### Installazione Automatica (Consigliata)
 
 ```bash
-./manage.sh install
+./tools/manage.sh install
 ```
 
 Lo script:
@@ -71,25 +71,25 @@ Se preferisci installare manualmente:
 
 ### Avviare il Servizio
 ```bash
-./manage.sh start
+./tools/manage.sh start
 # o manualmente: docker compose up -d
 ```
 
 ### Fermare il Servizio
 ```bash
-./manage.sh stop
+./tools/manage.sh stop
 # o manualmente: docker compose down
 ```
 
 ### Visualizzare i Log
 ```bash
-./manage.sh logs
+./tools/manage.sh logs
 # o manualmente: docker compose logs -f
 ```
 
 ### Controllare lo Stato
 ```bash
-./manage.sh status
+./tools/manage.sh status
 # o manualmente: docker compose ps
 ```
 
@@ -120,7 +120,7 @@ Se preferisci installare manualmente:
 
 ### Aggiornare il Servizio
 ```bash
-./manage.sh update
+./tools/manage.sh update
 ```
 Questo:
 - Scaricherà il codice più recente dal repository
@@ -129,7 +129,7 @@ Questo:
 
 ### Resettare il Servizio
 ```bash
-./manage.sh reset
+./tools/manage.sh reset
 ```
 Questo:
 - Fermerà tutti i container
@@ -139,7 +139,7 @@ Questo:
 
 ### Rimozione Completa
 ```bash
-./manage.sh remove
+./tools/manage.sh remove
 ```
 ⚠️ **ATTENZIONE**: Questo eliminerà TUTTO inclusi i tuoi documenti!
 
@@ -148,7 +148,7 @@ Questo:
 ### Il Servizio Non Si Avvia
 1. Controlla che Docker sia in esecuzione: `docker info`
 2. Controlla la disponibilità della porta: `netstat -tlnp | grep :8000`
-3. Visualizza i log: `./manage.sh logs`
+3. Visualizza i log: `./tools/manage.sh logs`
 
 ### I Documenti Non Vengono Elaborati
 1. Controlla che il formato del file sia supportato
@@ -199,7 +199,7 @@ docker exec -it ollama ollama pull tuo-modello
 ### Backup e Ripristino
 1. **Backup documenti**: Copia la cartella docs o esporta il volume Docker
 2. **Backup configurazione**: Salva le tue modifiche a docker-compose.yml
-3. **Ripristino**: Copia i file indietro e esegui `./manage.sh start`
+3. **Ripristino**: Copia i file indietro e esegui `./tools/manage.sh start`
 
 ## Considerazioni sulla Sicurezza
 
@@ -213,8 +213,8 @@ docker exec -it ollama ollama pull tuo-modello
 ## Ottenere Aiuto
 
 - Controlla prima questa documentazione
-- Visualizza i log dell'applicazione: `./manage.sh logs`
-- Controlla lo stato dei container: `./manage.sh status`
+- Visualizza i log dell'applicazione: `./tools/manage.sh logs`
+- Controlla lo stato dei container: `./tools/manage.sh status`
 - Per problemi, controlla il repository del progetto
 
 ---

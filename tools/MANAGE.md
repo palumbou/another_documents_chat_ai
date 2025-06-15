@@ -58,4 +58,4 @@ RESTART_POLICY=unless-stopped
 3. **Ports in use**: Change `WEB_PORT` in `.env` file
 4. **Permission issues**: Run with `sudo` if needed for Docker operations
 
-For detailed instructions, see [HOWTO.md](HOWTO.md) or [HOWTO.it.md](HOWTO.it.md).
+For detailed instructions, see [HOWTO.md](../HOWTO.md).

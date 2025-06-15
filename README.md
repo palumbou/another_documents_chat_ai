@@ -16,18 +16,17 @@ This is an experimental project to understand how local AI works, specifically e
 ## 🚀 Quick Start
 
 **For detailed installation and usage instructions, please read:**
-- 📖 **[HOWTO.md](HOWTO.md)** - Complete English guide
-- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida completa in italiano
-- 🛠️ **[MANAGE.md](MANAGE.md)** - Management script quick reference
+- 📖 **[HOWTO.md](HOWTO.md)** - Usage Guide
+- 🛠️ **[tools/MANAGE.md](tools/MANAGE.md)** - Management script quick reference
 
 **Quick installation:**
 ```bash
-./manage.sh install
+./tools/manage.sh install
 ```
 
 **Quick start:**
 ```bash
-./manage.sh start
+./tools/manage.sh start
 ```
 
 Then open http://localhost:8000 in your browser.
