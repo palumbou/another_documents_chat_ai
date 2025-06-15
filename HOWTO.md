@@ -100,7 +100,7 @@ If you prefer to install manually:
 1. **Via Web Interface** (Recommended)
    - Open http://localhost:8000
    - Click "Browse" or drag & drop files
-   - Supported formats: PDF, TXT, DOCX
+   - Supported formats: PDF, DOCX, DOC, TXT, MD
 
 2. **Via File System**
    - Copy files directly to the docs folder

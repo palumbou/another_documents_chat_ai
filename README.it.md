@@ -86,7 +86,7 @@ L'interfaccia presenta una bellissima palette di colori **Rosé Pine** con due m
 
 #### Limiti dimensioni file e elaborazione
 - **Dimensione massima file**: 50MB per file
-- **Formati supportati**: PDF, DOCX, TXT
+- **Formati supportati**: PDF, DOCX, DOC, TXT, MD
 - **Limite pagine OCR**: 20 pagine per file >10MB (per gestire tempo elaborazione)
 - **Limiti estrazione caratteri**:
   - PyPDF2: 500.000 caratteri per documento
@@ -127,7 +127,8 @@ uvicorn[standard] # Server ASGI per FastAPI
 python-multipart # Supporto caricamento file
 jinja2           # Template engine (anche se usiamo HTML semplice)
 requests         # Client HTTP per chiamate API Ollama
-python-docx      # Elaborazione documenti Microsoft Word
+python-docx      # Elaborazione documenti Microsoft Word (DOCX)
+docx2txt         # Elaborazione documenti Microsoft Word legacy (DOC)
 PyPDF2           # Elaborazione documenti PDF (metodo primario)
 pdfplumber       # Estrazione testo PDF avanzata (metodo fallback)
 beautifulsoup4   # Web scraping per scoperta modelli
@@ -557,7 +558,7 @@ Questo progetto è progettato per esplorare e capire:
 - **Dimensione file massima**: 35MB+ supportati con ottimizzazioni
 - **Gestione file grandi**: 50 pagine max per file >10MB
 - **Limite caratteri**: 500.000 caratteri per documento
-- **Formati supportati**: PDF, DOCX, TXT
+- **Formati supportati**: PDF, DOCX, DOC, TXT, MD
 
 ### Parametri sistema chunking
 - **Dimensione chunk**: 6.000 caratteri (ottimale per finestra contesto 8K)

@@ -127,7 +127,8 @@ uvicorn[standard] # ASGI server for FastAPI
 python-multipart # File upload support
 jinja2           # Template engine (though we use simple HTML)
 requests         # HTTP client for Ollama API calls
-python-docx      # Microsoft Word document processing
+python-docx      # Microsoft Word document processing (DOCX)
+docx2txt         # Microsoft Word legacy document processing (DOC)
 PyPDF2           # PDF document processing (primary method)
 pdfplumber       # Advanced PDF text extraction (fallback method)
 beautifulsoup4   # Web scraping for model discovery
@@ -152,7 +153,7 @@ tesseract-ocr-eng # English language pack for OCR
 - **FastAPI + Uvicorn**: provides the web server and API endpoints for the application
 - **python-multipart**: enables file uploads through web forms
 - **requests**: communicates with the local Ollama API to manage and query AI models
-- **python-docx**: extract text from Microsoft Word documents
+- **python-docx + docx2txt**: extract text from Microsoft Word documents (DOCX and legacy DOC formats)
 - **PyPDF2 + pdfplumber**: multi-strategy PDF text extraction (PyPDF2 first, pdfplumber as fallback)
 - **pytesseract + Pillow + pdf2image**: oCR functionality for scanned PDFs with no extractable text
 - **poppler-utils + tesseract-ocr**: system tools for PDF-to-image conversion and optical character recognition
