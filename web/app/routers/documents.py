@@ -42,7 +42,7 @@ async def list_documents(project: str = Query(None, description="Filter document
         # No filter: return all documents
         return get_documents_overview(documents)
 
-@router.get("/documents/{filename}/chunks", response_model=DocumentChunksResponse)
+@router.get("/documents/{filename:path}/chunks", response_model=DocumentChunksResponse)
 async def get_document_chunks(filename: str):
     """Get chunk information for a specific document."""
     documents = get_documents()
