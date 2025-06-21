@@ -1,0 +1,96 @@
+/* Main layout */
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 320px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--background-light);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content h1 {
+  color: var(--primary-color);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Sidebar sections */
+.sidebar section {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.sidebar section:last-child {
+  border-bottom: none;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Chat container */
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--background);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .sidebar section {
+    padding: 1rem;
+  }
+  
+  .chat-container {
+    flex: 1;
+    min-height: 60vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    max-height: 35vh;
+  }
+  
+  .sidebar section {
+    padding: 0.75rem;
+  }
+  
+  .header-content h1 {
+    font-size: 1.2rem;
+  }
+}

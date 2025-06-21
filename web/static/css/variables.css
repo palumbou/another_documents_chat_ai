@@ -1,0 +1,59 @@
+/* Root variables - Rosé Pine Dawn (Light Theme) */
+:root {
+  /* Rosé Pine Dawn palette */
+  --primary-color: #d7827e;
+  --primary-hover: #b4637a;
+  --primary-light: #f2e9e1;
+  --secondary-color: #797593;
+  --success-color: #56949f;
+  --danger-color: #b4637a;
+  --warning-color: #ea9d34;
+  --background: #faf4ed;
+  --background-alt: #f2e9e1;
+  --background-light: #fffaf3;
+  --background-muted: #e8e3e1;
+  --sidebar-bg: #f2e9e1;
+  --border-color: #dfdad9;
+  --text-primary: #575279;
+  --text-secondary: #797593;
+  --text-muted: #9893a5;
+  --shadow: 0 4px 6px -1px rgb(87 82 121 / 0.1), 0 2px 4px -1px rgb(87 82 121 / 0.06);
+  --shadow-lg: 0 20px 25px -5px rgb(87 82 121 / 0.15), 0 10px 10px -5px rgb(87 82 121 / 0.04);
+
+  /* Chat message colors (Rose Pine) */
+  --user-message-bg: #d7827e;
+  --user-message-text: #faf4ed;
+  --ai-message-bg: #f2e9e1;
+  --ai-message-text: #575279;
+  --ai-message-border: #dfdad9;
+}
+
+/* Dark theme - Rosé Pine Moon */
+[data-theme="dark"] {
+  /* Rosé Pine Moon palette */
+  --primary-color: #eb6f92;
+  --primary-hover: #f6c177;
+  --primary-light: #393552;
+  --secondary-color: #9ccfd8;
+  --success-color: #31748f;
+  --danger-color: #eb6f92;
+  --warning-color: #f6c177;
+  --background: #232136;
+  --background-alt: #2a273f;
+  --background-light: #393552;
+  --background-muted: #2a273f;
+  --sidebar-bg: #2a273f;
+  --border-color: #44415a;
+  --text-primary: #e0def4;
+  --text-secondary: #908caa;
+  --text-muted: #6e6a86;
+  --shadow: 0 4px 6px -1px rgb(35 33 54 / 0.3), 0 2px 4px -1px rgb(35 33 54 / 0.2);
+  --shadow-lg: 0 20px 25px -5px rgb(35 33 54 / 0.4), 0 10px 10px -5px rgb(35 33 54 / 0.1);
+
+  /* Chat message colors (Rose Pine Moon) */
+  --user-message-bg: #eb6f92;
+  --user-message-text: #232136;
+  --ai-message-bg: #2a273f;
+  --ai-message-text: #e0def4;
+  --ai-message-border: #44415a;
+}

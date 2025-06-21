@@ -1,0 +1,310 @@
+/* Chat messages area */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+  background: var(--background);
+}
+
+/* Welcome message */
+.welcome-message {
+  max-width: 700px;
+  margin: 2rem auto;
+  text-align: center;
+  padding: 2rem;
+  background: var(--background-light);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+}
+
+.welcome-message h2 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.welcome-message p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--background);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+}
+
+.welcome-actions {
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.theme-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--primary-light);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+/* Chat messages */
+.message {
+  margin-bottom: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-user {
+  align-items: flex-end;
+}
+
+.message-ai {
+  align-items: flex-start;
+}
+
+.message-content {
+  padding: 1.25rem 1.5rem;
+  border-radius: 20px;
+  max-width: 75%;
+  word-wrap: break-word;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.message-user .message-content {
+  background: linear-gradient(135deg, var(--user-message-bg) 0%, var(--primary-hover) 100%);
+  color: var(--user-message-text);
+  border-bottom-right-radius: 8px;
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.message-ai .message-content {
+  background-color: var(--ai-message-bg);
+  color: var(--ai-message-text);
+  border: 1px solid var(--ai-message-border);
+  border-bottom-left-radius: 8px;
+  margin-right: auto;
+}
+
+/* Add message labels with better styling */
+.message::before {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.message-user::before {
+  content: "🤔 You";
+  text-align: right;
+  align-self: flex-end;
+  margin-right: 0.5rem;
+  color: var(--primary-color);
+}
+
+.message-ai::before {
+  content: "🤖 AI Assistant";
+  text-align: left;
+  align-self: flex-start;
+  margin-left: 0.5rem;
+  color: var(--success-color);
+}
+
+.message-timestamp {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  opacity: 0.7;
+}
+
+/* Thinking bubble for AI (comic-style thought bubble) */
+.message-thinking {
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.thinking-bubble {
+  background: var(--ai-message-bg);
+  border: 2px solid var(--ai-message-border);
+  border-radius: 20px;
+  padding: 1rem 1.5rem;
+  max-width: 300px;
+  position: relative;
+  margin-left: 0.5rem;
+  box-shadow: var(--shadow);
+  animation: fadeInBounce 0.5s ease-out;
+}
+
+.thinking-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 30px;
+  width: 20px;
+  height: 20px;
+  background: var(--ai-message-bg);
+  border: 2px solid var(--ai-message-border);
+  border-radius: 50%;
+  border-top: none;
+  border-left: none;
+}
+
+.thinking-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -25px;
+  left: 15px;
+  width: 12px;
+  height: 12px;
+  background: var(--ai-message-bg);
+  border: 2px solid var(--ai-message-border);
+  border-radius: 50%;
+  border-top: none;
+  border-left: none;
+}
+
+.thinking-content {
+  font-style: italic;
+  color: var(--ai-message-text);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.thinking-dots {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.thinking-dots span {
+  width: 6px;
+  height: 6px;
+  background: var(--ai-message-text);
+  border-radius: 50%;
+  animation: thinkingPulse 1.4s infinite;
+}
+
+.thinking-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.message-thinking::before {
+  content: "💭 AI is thinking";
+  color: #6c757d;
+  font-style: italic;
+}
+
+@keyframes thinkingPulse {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes fadeInBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Debug controls */
+.debug-controls {
+  padding: 1rem 2rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--background-light);
+}
+
+.debug-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.debug-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.debug-toggle:hover .debug-label {
+  color: var(--primary-color);
+}
+
+.debug-toggle input[type="checkbox"] {
+  margin-right: 0.75rem;
+  transform: scale(1.1);
+}
+
+/* Chat input area */
+.chat-input-area {
+  border-top: 1px solid var(--border-color);
+  background: var(--background-light);
+  padding: 1.5rem 2rem;
+}
+
+.input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.input-container textarea {
+  flex: 1;
+  resize: none;
+  min-height: 44px;
+  max-height: 120px;
+  border-radius: 22px;
+  padding: 0.75rem 1.25rem;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.input-help {
+  text-align: center;
+  margin-top: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}

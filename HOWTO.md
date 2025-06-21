@@ -298,3 +298,48 @@ docker exec -it ollama ollama pull your-model
 ---
 
 For more information, see the main README.md file.
+
+## User Interface & Themes
+
+### 🎨 Automatic Theme Detection
+
+The application features a smart theme system that automatically adapts to your system preferences:
+
+#### Three Theme Modes
+
+1. **🔄 Auto Mode (Default)**
+   - Automatically follows your system's dark/light mode preference
+   - Updates in real-time when you change your system theme
+   - Shows a rotating 🔄 icon to indicate auto detection
+
+2. **☀️ Dawn Mode (Light)**
+   - Rosé Pine Dawn theme with warm, light colors
+   - Perfect for daytime use or bright environments
+   - Shows a 🌙 icon to indicate you can switch to dark mode
+
+3. **🌙 Moon Mode (Dark)**
+   - Rosé Pine Moon theme with cool, dark colors
+   - Easy on the eyes for night-time use
+   - Shows a ☀️ icon to indicate you can switch to light mode
+
+#### How to Use
+
+- **Click the theme button** in the top-right corner of the sidebar
+- **Cycles through**: Auto → Dawn → Moon → Auto
+- **Theme preference** is automatically saved and remembered
+- **Auto mode** responds instantly to system theme changes
+
+#### Theme Indicators
+
+- **🔄 Rotating icon**: Auto mode is active
+- **🌙 Moon icon**: Currently in Dawn (light) mode, click for Moon (dark)
+- **☀️ Sun icon**: Currently in Moon (dark) mode, click for Auto
+
+### 🎯 Visual Design
+
+The interface uses the beautiful **Rosé Pine** color palette:
+
+- **Warm, muted colors** that are easy on the eyes
+- **High contrast ratios** for accessibility
+- **Consistent color language** throughout the interface
+- **Smooth transitions** between themes

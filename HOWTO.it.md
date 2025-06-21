@@ -298,3 +298,48 @@ docker exec -it ollama ollama pull tuo-modello
 ---
 
 Per maggiori informazioni, vedi il file README.md principale.
+
+## Interfaccia Utente e Temi
+
+### 🎨 Rilevamento Automatico Tema
+
+L'applicazione presenta un sistema tema intelligente che si adatta automaticamente alle tue preferenze di sistema:
+
+#### Tre Modalità Tema
+
+1. **🔄 Modalità Auto (Default)**
+   - Segue automaticamente le preferenze dark/light del sistema
+   - Si aggiorna in tempo reale quando cambi il tema del sistema
+   - Mostra un'icona 🔄 rotante per indicare il rilevamento automatico
+
+2. **☀️ Modalità Dawn (Chiaro)**
+   - Tema Rosé Pine Dawn con colori caldi e chiari
+   - Perfetto per uso diurno o ambienti luminosi
+   - Mostra un'icona 🌙 per indicare che puoi passare alla modalità scura
+
+3. **🌙 Modalità Moon (Scuro)**
+   - Tema Rosé Pine Moon con colori freschi e scuri
+   - Delicato sugli occhi per uso notturno
+   - Mostra un'icona ☀️ per indicare che puoi passare alla modalità chiara
+
+#### Come Usare
+
+- **Clicca il pulsante tema** nell'angolo in alto a destra della sidebar
+- **Cicla attraverso**: Auto → Dawn → Moon → Auto
+- **La preferenza tema** viene salvata automaticamente e ricordata
+- **Modalità auto** risponde istantaneamente ai cambi tema sistema
+
+#### Indicatori Tema
+
+- **🔄 Icona rotante**: Modalità auto è attiva
+- **🌙 Icona luna**: Attualmente in modalità Dawn (chiaro), clicca per Moon (scuro)
+- **☀️ Icona sole**: Attualmente in modalità Moon (scuro), clicca per Auto
+
+### 🎯 Design Visivo
+
+L'interfaccia usa la bellissima palette di colori **Rosé Pine**:
+
+- **Colori caldi e smorzati** che sono delicati sugli occhi
+- **Rapporti di contrasto elevati** per l'accessibilità
+- **Linguaggio colori consistente** in tutta l'interfaccia
+- **Transizioni fluide** tra i temi

@@ -130,12 +130,19 @@ def get_models_with_memory_info() -> Dict[str, Any]:
     """
     try:
         remote = get_remote_models()
+        remote_error = None
     except Exception as e:
         # If we can't fetch remote models, return error info
         remote = []
-        remote_error = str(e)
-    else:
-        remote_error = None
+        error_msg = str(e)
+        
+        # Provide a user-friendly error message for common cases
+        if "Connection" in error_msg or "timeout" in error_msg.lower():
+            remote_error = "⚠️ Ollama servers for downloading models are temporarily unreachable. Please try again later."
+        elif "Network" in error_msg:
+            remote_error = "⚠️ Network error while fetching remote models. Please check your internet connection."
+        else:
+            remote_error = f"⚠️ Error fetching remote models: {error_msg}"
     
     local = get_local_models()
 
@@ -186,6 +193,90 @@ def pull_model(name: str) -> Dict[str, Any]:
         return {"success": True, "pulled": name}
     except requests.RequestException as e:
         return {"success": False, "error": f"Failed to pull model {name}: {str(e)}"}
+
+def pull_model_with_progress(name: str):
+    """
+    Pull a model with progress updates.
+    Yields progress data as the model is being downloaded.
+    """
+    try:
+        import json
+        resp = requests.post(
+            f"{OLLAMA_BASE_URL}/api/pull",
+            json={"model": name},
+            timeout=300,  # Longer timeout for downloads
+            stream=True
+        )
+        resp.raise_for_status()
+        
+        total_size = 0
+        downloaded_size = 0
+        last_status = ""
+        
+        for line in resp.iter_lines():
+            if line:
+                try:
+                    data = json.loads(line.decode('utf-8'))
+                    
+                    # Extract progress information
+                    status = data.get('status', '')
+                    total = data.get('total', 0)
+                    completed = data.get('completed', 0)
+                    
+                    # Calculate progress percentage
+                    progress_percent = 0
+                    if total > 0:
+                        progress_percent = min(100, (completed / total) * 100)
+                        total_size = total
+                        downloaded_size = completed
+                    
+                    # Format size information
+                    def format_bytes(bytes_val):
+                        if bytes_val == 0:
+                            return "0 B"
+                        for unit in ['B', 'KB', 'MB', 'GB']:
+                            if bytes_val < 1024.0:
+                                return f"{bytes_val:.1f} {unit}"
+                            bytes_val /= 1024.0
+                        return f"{bytes_val:.1f} TB"
+                    
+                    # Prepare progress data
+                    progress_data = {
+                        "status": status,
+                        "progress_percent": round(progress_percent, 1),
+                        "downloaded": format_bytes(downloaded_size),
+                        "total": format_bytes(total_size),
+                        "model_name": name,
+                        "completed": False
+                    }
+                    
+                    # Check if this is a new status worth reporting
+                    if status != last_status or progress_percent > 0:
+                        yield progress_data
+                        last_status = status
+                    
+                    # Check if pulling is complete
+                    if status == "success" or "success" in status.lower():
+                        progress_data["completed"] = True
+                        progress_data["progress_percent"] = 100
+                        yield progress_data
+                        break
+                        
+                except json.JSONDecodeError:
+                    # Skip malformed lines
+                    continue
+        
+        # Invalidate cache so remote list refreshes
+        enabled_models_cache["time"] = 0
+        
+    except requests.RequestException as e:
+        yield {
+            "status": "error",
+            "error": f"Failed to pull model {name}: {str(e)}",
+            "model_name": name,
+            "completed": True,
+            "progress_percent": 0
+        }
 
 def get_model_info(name: str) -> Dict[str, Any]:
     """Get detailed information about a specific model."""

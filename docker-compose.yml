@@ -7,6 +7,7 @@ services:
     image: ollama/ollama:latest
     container_name: ${OLLAMA_CONTAINER_NAME:-ollama}
     restart: ${RESTART_POLICY:-unless-stopped}
+    env_file: env.conf
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
     volumes:
@@ -24,6 +25,7 @@ services:
         - BUILDKIT_INLINE_CACHE=1
     container_name: ${WEB_CONTAINER_NAME:-another-chat-web}
     restart: ${RESTART_POLICY:-unless-stopped}
+    env_file: env.conf
     ports:
       - "${WEB_PORT:-8000}:8000"
     volumes:

@@ -1,6 +1,4 @@
-# Another Documen**Per le istruzioni dettagliate di installazione e utilizzo, leggi:**
-- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida all'utilizzo
-- 🛠️ **[tools/MANAGE.it.md](tools/MANAGE.it.md)** - Riferimento rapido script di gestioneChat AI 🤖📄
+# Another Documents Chat AI 🤖📄
 
 > **Lingue disponibili**: [English](README.md) | [Italiano (corrente)](README.it.md)
 
@@ -17,9 +15,9 @@ Questo è un progetto sperimentale per capire come funzionano le IA in locale, e
 
 ## 🚀 Avvio Rapido
 
-**Per istruzioni dettagliate di installazione e utilizzo, leggi:**
-- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida sull'utilizzo
-- 🛠️ **[MANAGE.it.md](tools/MANAGE.it.md)** - Riferimento rapido script di gestione
+**Per le istruzioni dettagliate di installazione e utilizzo, leggi:**
+- 📖 **[HOWTO.it.md](HOWTO.it.md)** - Guida all'utilizzo
+- 🛠️ **[tools/MANAGE.it.md](tools/MANAGE.it.md)** - Riferimento rapido script di gestione
 
 **Installazione rapida:**
 ```bash
@@ -82,10 +80,13 @@ L'interfaccia presenta una bellissima palette di colori **Rosé Pine** con due m
 - **Avviso**: `#f6c177` (giallo dorato)
 
 **Caratteristiche Tema**:
-- 🔄 **Cambio tema con un click** nell'header della sidebar
+- 🔄 **Rilevamento tema automatico**: segue automaticamente le preferenze dark/light del sistema
+- 🌅 **Ciclo a tre modalità**: Auto → Dawn (Chiaro) → Moon (Scuro) → Auto
 - 💾 **Persistenza tema** tra le sessioni del browser
 - 🎯 **Palette colori consistente** in tutta l'interfaccia
 - ✨ **Transizioni fluide** tra modalità chiara e scura
+- 🔄 **Aggiornamenti dinamici**: modalità auto risponde ai cambi tema sistema in tempo reale
+- 🎨 **Indicatori visivi**: icona rotante per modalità auto, icone distintive per ogni tema
 
 ### Funzionalità tecniche
 - ⚡ **Backend FastAPI**: framework web Python moderno con supporto async e architettura router modulare
@@ -427,53 +428,59 @@ Apri il tuo browser e vai su: http://localhost:8000
 - **Nota**: disponibile solo per documenti completati
 
 #### `DELETE /documents/{filename}`
-- **Descrizione**: elimina un documento dall'archivio
+- **Descrizione**: elimina documento specifico dal sistema
+- **Parametri**: `filename`: Nome file da eliminare
 - **Risposta**: conferma eliminazione
-- **Funzionalità**: rimuove file, dati elaborati e tracciamento stato
-
-#### `POST /documents/{filename}/retry`
-- **Descrizione**: riprova elaborazione per documento fallito
-- **Risposta**: avvio nuovo task elaborazione
-- **Uso**: recupero da errori elaborazione
+- **Funzionalità**: 
+  - Rimozione sicura file e chunk associati
+  - Pulizia metadati documento
+  - Aggiornamento istantaneo interfaccia
 
 #### `POST /documents/reprocess/{filename}`
-- **Descrizione**: rielabora un documento esistente con le attuali impostazioni di estrazione
-- **Risposta**: avvio task rielaborazione con stato aggiornato
-- **Uso**: migliorare risultati estrazione dopo aggiornamenti sistema o modifiche impostazioni
+- **Descrizione**: rielabora documento esistente con strategia estrazione aggiornata
+- **Parametri**: `filename`: Nome file da rielaborare
+- **Risposta**: risultati nuova elaborazione
 - **Funzionalità**: 
-  - Sovrascrive dati elaborati esistenti
-  - Usa algoritmi ed impostazioni estrazione più recenti
-  - Mantiene timestamp caricamento documento
+  - Rielaborazione dopo miglioramenti algoritmo
+  - Riparazione documenti elaborazione fallita
+  - Aggiornamento chunk e metadata
 
-### Ricerca e gestione chunk
+#### `GET /documents/chunks/{filename}`
+- **Descrizione**: visualizza tutti i chunk elaborati per documento specifico
+- **Parametri**: `filename`: Nome file per visualizzazione chunk
+- **Risposta**: lista dettagliata chunk con metadata
+- **Funzionalità**: 
+  - Debug e analisi strategia chunking
+  - Comprensione elaborazione documento
+  - Ottimizzazione qualità estrazione
 
 #### `POST /search-chunks`
 - **Descrizione**: cerca chunk rilevanti in tutti i documenti elaborati
 - **Parametri**:
   - `query`: Query di ricerca
   - `max_results`: Numero massimo risultati (default: 5)
-- **Risposta**: lista classificata di chunk documenti rilevanti
+- **Risposta**: lista classificata chunk documenti rilevanti
 - **Funzionalità**: 
   - Scoring rilevanza multi-criterio
-  - Match esatti e bonus prossimità
-  - Selezione chunk consapevole del contesto
+  - Bonus match esatti e prossimità
+  - Selezione chunk context-aware
 
 ### Endpoint debug e diagnostica
 
 #### `GET /debug/pdf/{filename}`
 - **Descrizione**: testa estrazione PyPDF2 su PDF specifico
 - **Risposta**: testo estratto e metadata
-- **Uso**: diagnosi problemi estrazione testo PDF
+- **Utilizzo**: diagnostica problemi estrazione testo PDF
 
 #### `GET /debug/pdf-plumber/{filename}`
 - **Descrizione**: testa estrazione pdfplumber su PDF specifico
 - **Risposta**: testo estratto e metadata
-- **Uso**: diagnosi estrazione PDF alternativa
+- **Utilizzo**: diagnostica estrazione PDF alternativa
 
 #### `GET /debug/pdf-ocr/{filename}`
 - **Descrizione**: testa estrazione OCR su PDF specifico
 - **Risposta**: testo estratto OCR e metadata
-- **Uso**: diagnosi elaborazione OCR per documenti scansionati
+- **Utilizzo**: diagnostica elaborazione OCR per documenti scansionati
 
 ### Gestione modelli AI
 
@@ -516,26 +523,28 @@ Apri il tuo browser e vai su: http://localhost:8000
 - **Risposta**: statistiche uso RAM e memoria disponibile
 - **Funzionalità**: monitoraggio memoria tempo reale per selezione modelli
 
-#### Chat con documenti
+#### Esempi utilizzo curl
+
+##### Chat con documenti
 ```bash
 curl -X POST "http://localhost:8000/chat" \
   -F "query=Qual è l'argomento principale?" \
   -F "model=llama3.2:1b"
 ```
 
-#### Testa estrazione PDF
+##### Testa estrazione PDF
 ```bash
 curl "http://localhost:8000/debug/pdf-ocr/documento.pdf"
 ```
 
-#### Scarica un modello
+##### Scarica un modello
 ```bash
 curl -X POST "http://localhost:8000/models/pull" \
   -H "Content-Type: application/json" \
   -d '{"name": "llama3.2:1b"}'
 ```
 
-#### Controlla stato sistema
+##### Controlla stato sistema
 ```bash
 curl "http://localhost:8000/status"
 ```

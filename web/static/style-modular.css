@@ -1,0 +1,13 @@
+/* 
+ * Documents Chat AI - Main Stylesheet
+ * Modular CSS architecture for better maintainability
+ */
+
+/* Import all CSS modules in correct order */
+@import 'css/themes.css';        /* Color themes (Rose Pine Dawn/Moon) */
+@import 'css/layout.css';        /* Layout, grid, sidebar structure */
+@import 'css/components.css';    /* Buttons, forms, modals, general components */
+@import 'css/chat.css';          /* Chat interface, messages, input */
+@import 'css/documents.css';     /* Documents section, upload, projects */
+@import 'css/debug.css';         /* Debug functionality styles */
+@import 'css/responsive.css';    /* Responsive design, media queries */

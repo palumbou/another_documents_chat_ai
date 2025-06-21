@@ -9,6 +9,12 @@ class ChatRequest(BaseModel):
     query: str = Field(..., description="The user's question or message")
     model: Optional[str] = Field(None, description="Optional model to use for chat")
 
+class DebugInfo(BaseModel):
+    ollama_url: str
+    prompt_used: str
+    ollama_request_payload: Dict[str, Any]
+    thinking_process: str
+
 class ChatResponse(BaseModel):
     response: str
     model: str
@@ -16,6 +22,7 @@ class ChatResponse(BaseModel):
     chunks_processed: int
     total_chunks_available: int
     context_length: int
+    debug_info: Optional[DebugInfo] = None
 
 class DocumentInfo(BaseModel):
     processing_status: str

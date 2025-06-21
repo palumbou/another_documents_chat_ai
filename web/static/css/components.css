@@ -1,0 +1,512 @@
+/* Theme toggle */
+.theme-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--background);
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.theme-icon {
+  font-size: 1.2rem;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+/* Auto theme icon animation */
+.theme-icon.auto-icon {
+  animation: autoRotate 3s linear infinite;
+}
+
+/* Auto theme rotation animation */
+@keyframes autoRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button styles */
+.btn-primary, .btn-secondary, .btn-send {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  color: var(--background);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(215, 130, 126, 0.4);
+}
+
+.btn-secondary {
+  background-color: var(--background);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--background-light);
+  color: var(--text-primary);
+  border-color: var(--primary-color);
+}
+
+.btn-small {
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--background);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-small:hover {
+  background-color: var(--primary-color);
+  color: var(--background);
+  border-color: var(--primary-color);
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn-xs {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--background-alt);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-xs:hover {
+  background-color: var(--primary-color);
+  color: var(--background);
+  transform: scale(1.05);
+}
+
+.btn-xs.delete:hover {
+  background-color: var(--danger-color);
+}
+
+.btn-xs.retry:hover {
+  background-color: var(--warning-color);
+}
+
+/* Form elements */
+.model-group {
+  margin-bottom: 1.5rem; /* Increased space for progress bars */
+}
+
+.model-group:last-child {
+  margin-bottom: 0;
+}
+
+.model-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.model-group select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.model-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+}
+
+.model-group select, .file-input {
+  background-color: var(--background);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.model-group select:focus, .file-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(215, 130, 126, 0.1);
+}
+
+/* Error styling for select options */
+.model-group select option[disabled] {
+  color: var(--danger-color);
+  font-style: italic;
+  background-color: var(--background);
+}
+
+.model-group select option.error {
+  color: var(--danger-color);
+  font-style: italic;
+}
+
+.status-msg {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  min-height: 1.1rem;
+}
+
+.status-msg:empty {
+  display: none;
+}
+
+/* Specific styles for different message types */
+.status-msg .success {
+  color: var(--success-color);
+  font-weight: 600;
+}
+
+.status-msg .error {
+  color: var(--danger-color);
+  font-weight: 600;
+}
+
+.status-msg .warning {
+  color: var(--warning-color);
+  font-weight: 600;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: var(--background);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.modal-content h4 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--background);
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.modal-content input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(215, 130, 126, 0.1);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.modal-buttons .btn-primary,
+.modal-buttons .btn-secondary {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Chunks modal styles */
+.chunks-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.chunks-modal-content {
+  background: var(--background);
+  border-radius: 12px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  padding: 2rem;
+}
+
+.chunks-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.chunks-modal-close:hover {
+  color: var(--text-primary);
+  background-color: var(--background-alt);
+}
+
+.chunks-modal h4 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Search components */
+.chunk-search {
+  margin: 1rem 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color)20;
+}
+
+/* Search highlight */
+.search-highlight {
+  background-color: var(--warning-color);
+  color: var(--background);
+  padding: 0.1rem 0.2rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+/* Focus states for accessibility */
+button:focus,
+select:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.hidden {
+  display: none;
+}
+
+/* Loading and status states */
+.loading {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.status-online {
+  color: var(--success-color);
+}
+
+.status-offline {
+  color: var(--danger-color);
+}
+
+.status-pending {
+  color: var(--warning-color);
+}
+
+/* Model pull progress styles */
+.pull-progress {
+  text-align: left;
+  padding: 1rem;
+  background: var(--background-light);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-top: 0.5rem;
+}
+
+.progress-info {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.progress-bar-container {
+  margin-bottom: 0.75rem;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background-color: var(--background-muted);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+.progress-bar-fill[style*="width: 100%"] {
+  animation: none; /* Stop animation when complete */
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.status-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  animation: statusBlink 1.5s ease-in-out infinite;
+}
+
+.pull-progress .success {
+  color: var(--success-color);
+  font-weight: 600;
+  animation: successFadeIn 0.5s ease-out;
+}
+
+.pull-progress .error {
+  color: var(--danger-color);
+  font-weight: 600;
+  animation: errorShake 0.5s ease-out;
+}
+
+/* Animations for progress bars */
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Loading animation for status text */
+@keyframes statusBlink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Success animation */
+@keyframes successFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Error shake animation */
+@keyframes errorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}

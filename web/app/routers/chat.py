@@ -11,12 +11,13 @@ from app.services.chat_service import process_chat_request
 router = APIRouter()
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(query: str = Form(...), model: str = Form(None), project: str = Form("global")):
+async def chat(query: str = Form(...), model: str = Form(None), project: str = Form("global"), debug: bool = Form(False)):
     """
     Perform a chat query using Ollama with intelligent document chunking.
     Uses the provided model, or the currently selected engine, or fallback to a default model.
     Works with or without documents - if no documents, provides general AI assistance.
     Project parameter allows filtering documents by project with priority handling.
+    Debug parameter enables detailed information about the reasoning process and Ollama call.
     """
     from app.shared_state import get_documents
     from app.config import DEFAULT_PROJECT_NAME
@@ -53,7 +54,7 @@ async def chat(query: str = Form(...), model: str = Form(None), project: str = F
         
         documents = filtered_documents
     
-    result = process_chat_request(query, documents, model)
+    result = process_chat_request(query, documents, model, debug)
     
     if not result["success"]:
         if "timed out" in result["error"]:
@@ -61,7 +62,7 @@ async def chat(query: str = Form(...), model: str = Form(None), project: str = F
         else:
             raise HTTPException(status_code=500, detail=result["error"])
     
-    return {
+    response_data = {
         "response": result["response"],
         "model": result["model"],
         "mode": result["mode"],
@@ -69,3 +70,8 @@ async def chat(query: str = Form(...), model: str = Form(None), project: str = F
         "total_chunks_available": result["total_chunks_available"],
         "context_length": result["context_length"]
     }
+    
+    if debug and result.get("debug_info"):
+        response_data["debug_info"] = result["debug_info"]
+    
+    return response_data

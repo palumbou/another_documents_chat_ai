@@ -34,7 +34,7 @@ ENV/
 .env/
 
 # Environment variables
-# Note: .env is tracked because it's a symlink to env.conf (our main config file)
+# Note: env.conf is the main configuration file (visible and tracked)
 .env.local
 .env.*.local
 

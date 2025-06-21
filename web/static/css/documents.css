@@ -1,0 +1,335 @@
+/* Status section */
+.status-section .status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.status-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Documents section */
+.documents-section #docs-list {
+  margin-bottom: 0.5rem;
+}
+
+/* Project Management Styles */
+.project-management {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background-color: var(--background-light);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.project-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+  flex-wrap: nowrap;
+}
+
+.project-header label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 55px;
+  flex-shrink: 0;
+}
+
+.project-select {
+  flex: 1;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--background);
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  max-width: calc(100% - 110px);
+  min-width: 0;
+}
+
+.project-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(215, 130, 126, 0.1);
+}
+
+/* Updated doc-item styles for reduced space */
+.doc-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.25rem 0.4rem;
+  background-color: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 0.1rem;
+  transition: all 0.2s ease;
+  font-size: 0.7rem;
+}
+
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.doc-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doc-info {
+  display: flex;
+  flex-direction: row;
+  gap: 0.3rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-text {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  line-height: 1.1;
+}
+
+.doc-actions {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
+.view-chunks-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.delete-btn {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #dc2626;
+}
+
+.doc-summary {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--background-alt);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+/* Upload area */
+.upload-area {
+  margin-top: 1rem;
+}
+
+.file-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background);
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.file-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Document processing status styles */
+.doc-item {
+  transition: all 0.3s ease;
+}
+
+.doc-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.status-icon {
+  font-size: 0.875rem;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.status-pending .status-text {
+  color: var(--warning-color);
+}
+
+.status-processing .status-text {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.status-completed .status-text {
+  color: var(--text-muted);
+}
+
+.status-error .status-text {
+  color: var(--danger-color);
+}
+
+/* Progress bar */
+.progress-bar {
+  width: 100%;
+  height: 3px;
+  background-color: var(--border-color);
+  border-radius: 2px;
+  margin-top: 0.25rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+  animation: progress-shimmer 2s infinite;
+}
+
+@keyframes progress-shimmer {
+  0% { transform: translateX(-100%); opacity: 0.5; }
+  50% { transform: translateX(0%); opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0.5; }
+}
+
+/* Retry button */
+.retry-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: var(--warning-color);
+  color: var(--background);
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(234, 157, 52, 0.3);
+}
+
+/* Processing animation for doc items - removed border, kept only animation */
+.status-processing {
+  background: linear-gradient(90deg, transparent 0%, rgba(215, 130, 126, 0.1) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: processing-pulse 2s infinite;
+}
+
+/* Ensure no colored borders for any document status */
+.status-completed,
+.status-pending,
+.status-error,
+.status-processing {
+  border-left: none !important;
+}
+
+@keyframes processing-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Chunk modal specific styles */
+.chunk-item {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--background-alt);
+}
+
+.chunk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+  gap: 1rem;
+}
+
+.expand-chunk {
+  background-color: var(--primary-color);
+  color: var(--background);
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.expand-chunk:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.chunk-size {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.chunk-preview {
+  background-color: var(--background);
+  padding: 1rem;
+  border-radius: 6px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 500px; /* Increased height for better viewing */
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  transition: max-height 0.3s ease;
+}
+
+.chunk-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.copy-chunk {
+  background-color: var(--secondary-color);
+  color: var(--background);
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.copy-chunk:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-1px);
+}

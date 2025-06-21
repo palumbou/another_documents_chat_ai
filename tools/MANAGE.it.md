@@ -55,7 +55,71 @@ RESTART_POLICY=unless-stopped
 
 1. **Script non funziona**: Assicurati che sia eseguibile: `chmod +x manage.sh`
 2. **Docker non trovato**: Lo script offrirà di installare Docker automaticamente
-3. **Porte in uso**: Cambia `WEB_PORT` nel file `.env`
+3. **Porte in uso**: Cambia `WEB_PORT` nel file `env.conf`
 4. **Problemi di permessi**: Esegui con `sudo` se necessario per le operazioni Docker
 
 Per istruzioni dettagliate, vedi [HOWTO.it.md](../HOWTO.it.md).
+
+## Monitoraggio Salute e Endpoint API
+
+### Monitoraggio Stato Sistema
+
+Puoi monitorare la salute dell'applicazione usando questi endpoint:
+
+```bash
+# Controlla stato sistema generale
+curl http://localhost:8000/status
+
+# Monitora uso memoria
+curl http://localhost:8000/system/memory
+
+# Elenca modelli AI disponibili
+curl http://localhost:8000/models
+```
+
+### Risposta Endpoint Status
+
+```json
+{
+  "connected": true,
+  "engine": {
+    "name": "llama3.2:1b",
+    "available": true,
+    "responding": true,
+    "verified": true
+  },
+  "local_models": ["llama3.2:1b", "gemma3:latest"],
+  "total_models": 2,
+  "error": null
+}
+```
+
+### Monitoraggio Memoria
+
+```json
+{
+  "total_gb": 7.72,
+  "available_gb": 2.31,
+  "used_gb": 5.41,
+  "percent_used": 70.1
+}
+```
+
+### Esempi Integrazione
+
+```bash
+# Script controllo salute
+#!/bin/bash
+STATUS=$(curl -s http://localhost:8000/status | jq -r '.connected')
+if [ "$STATUS" = "true" ]; then
+  echo "✅ Il servizio è in salute"
+else
+  echo "❌ Il servizio necessita attenzione"
+fi
+
+# Avviso memoria
+MEMORY_USAGE=$(curl -s http://localhost:8000/system/memory | jq -r '.percent_used')
+if (( $(echo "$MEMORY_USAGE > 90" | bc -l) )); then
+  echo "⚠️  Alto uso memoria: ${MEMORY_USAGE}%"
+fi
+```

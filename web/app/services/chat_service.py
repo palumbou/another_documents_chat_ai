@@ -14,11 +14,17 @@ from app.services.chunking_service import chunk_documents_for_processing, find_m
 from app.services.engine_manager import engine_manager
 from app.utils.logging import log_chat_request
 
-def process_chat_request(query: str, documents: Dict[str, str], model: Optional[str] = None) -> Dict[str, Any]:
+def process_chat_request(query: str, documents: Dict[str, str], model: Optional[str] = None, include_debug: bool = False) -> Dict[str, Any]:
     """
     Process a chat query using Ollama with intelligent document chunking.
     Uses the provided model, or the currently selected engine, or fallback to a default model.
     Works with or without documents - if no documents, provides general AI assistance.
+    
+    Args:
+        query: The user's question
+        documents: Dictionary of documents to search through
+        model: Optional specific model to use
+        include_debug: Whether to include debug information in the response
     """
     chosen_model = model or engine_manager.current_engine or DEFAULT_MODEL
 
@@ -70,24 +76,38 @@ Answer:"""
     # Log the chat request
     log_chat_request(query, chosen_model, context_info["mode"], context_info["chunks_processed"])
 
+    # Prepare debug information if requested
+    debug_info = None
+    thinking_process = ""
+    
+    if include_debug:
+        if context_info["mode"] == "general_chat":
+            thinking_process = f"🤔 Modalità chat generale attivata. Nessun documento da analizzare. Utilizzo il modello {chosen_model} per una risposta diretta alla domanda."
+        else:
+            thinking_process = f"🤔 Modalità chat documentale attivata. Ho trovato {context_info['total_chunks_available']} chunk totali nei documenti. Sto analizzando i {context_info['chunks_processed']} chunk più rilevanti per la domanda. Contesto utilizzato: {context_info['context_length']} caratteri. Modello: {chosen_model}."
+
+    # Prepare request payload
+    request_payload = {
+        "model": chosen_model, 
+        "prompt": prompt, 
+        "stream": False,
+        "options": {
+            "temperature": CHAT_TEMPERATURE,
+            "top_p": CHAT_TOP_P,
+            "num_ctx": CHAT_CONTEXT_WINDOW,
+            "num_predict": CHAT_MAX_RESPONSE,
+            "stop": ["Question:", "Instructions:"]  # Stop tokens to prevent repetition
+        }
+    }
+
     try:
         print(f"Processing query in {context_info['mode']} mode, context length: {context_info['context_length']} chars")
         
         # Call Ollama generate API with optimized settings for chunked content
+        ollama_url = f"{OLLAMA_BASE_URL}/api/generate"
         resp = requests.post(
-            f"{OLLAMA_BASE_URL}/api/generate",
-            json={
-                "model": chosen_model, 
-                "prompt": prompt, 
-                "stream": False,
-                "options": {
-                    "temperature": CHAT_TEMPERATURE,
-                    "top_p": CHAT_TOP_P,
-                    "num_ctx": CHAT_CONTEXT_WINDOW,
-                    "num_predict": CHAT_MAX_RESPONSE,
-                    "stop": ["Question:", "Instructions:"]  # Stop tokens to prevent repetition
-                }
-            },
+            ollama_url,
+            json=request_payload,
             timeout=OLLAMA_TIMEOUT
         )
         resp.raise_for_status()
@@ -96,13 +116,27 @@ Answer:"""
         # Ollama generate API returns response in "response" field
         text = data.get("response", "No response generated")
         
+        # Prepare debug info if requested
+        if include_debug:
+            debug_info = {
+                "ollama_url": ollama_url,
+                "prompt_used": prompt,
+                "ollama_request_payload": request_payload,
+                "thinking_process": thinking_process
+            }
+        
         # Return additional metadata about the processing
-        return {
+        result = {
             "success": True,
             "response": text, 
             "model": chosen_model,
             **context_info
         }
+        
+        if debug_info:
+            result["debug_info"] = debug_info
+            
+        return result
         
     except requests.exceptions.Timeout:
         return {

@@ -1,0 +1,205 @@
+/* Sidebar Sections and Components */
+
+/* Sidebar sections */
+.sidebar section {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.sidebar section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.sidebar h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+/* Add icons to section headers */
+.documents-section h3::before {
+  content: "📁";
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.models-section h3::before {
+  content: "🤖";
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.status-section h3::before {
+  content: "📊";
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Status section */
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: var(--background-light);
+  border-radius: 0.375rem;
+  border: 1px solid var(--border-color);
+}
+
+.status-label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+#conn-status,
+#engine-info,
+#memory-info {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+#conn-status.online {
+  color: var(--success-color);
+}
+
+#conn-status.offline {
+  color: var(--danger-color);
+}
+
+/* Project Management Styles */
+.project-management {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--background-light);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.project-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.project-header label {
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: fit-content;
+}
+
+.project-select {
+  flex: 1;
+  min-width: 120px;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+.btn-small {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  min-width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Documents list */
+#docs-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.doc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--background-light);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.doc-item:hover {
+  background: var(--primary-light);
+  border-color: var(--primary-color);
+  transform: translateX(2px);
+}
+
+.doc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.doc-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.doc-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.doc-actions .btn-small {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.doc-item:hover .doc-actions .btn-small {
+  opacity: 1;
+}
+
+/* Enhanced visual feedback */
+.doc-item.selected {
+  background: var(--primary-color)20;
+  border-color: var(--primary-color);
+}
+
+.doc-item.selected .doc-name {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Empty state */
+.docs-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.docs-empty::before {
+  content: "📄";
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}

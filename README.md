@@ -80,10 +80,13 @@ The interface features a beautiful **Rosé Pine** color scheme with two modes:
 - **Warning**: `#f6c177` (golden yellow)
 
 **Theme Features**:
-- 🔄 **One-click theme switcher** in the sidebar header
+- 🔄 **Auto theme detection**: automatically follows system dark/light mode preference
+- 🌅 **Three-mode cycle**: Auto → Dawn (Light) → Moon (Dark) → Auto
 - 💾 **Theme persistence** across browser sessions
 - 🎯 **Consistent color palette** throughout the interface
 - ✨ **Smooth transitions** between light and dark modes
+- 🔄 **Dynamic updates**: auto mode responds to system theme changes in real-time
+- 🎨 **Visual indicators**: rotating icon for auto mode, distinct icons for each theme
 
 ### Technical features
 - ⚡ **FastAPI backend**: modern Python web framework with async support and modular router architecture
@@ -225,7 +228,7 @@ The application implements a robust three-tier PDF text extraction system:
 The application implements an advanced chunking strategy to handle large documents efficiently:
 
 #### Chunking parameters
-- **Chunk size**: 6,000 characters per chunk (optimized for context window usage)
+- **Chunk size**: 6,000 characters per chunk (optimized for 8K context window)
 - **Overlap**: 200 characters between chunks to maintain context continuity
 - **Maximum chunks processed**: 5 most relevant chunks per query
 - **Processing timeout**: 300 seconds (5 minutes) for large document handling
@@ -501,7 +504,7 @@ Open your browser and go to: http://localhost:8000
 ### System monitoring and health
 
 #### `GET /status`
-- **Description**: check system and AI engine status
+- **Description**: check system status and AI engine health
 - **Response**: comprehensive system health information
 - **Features**: 
   - Ollama connectivity status
@@ -511,52 +514,8 @@ Open your browser and go to: http://localhost:8000
 
 #### `GET /system/memory`
 - **Description**: get current system memory usage
-- **Response**: RAM usage statistics and available memory
+- **Response**: RAM usage statistics and availability
 - **Features**: real-time memory monitoring for model selection
-
-#### `GET /system/memory`
-- **Description**: get current system memory information
-- **Response**: RAM usage statistics in GB
-- **Features**: total, used, available memory with percentages
-
-#### `GET /engine/health`
-- **Description**: detailed health check for current AI engine
-- **Response**: engine performance metrics and response times
-- **Features**: test query execution and performance measurement
-
-#### `POST /engine/verify`
-- **Description**: verify current engine and initialize fallback if needed
-- **Response**: verification results with potential engine switching
-- **Features**: automatic fallback to working models
-
-### Debug and diagnostic endpoints
-
-#### `GET /debug/pdf/{filename}`
-- **Description**: analyze PDF structure and extraction issues
-- **Parameters**: `filename`: PDF file to analyze
-- **Response**: detailed PDF analysis with page-by-page breakdown
-- **Features**: page count, text extraction success, annotations, images
-
-#### `GET /debug/pdf-plumber/{filename}`
-- **Description**: test both PyPDF2 and pdfplumber extraction methods
-- **Parameters**: `filename`: PDF file to test
-- **Response**: comparison of extraction methods with results
-- **Features**: side-by-side comparison of text extraction quality
-
-#### `GET /debug/pdf-ocr/{filename}`
-- **Description**: test all three extraction methods including OCR
-- **Parameters**: `filename`: PDF file to test with OCR
-- **Response**: complete extraction test results
-- **Features**: pyPDF2, pdfplumber, and OCR results comparison
-
-### API usage examples
-
-#### Upload a document
-```bash
-curl -X POST "http://localhost:8000/upload" \
-  -F "file=@document.pdf" \
-  -F "overwrite=false"
-```
 
 #### Chat with documents
 ```bash
@@ -582,12 +541,12 @@ curl -X POST "http://localhost:8000/models/pull" \
 curl "http://localhost:8000/status"
 ```
 
-## Model recommendations
+## Model Recommendations
 
 ### For limited RAM (< 8GB)
 - `llama3.2:1b` (2GB RAM) - Good for basic tasks
 - `phi3.5:mini` (3GB RAM) - Efficient small model
-- `gemma3:1b` (2GB RAM) - Google's lightweight model
+- `gemma3:1b` (2GB RAM) - Lightweight Google model
 
 ### For moderate RAM (8-16GB)
 - `llama3.2:3b` (4GB RAM) - Better performance
@@ -599,20 +558,20 @@ curl "http://localhost:8000/status"
 - `mixtral:8x7b` (26GB RAM) - Very capable model
 - `llama3.1:70b` (40GB RAM) - Top performance (requires powerful hardware)
 
-## Learning objectives
+## Learning Objectives
 
 This project is designed to explore and understand:
 
 - **Local AI deployment**: how to run AI models without cloud services
 - **RAG systems**: advanced document chunking and retrieval strategies
-- **Resource requirements**: real-world computational needs for AI applications
-- **Model selection**: choosing the right model for your hardware constraints
+- **Resource requirements**: real computational needs for AI applications
+- **Model selection**: choosing the right model for hardware constraints
 - **Document processing**: handling various file formats with size optimizations
 - **Performance optimization**: timeout management, memory efficiency, and scalability
 - **Relevance scoring**: multi-criteria algorithms for finding relevant document chunks
 - **System monitoring**: real-time resource tracking and capacity planning
 
-## Technical specifications
+## Technical Specifications
 
 ### Document processing limits
 - **Maximum file size**: 35MB+ supported with optimizations
@@ -623,7 +582,7 @@ This project is designed to explore and understand:
 ### Chunking system parameters
 - **Chunk size**: 6,000 characters (optimal for 8K context window)
 - **Overlap**: 200 characters between chunks
-- **Maximum chunks per query**: 5 most relevant chunks
+- **Max chunks per query**: 5 most relevant chunks
 - **Processing timeout**: 300 seconds (5 minutes)
 
 ### AI model configuration
@@ -637,21 +596,21 @@ This project is designed to explore and understand:
 - **Exact phrase match**: +10 points
 - **Word match**: +2 points
 - **Partial match**: +1 point
-- **Proximity bonus**: +5 points (words within 50 chars)
+- **Proximity bonus**: +5 points (words within 50 characters)
 - **Length bonus**: +1 point per 100 characters
 
 ## Troubleshooting
 
 ### Common issues
 
-1. **Out of Memory**: choose a smaller model or close other applications
+1. **Out of memory**: choose a smaller model or close other applications
 2. **Slow responses**: normal for larger models on limited hardware
 3. **Model download fails**: check internet connection and available disk space
-4. **Ollama not responding**: restart the Docker containers
-5. **Large document timeout**: files >35MB may need manual chunking
+4. **Ollama not responding**: restart Docker containers
+5. **Large document timeout**: files >35MB might require manual chunking
 6. **Chunk processing errors**: check document format and encoding
 7. **OCR extraction fails**: verify PDF contains images/scanned content
-8. **Poor OCR quality**: document may have low resolution or poor scan quality
+8. **Poor OCR quality**: document might have low resolution or poor scan quality
 9. **OCR language detection**: currently supports Italian and English only
 
 ### PDF extraction troubleshooting
@@ -663,19 +622,19 @@ This project is designed to explore and understand:
 4. **Reprocess document**: use `/documents/reprocess/{filename}` after improvements
 
 #### OCR-specific issues
-- **"poppler not found"**: system dependencies missing (automatically installed in Docker)
-- **"tesseract not found"**: oCR engine not installed (automatically installed in Docker)
+- **"poppler not found"**: missing system dependencies (automatically installed in Docker)
+- **"tesseract not found"**: OCR engine not installed (automatically installed in Docker)
 - **Slow OCR processing**: normal for high-resolution scanned documents
-- **OCR timeout**: large documents may take several minutes to process
+- **OCR timeout**: large documents might require several minutes for processing
 - **Poor text quality**: scanned documents with low resolution or poor quality
 
 ### Performance tips
 
 - **Memory management**: close unnecessary applications to free RAM
 - **Storage optimization**: use SSD storage for better model loading times
-- **Model selection**: consider model quantization for memory efficiency
-- **System monitoring**: monitor temperature during intensive usage
-- **Document optimization**: break very large documents into smaller files
+- **Model selection**: consider quantized models for memory efficiency
+- **System monitoring**: monitor temperature during intensive use
+- **Document optimization**: split very large documents into smaller files
 - **Chunking strategy**: use the chunk viewer to understand document processing
 - **OCR optimization**: for better OCR results, ensure scanned documents have good quality and contrast
 
@@ -709,7 +668,7 @@ options = {
 
 ## Disclaimer
 
-This is an experimental project for learning purposes. Performance and accuracy may vary based on your hardware and the chosen AI model. Always verify important information from AI responses.
+This is an experimental project for educational purposes. Performance and accuracy may vary based on your hardware and chosen AI model. Always verify important information from AI responses.
 
 ---
 
@@ -717,4 +676,4 @@ This is an experimental project for learning purposes. Performance and accuracy 
 
 This project is released under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-This project is for learning, educational and experimental purposes. Please respect the terms of use of Ollama and the individual AI models.
+This project is for learning, educational, and experimental purposes. Please respect Ollama's terms of use and individual AI model terms.

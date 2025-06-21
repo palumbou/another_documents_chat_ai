@@ -1,0 +1,171 @@
+/* Debug controls */
+.debug-controls {
+  border-top: 1px solid var(--border-color);
+  background: var(--background-alt);
+  padding: 1rem 2rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+}
+
+.debug-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.debug-toggle:hover {
+  color: var(--text-primary);
+}
+
+.debug-toggle input[type="checkbox"] {
+  margin: 0;
+  transform: scale(1.1);
+}
+
+.debug-label {
+  user-select: none;
+}
+
+.debug-controls input:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+.debug-controls .debug-label {
+  transition: opacity 0.3s ease;
+}
+
+.debug-controls input:disabled + .debug-label {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Debug Information Display */
+.debug-thinking {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--background-light);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  border-left: 4px solid var(--warning-color);
+}
+
+.debug-section {
+  margin-bottom: 0.5rem;
+}
+
+.thinking-content {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--background);
+  border-radius: 6px;
+  font-style: italic;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--warning-color);
+}
+
+.ai-response {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--ai-message-bg);
+  border: 1px solid var(--ai-message-border);
+  border-radius: 8px;
+}
+
+.response-content {
+  margin-top: 0.5rem;
+  color: var(--ai-message-text);
+  line-height: 1.6;
+}
+
+.debug-technical {
+  margin-top: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.debug-technical details {
+  background-color: var(--background-alt);
+}
+
+.debug-technical summary {
+  padding: 0.75rem;
+  cursor: pointer;
+  background-color: var(--background-alt);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: background-color 0.2s ease;
+}
+
+.debug-technical summary:hover {
+  background-color: var(--background-light);
+}
+
+.debug-details {
+  padding: 1rem;
+  background-color: var(--background);
+}
+
+.debug-item {
+  margin-bottom: 1rem;
+}
+
+.debug-item:last-child {
+  margin-bottom: 0;
+}
+
+.debug-item strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.debug-code {
+  background-color: var(--background-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.debug-item code {
+  background-color: var(--background-alt);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+/* Enhanced message styling when debug is active */
+.message.ai-message .message-content {
+  line-height: 1.6;
+}
+
+.message.ai-message .debug-thinking {
+  animation: debugFadeIn 0.5s ease;
+}
+
+@keyframes debugFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

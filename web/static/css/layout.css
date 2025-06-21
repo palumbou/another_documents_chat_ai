@@ -1,0 +1,154 @@
+/* Global reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--background);
+  overflow-x: hidden;
+}
+
+/* Main app container - two column layout */
+.app-container {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  height: 100vh;
+  background-color: var(--background);
+}
+
+/* Left sidebar */
+.sidebar {
+  width: 100%;
+  background: linear-gradient(145deg, var(--sidebar-bg) 0%, var(--background-alt) 100%);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(87, 82, 121, 0.1);
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  color: var(--background);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--background);
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Sidebar sections */
+.sidebar section {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  margin: 0.5rem;
+  border-radius: 12px;
+  background-color: var(--background-light);
+  transition: all 0.2s ease;
+}
+
+.sidebar section:hover {
+  background-color: var(--background);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.sidebar section:last-child {
+  border-bottom: none;
+}
+
+.sidebar h3 {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Add icons to section headers */
+.status-section h3::before {
+  content: "⚡";
+  font-size: 1rem;
+}
+
+.models-section h3::before {
+  content: "🤖";
+  font-size: 1rem;
+}
+
+.documents-section h3::before {
+  content: "📁";
+  font-size: 1rem;
+}
+
+/* Main chat container */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--background);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-alt);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .app-container {
+    grid-template-columns: 320px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  
+  .sidebar {
+    height: auto;
+    max-height: 50vh;
+    order: 2;
+    border-right: none;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .chat-container {
+    order: 1;
+    height: auto;
+    min-height: 50vh;
+  }
+}
