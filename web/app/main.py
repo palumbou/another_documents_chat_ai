@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import STATIC_DIR, TEMPLATES_DIR
-from app.routers import documents, search, system, engine, models, debug, chat, projects
+from app.routers import documents, search, system, engine, models, debug, chat, projects, chat_history
 from app.services.extraction_service import load_existing_documents
 from app.services.engine_manager import engine_manager
 from app.utils.logging import app_logger
@@ -33,6 +33,7 @@ app.include_router(engine.router, tags=["Engine"])
 app.include_router(models.router, tags=["Models"])
 app.include_router(debug.router, tags=["Debug"])
 app.include_router(chat.router, tags=["Chat"])
+app.include_router(chat_history.router, tags=["Chat History"])
 
 @app.get("/", response_class=HTMLResponse)
 async def home():

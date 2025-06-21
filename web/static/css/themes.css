@@ -24,6 +24,17 @@
     --ai-message-bg: #393552;
     --ai-message-text: #e0def4;
     --ai-message-border: #44415a;
+    --hover-bg: #393552;
+    --success-bg: rgba(156, 207, 216, 0.1);
+    --error-bg: rgba(235, 111, 146, 0.1);
+    --error-color: #eb6f92;
+    --primary-bg: rgba(235, 111, 146, 0.1);
+    
+    /* Button variables */
+    --button-bg: #393552;
+    --button-text: #e0def4;
+    --button-hover-bg: #44415a;
+    --button-hover-text: #f6c177;
   }
 }
 
@@ -52,6 +63,17 @@
     --ai-message-bg: #f4f0ed;
     --ai-message-text: #575279;
     --ai-message-border: #ddd6d1;
+    --hover-bg: #f4f0ed;
+    --success-bg: rgba(86, 148, 159, 0.1);
+    --error-bg: rgba(180, 99, 122, 0.1);
+    --error-color: #b4637a;
+    --primary-bg: rgba(215, 130, 126, 0.1);
+    
+    /* Button variables */
+    --button-bg: #f2e9e1;
+    --button-text: #575279;
+    --button-hover-bg: #dfdad9;
+    --button-hover-text: #d7827e;
   }
 }
 
@@ -80,6 +102,17 @@
   --ai-message-bg: #f2e9e1;
   --ai-message-text: #575279;
   --ai-message-border: #dfdad9;
+  --hover-bg: #f2e9e1;
+  --success-bg: rgba(86, 148, 159, 0.1);
+  --error-bg: rgba(180, 99, 122, 0.1);
+  --error-color: #b4637a;
+  --primary-bg: rgba(215, 130, 126, 0.1);
+  
+  /* Button variables */
+  --button-bg: #f2e9e1;
+  --button-text: #575279;
+  --button-hover-bg: #dfdad9;
+  --button-hover-text: #d7827e;
 }
 
 /* Dark theme - Rosé Pine Moon */
@@ -107,6 +140,17 @@
   --ai-message-bg: #393552;
   --ai-message-text: #e0def4;
   --ai-message-border: #44415a;
+  --hover-bg: #393552;
+  --success-bg: rgba(156, 207, 216, 0.1);
+  --error-bg: rgba(235, 111, 146, 0.1);
+  --error-color: #eb6f92;
+  --primary-bg: rgba(235, 111, 146, 0.1);
+  
+  /* Button variables */
+  --button-bg: #393552;
+  --button-text: #e0def4;
+  --button-hover-bg: #44415a;
+  --button-hover-text: #f6c177;
 }
 
 /* Theme-specific shadow adjustments */

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 class ChatRequest(BaseModel):
     query: str = Field(..., description="The user's question or message")
     model: Optional[str] = Field(None, description="Optional model to use for chat")
+    debug: bool = Field(False, description="Whether to include debug information")
 
 class DebugInfo(BaseModel):
     ollama_url: str
@@ -190,3 +191,34 @@ class MoveDocumentResponse(BaseModel):
     message: str
     old_project: str
     new_project: str
+
+class ChatMessage(BaseModel):
+    role: str  # "user" or "assistant"
+    content: str
+    timestamp: str
+    model: Optional[str] = None
+
+class ChatSession(BaseModel):
+    id: str
+    name: str
+    project_name: str
+    created_at: Any  # datetime
+    updated_at: Any  # datetime
+    messages: List[ChatMessage]
+    share_token: Optional[str] = None
+
+class ChatSessionRequest(BaseModel):
+    project_name: str
+    chat_name: Optional[str] = None
+    first_message: Optional[str] = None
+
+class ChatSessionResponse(BaseModel):
+    id: str
+    name: str
+    created_at: str
+    updated_at: str
+    message_count: int
+
+class ShareChatRequest(BaseModel):
+    chat_id: str
+    project_name: str

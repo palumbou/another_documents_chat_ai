@@ -4,6 +4,151 @@
 window.currentProject = 'global';
 window.autoRefreshInterval = null;
 
+// Setup improved file upload with drag & drop
+function setupImprovedFileUpload() {
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileLabel = document.querySelector('.file-input-label');
+    const uploadMsg = document.getElementById('upload-msg');
+
+    if (!fileInput || !fileLabel) return;
+
+    // Handle file selection
+    fileInput.addEventListener('change', function() {
+        const files = this.files;
+        updateFileDisplay(files, fileLabel, uploadBtn);
+    });
+
+    // Handle drag and drop
+    fileLabel.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+    });
+
+    fileLabel.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+    });
+
+    fileLabel.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        fileInput.files = files;
+        updateFileDisplay(files, fileLabel, uploadBtn);
+    });
+
+    // Handle upload button
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', async function() {
+            await uploadSelectedFiles();
+        });
+    }
+
+    function updateFileDisplay(files, label, btn) {
+        if (files.length > 0) {
+            label.classList.add('has-files');
+            const fileNames = Array.from(files).map(f => f.name).join(', ');
+            label.querySelector('.upload-text').textContent = `${files.length} file(s) selected`;
+            label.querySelector('.upload-hint').textContent = fileNames.length > 50 ? 
+                fileNames.substring(0, 50) + '...' : fileNames;
+            
+            if (btn) {
+                btn.style.display = 'block';
+                btn.textContent = `Upload ${files.length} file(s)`;
+            }
+        } else {
+            label.classList.remove('has-files');
+            label.querySelector('.upload-text').textContent = 'Choose files or drag & drop';
+            label.querySelector('.upload-hint').textContent = 'PDF, DOCX, DOC, TXT, MD';
+            
+            if (btn) {
+                btn.style.display = 'none';
+            }
+        }
+    }
+
+    async function uploadSelectedFiles() {
+        const files = fileInput.files;
+        if (files.length === 0) return;
+
+        const formData = new FormData();
+        for (let file of files) {
+            formData.append('files', file);
+        }
+        
+        // Add current project
+        const projectSelect = document.getElementById('project-select');
+        if (projectSelect) {
+            formData.append('project', projectSelect.value);
+        }
+
+        try {
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            showMessage('Uploading files...', 'info', uploadMsg);
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                let message = '';
+                if (result.uploaded && result.uploaded.length > 0) {
+                    message += `Uploaded: ${result.uploaded.join(', ')}`;
+                    if (result.processing && result.processing.length > 0) {
+                        message += ` (processing in background...)`;
+                    }
+                }
+
+                // Handle existing files
+                if (result.existing && result.existing.length > 0) {
+                    const overwrite = confirm(
+                        `The following files already exist:\n${result.existing.join(', ')}\n\nDo you want to overwrite them?`
+                    );
+                    
+                    if (overwrite) {
+                        formData.append('overwrite', 'true');
+                        const overwriteRes = await fetch('/upload', { method: 'POST', body: formData });
+                        const overwriteData = await overwriteRes.json();
+                        
+                        if (overwriteData.uploaded) {
+                            message += (message ? '\n' : '') + `Overwritten: ${overwriteData.uploaded.join(', ')}`;
+                        }
+                    } else {
+                        message += (message ? '\n' : '') + `Skipped: ${result.existing.join(', ')}`;
+                    }
+                }
+
+                showMessage(message || 'Upload completed', 'success', uploadMsg);
+                
+                // Reset form
+                fileInput.value = '';
+                updateFileDisplay([], fileLabel, uploadBtn);
+                
+                // Refresh documents list
+                loadExistingDocuments();
+                
+                // Start auto-refresh for processing status
+                startAutoRefresh();
+            } else {
+                throw new Error(result.error || 'Upload failed');
+            }
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            showMessage('Upload failed: ' + error.message, 'error', uploadMsg);
+        } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Upload Files';
+        }
+    }
+}
+
 // Load and display existing documents with processing status
 async function loadExistingDocuments() {
   try {
@@ -407,12 +552,21 @@ function stopAutoRefresh() {
 
 // Handle uploads with background processing
 function initializeUploadHandler() {
-  document.getElementById('upload-form').onsubmit = async e => {
+  const uploadForm = document.getElementById('upload-form');
+  if (!uploadForm) {
+    console.warn('Upload form not found');
+    return;
+  }
+  
+  uploadForm.onsubmit = async e => {
     e.preventDefault();
     const files = document.getElementById('file-input').files;
     if (!files.length) return;
     
-    document.getElementById('upload-msg').innerText = 'Uploading…';
+    const uploadMsg = document.getElementById('upload-msg');
+    if (uploadMsg) {
+      uploadMsg.innerText = 'Uploading…';
+    }
     
     // First, check for existing files
     const form = new FormData(e.target);
@@ -610,6 +764,7 @@ function initializeProjectManagement() {
 function initializeDocuments() {
   initializeUploadHandler();
   initializeProjectManagement();
+  setupImprovedFileUpload();
   
   // Load initial data
   loadProjects().then(() => loadExistingDocuments());

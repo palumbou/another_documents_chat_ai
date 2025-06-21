@@ -132,6 +132,30 @@
   background-color: var(--warning-color);
 }
 
+/* Sidebar toggle button */
+.btn-icon {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+}
+
+.btn-icon:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--button-hover-text);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
 /* Form elements */
 .model-group {
   margin-bottom: 1.5rem; /* Increased space for progress bars */
@@ -509,4 +533,235 @@ textarea:focus {
   75% {
     transform: translateX(5px);
   }
+}
+
+/* Chat History Styles */
+.chats-section {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  background: var(--background-alt);
+}
+
+.chat-item:hover {
+  background-color: var(--hover-bg);
+  border-color: var(--border-color);
+}
+
+.chat-item.active {
+  background-color: var(--primary-bg);
+  border-color: var(--primary-color);
+}
+
+.chat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
+}
+
+.chat-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.chat-actions {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chat-item:hover .chat-actions {
+  opacity: 1;
+}
+
+.chat-placeholder {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem 1rem;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* Chat Header Styles */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--background-alt);
+  min-height: 60px;
+}
+
+.chat-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.chat-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.btn-icon:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.btn-icon.btn-danger:hover {
+  background-color: var(--error-bg);
+  color: var(--error-color);
+}
+
+/* File Upload Improvements */
+.upload-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.file-input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--background-alt);
+  text-align: center;
+  min-height: 100px;
+  justify-content: center;
+}
+
+.file-input-label:hover,
+.file-input-label.drag-over {
+  border-color: var(--primary-color);
+  background: var(--hover-bg);
+}
+
+.upload-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.upload-text {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.upload-hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.file-input-label.has-files {
+  border-color: var(--success-color);
+  background: var(--success-bg);
+}
+
+.file-input-label.has-files .upload-text {
+  color: var(--success-color);
+}
+
+/* Right Sidebar Styles */
+.right-sidebar {
+  width: 100%;
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+  box-shadow: -2px 0 8px rgba(87, 82, 121, 0.1);
+}
+
+.right-sidebar .sidebar-content {
+  padding: 1rem;
+}
+
+/* Responsive behavior for right sidebar */
+@media (max-width: 1200px) {
+  .right-sidebar {
+    display: none;
+  }
+  
+  .right-sidebar.visible {
+    display: block;
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    box-shadow: -4px 0 12px rgba(87, 82, 121, 0.2);
+    background: var(--sidebar-bg);
+  }
+}
+
+/* Projects section styling */
+.projects-section {
+  padding: 1rem 1.5rem;
+}
+
+.projects-section h3 {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: var(--text-primary);
 }

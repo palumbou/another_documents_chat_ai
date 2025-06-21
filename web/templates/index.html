@@ -3,12 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>Another Documents Chat AI</title>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
   <link rel="stylesheet" href="/static/style-modular.css">
+  <style>
+    /* CSS for sidebar toggle functionality */
+    .app-container.right-sidebar-hidden {
+      grid-template-columns: 380px 1fr 0 !important;
+    }
+    .app-container.right-sidebar-hidden .right-sidebar {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <div class="app-container">
-    <!-- Left Sidebar -->
-    <aside class="sidebar">
+    <!-- Left Sidebar - Projects and Chats -->
+    <aside class="sidebar left-sidebar">
       <header class="sidebar-header">
         <div class="header-content">
           <h1>Documents Chat AI</h1>
@@ -18,14 +28,13 @@
         </div>
       </header>
       
-      <!-- Documents Management -->
-      <section class="documents-section">
-        <h3>Documents</h3>
+      <!-- Project Management -->
+      <section class="projects-section">
+        <h3>Projects</h3>
         
-        <!-- Project Management -->
         <div class="project-management">
           <div class="project-header">
-            <label for="project-select">Project:</label>
+            <label for="project-select">Project Name:</label>
             <select id="project-select" class="project-select">
               <option value="global">Global Documents</option>
             </select>
@@ -50,60 +59,54 @@
         <div id="existing-docs">
           <div id="docs-list">Loading documents...</div>
         </div>
+        
         <div class="upload-area">
-          <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+          <form id="upload-form" class="upload-container">
             <input type="file"
                    name="files"
                    id="file-input"
                    multiple
                    accept=".pdf,.docx,.doc,.txt,.md"
                    class="file-input">
+            <label for="file-input" class="file-input-label">
+              <span class="upload-icon">📎</span>
+              <span class="upload-text">Choose files or drag & drop</span>
+              <span class="upload-hint">PDF, DOCX, DOC, TXT, MD</span>
+            </label>
             <input type="hidden" name="project" id="upload-project" value="global">
-            <button type="submit" class="btn-primary">Upload Files</button>
+            <button id="upload-btn" class="btn-primary" style="display: none;">Upload Files</button>
           </form>
           <div id="upload-msg" class="status-msg"></div>
         </div>
       </section>
 
-      <!-- Models Management -->
-      <section class="models-section">
-        <h3>Models</h3>
-        <div class="model-group">
-          <label for="remote-select">Available Models:</label>
-          <select id="remote-select"></select>
-          <button id="pull-btn" class="btn-secondary">Download</button>
-          <span id="pull-msg" class="status-msg"></span>
+      <!-- Chat History -->
+      <section class="chats-section">
+        <div class="section-header">
+          <h3>Chat History</h3>
+          <button id="new-chat-btn" class="btn-small" title="Start new chat">+</button>
         </div>
-        <div class="model-group">
-          <label for="local-select">Active Model:</label>
-          <select id="local-select"></select>
-          <button id="run-btn" class="btn-primary">Use</button>
-          <span id="run-msg" class="status-msg"></span>
-        </div>
-      </section>
-
-      <!-- System Status -->
-      <section class="status-section">
-        <h3>System Status</h3>
-        <div id="status">
-          <div class="status-item">
-            <span class="status-label">Ollama:</span>
-            <span id="conn-status">Checking…</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">Engine:</span>
-            <span id="engine-info">Loading…</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">Memory:</span>
-            <span id="memory-info">Checking…</span>
-          </div>
+        <div id="chat-list">
+          <div class="chat-placeholder">No chats yet. Start chatting to create your first conversation!</div>
         </div>
       </section>
     </aside>
 
     <!-- Main Chat Area -->
     <main class="chat-container">
+      <div class="chat-header">
+        <button id="mobile-menu-btn" class="btn-icon mobile-only" title="Open menu">☰</button>
+        <div class="chat-title">
+          <span id="current-chat-name">New Chat</span>
+          <div class="chat-actions">
+            <button id="rename-chat-btn" class="btn-icon" title="Rename chat">✏️</button>
+            <button id="share-chat-btn" class="btn-icon" title="Share chat">🔗</button>
+            <button id="delete-chat-btn" class="btn-icon btn-danger" title="Delete chat">🗑️</button>
+          </div>
+        </div>
+        <button id="toggle-right-sidebar" class="btn-icon" title="Toggle models panel">⚙️</button>
+      </div>
+      
       <div class="chat-messages" id="chat-messages">
         <div class="welcome-message">
           <h2>🤖 Welcome to Documents Chat AI</h2>
@@ -142,18 +145,11 @@
         </div>
       </div>
       
-      <div class="debug-controls">
-        <label class="debug-toggle">
-          <input type="checkbox" id="debug-mode" />
-          <span class="debug-label">🧠 Show AI Thinking Process</span>
-        </label>
-      </div>
-      
       <div class="chat-input-area">
         <div class="input-container">
           <textarea id="chat-input" 
-                    placeholder="Ask a question about your documents... (Enter to send, Shift+Enter for new line)"
-                    rows="3"></textarea>
+                    placeholder="Ask a question about your documents..."
+                    rows="2"></textarea>
           <button id="send-btn" class="btn-send" title="Send message (Enter)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -161,11 +157,61 @@
             </svg>
           </button>
         </div>
-        <div class="input-help">
-          <small>Press <kbd>Enter</kbd> to send, <kbd>Shift+Enter</kbd> for new line</small>
-        </div>
       </div>
     </main>
+
+    <!-- Right Sidebar - Models and Status -->
+    <aside class="sidebar right-sidebar visible" id="right-sidebar">
+      <div class="sidebar-header mobile-only">
+        <h3>Settings</h3>
+        <button id="close-right-sidebar" class="btn-icon" title="Close">✕</button>
+      </div>
+      <div class="sidebar-content">
+        <!-- Models Management -->
+        <section class="models-section">
+          <h3 class="desktop-only">Models</h3>
+          <div class="model-group">
+            <label for="remote-select">Available Models:</label>
+            <select id="remote-select"></select>
+            <button id="pull-btn" class="btn-secondary">Download</button>
+            <span id="pull-msg" class="status-msg"></span>
+          </div>
+          <div class="model-group">
+            <label for="local-select">Active Model:</label>
+            <select id="local-select"></select>
+            <button id="run-btn" class="btn-primary">Use</button>
+            <span id="run-msg" class="status-msg"></span>
+          </div>
+          
+          <!-- Debug Controls -->
+          <div class="model-group">
+            <label class="debug-toggle">
+              <input type="checkbox" id="debug-mode" />
+              <span class="debug-label">🧠 Show AI Thinking Process</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- System Status -->
+        <section class="status-section">
+          <h3>System Status</h3>
+          <div id="status">
+            <div class="status-item">
+              <span class="status-label">Ollama:</span>
+              <span id="conn-status">Checking…</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Engine:</span>
+              <span id="engine-info">Loading…</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Memory:</span>
+              <span id="memory-info">Checking…</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
   </div>
 
   <!-- Modular JavaScript -->
@@ -175,6 +221,7 @@
   <script src="/static/js/models.js"></script>
   <script src="/static/js/ui.js"></script>
   <script src="/static/js/utils.js"></script>
+  <script src="/static/js/chat-history.js"></script>
   <script src="/static/js/main.js"></script>
 </body>
 </html>

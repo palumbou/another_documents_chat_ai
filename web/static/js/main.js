@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
     // Initialize all modules
     try {
+      // Ensure chatHistory is available globally
+      if (typeof chatHistory !== 'undefined') {
+        window.chatHistory = chatHistory;
+        console.log('Chat history initialized:', !!window.chatHistory);
+      }
+      
       if (typeof initializeStatusMonitoring === 'function') {
         initializeStatusMonitoring();
       }
@@ -23,6 +29,13 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       if (typeof initializeUtils === 'function') {
         initializeUtils();
+      }
+      if (typeof setupImprovedFileUpload === 'function') {
+        setupImprovedFileUpload();
+      }
+      // Initialize chat history last
+      if (window.chatHistory) {
+        window.chatHistory.loadProjectChats();
       }
     } catch (error) {
       console.error('Error during initialization:', error);
