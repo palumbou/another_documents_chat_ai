@@ -72,6 +72,14 @@
             </label>
             <input type="hidden" name="project" id="upload-project" value="global" aria-label="Upload project selector">
             <button id="upload-btn" class="btn-primary" style="display: none;">Upload Files</button>
+            
+            <!-- Progress bar for upload -->
+            <div id="upload-progress" class="upload-progress" style="display: none;">
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <div class="progress-text">Uploading...</div>
+            </div>
           </form>
           <div id="upload-msg" class="status-msg"></div>
         </div>
