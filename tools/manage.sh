@@ -346,6 +346,11 @@ show_help() {
     echo "  restart    Restart the service"
     echo "  status     Show service status"
     echo "  logs       Show service logs"
+    echo "  timezone   Manage container timezone settings"
+    echo "             Examples:"
+    echo "               ./manage.sh timezone show     - Show current timezone"
+    echo "               ./manage.sh timezone auto     - Auto-detect timezone"
+    echo "               ./manage.sh timezone set Europe/Rome  - Set specific timezone"
     echo "  help       Show this help message"
     echo
     echo "For detailed instructions, see HOWTO.md (English) or HOWTO.it.md (Italiano)"
@@ -381,6 +386,13 @@ case "${1:-}" in
     logs)
         show_logs
         ;;
+    timezone)
+        if [[ -f "tools/timezone_manager.sh" ]]; then
+            tools/timezone_manager.sh "${@:2}"
+        else
+            print_color "$LOVE" "Timezone manager not found at tools/timezone_manager.sh"
+        fi
+        ;;
     help|--help|-h)
         show_help
         ;;
@@ -395,9 +407,10 @@ case "${1:-}" in
         echo "6) Stop service"
         echo "7) Show status"
         echo "8) Show logs"
-        echo "9) Help"
+        echo "9) Manage timezone"
+        echo "10) Help"
         echo
-        read -p "Enter your choice (1-9): " choice
+        read -p "Enter your choice (1-10): " choice
         
         case $choice in
             1) install_service ;;
@@ -408,7 +421,14 @@ case "${1:-}" in
             6) stop_service ;;
             7) show_status ;;
             8) show_logs ;;
-            9) show_help ;;
+            9) 
+                if [[ -f "tools/timezone_manager.sh" ]]; then
+                    tools/timezone_manager.sh
+                else
+                    print_color "$LOVE" "Timezone manager not found"
+                fi
+                ;;
+            10) show_help ;;
             *) print_color "$LOVE" "Invalid choice." ;;
         esac
         ;;
