@@ -176,6 +176,7 @@ class ChatHistory {
             </div>
             <div class="chat-actions">
                 <button class="btn-icon" onclick="chatHistory.loadChat('${chat.id}')" title="Load chat">📖</button>
+                <button class="btn-icon" onclick="chatHistory.renameChatPrompt('${chat.id}')" title="Rename chat">✏️</button>
                 <button class="btn-icon" onclick="chatHistory.deleteChatPrompt('${chat.id}')" title="Delete chat">🗑️</button>
             </div>
         `;
@@ -248,7 +249,7 @@ class ChatHistory {
                     content = this.addDebugInfoToResponse(content, msg.debug_info);
                 }
                 
-                this.addMessageToDisplay('ai', content);
+                this.addMessageToDisplay('ai', content, msg.model);
             }
         });
 
@@ -256,12 +257,17 @@ class ChatHistory {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    addMessageToDisplay(sender, content) {
+    addMessageToDisplay(sender, content, model = null) {
         const chatMessages = document.getElementById('chat-messages');
         if (!chatMessages) return;
 
         const messageDiv = document.createElement('div');
         messageDiv.className = `message message-${sender}`;
+        
+        // Add model info as data attribute for AI messages
+        if (sender === 'ai' && model) {
+            messageDiv.setAttribute('data-model', model);
+        }
         
         messageDiv.innerHTML = `
             <div class="message-content">${content}</div>
@@ -326,14 +332,20 @@ class ChatHistory {
         // For example, enable share button, show chat options etc.
     }
 
-    async renameChatPrompt() {
-        if (!this.currentChatId) return;
+    async renameChatPrompt(chatId = null) {
+        // Use provided chatId or current chat
+        const targetChatId = chatId || this.currentChatId;
+        if (!targetChatId) return;
 
-        const newName = prompt('Enter new chat name:');
+        // Find the chat name for the prompt
+        const chat = this.chats.find(c => c.id === targetChatId);
+        const currentName = chat ? chat.name : 'Chat';
+
+        const newName = prompt(`Enter new chat name:`, currentName);
         if (!newName || !newName.trim()) return;
 
         try {
-            const response = await fetch(`/chats/${this.currentProject}/${this.currentChatId}/rename`, {
+            const response = await fetch(`/chats/${this.currentProject}/${targetChatId}/rename`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newName.trim() })
@@ -343,7 +355,11 @@ class ChatHistory {
                 throw new Error('Failed to rename chat');
             }
 
-            this.updateChatTitle(newName.trim());
+            // If renaming current chat, update the title
+            if (targetChatId === this.currentChatId) {
+                this.updateChatTitle(newName.trim());
+            }
+            
             this.loadProjectChats(); // Refresh list
             showMessage('Chat renamed successfully', 'success');
 
@@ -513,8 +529,9 @@ class ChatHistory {
 
             const result = await response.json();
             
-            // Load chat messages to update the UI immediately
-            await this.loadChatMessages(this.currentChatId);
+            // Don't automatically reload chat messages here
+            // Let the calling code handle the UI update to preserve model info
+            // await this.loadChatMessages(this.currentChatId);
             
             this.loadProjectChats(); // Update chat list timestamps
             return result;

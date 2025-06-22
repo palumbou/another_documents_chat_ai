@@ -22,9 +22,6 @@
       <header class="sidebar-header">
         <div class="header-content">
           <h1>Documents Chat AI</h1>
-          <button id="theme-toggle" class="theme-toggle" title="Switch between Dawn and Moon themes">
-            <span class="theme-icon">🌙</span>
-          </button>
         </div>
       </header>
       
@@ -73,7 +70,7 @@
               <span class="upload-text">Choose files or drag & drop</span>
               <span class="upload-hint">PDF, DOCX, DOC, TXT, MD</span>
             </label>
-            <input type="hidden" name="project" id="upload-project" value="global">
+            <input type="hidden" name="project" id="upload-project" value="global" aria-label="Upload project selector">
             <button id="upload-btn" class="btn-primary" style="display: none;">Upload Files</button>
           </form>
           <div id="upload-msg" class="status-msg"></div>
@@ -182,13 +179,29 @@
             <button id="run-btn" class="btn-primary">Use</button>
             <span id="run-msg" class="status-msg"></span>
           </div>
+        </section>
+
+        <!-- Settings -->
+        <section class="options-section">
+          <h3>Settings</h3>
+          
+          <!-- Theme Controls -->
+          <div class="option-group option-inline">
+            <label>Theme:</label>
+            <button id="theme-toggle" class="theme-toggle compact" title="Switch between Dawn and Moon themes">
+              <span class="theme-icon">⚙️</span>
+              <span class="theme-text">Auto</span>
+            </button>
+          </div>
           
           <!-- Debug Controls -->
-          <div class="model-group">
-            <label class="debug-toggle">
-              <input type="checkbox" id="debug-mode" />
-              <span class="debug-label">🧠 Show AI Thinking Process</span>
-            </label>
+          <div class="option-group option-inline">
+            <label>AI Thinking:</label>
+            <button id="debug-toggle" class="debug-toggle-btn compact" title="Toggle AI thinking process display">
+              <span class="debug-icon">🧠</span>
+              <span class="debug-status">Off</span>
+            </button>
+            <input type="checkbox" id="debug-mode" style="display: none;" aria-label="Debug mode toggle" />
           </div>
         </section>
 

@@ -27,16 +27,19 @@ function initializeThemeToggle() {
   
   function updateThemeIcon(theme) {
     themeIcon.classList.remove('auto-icon');
+    const themeText = themeToggle.querySelector('.theme-text');
     
     if (theme === 'auto') {
-      themeIcon.textContent = '🔄';
-      themeIcon.classList.add('auto-icon');
+      themeIcon.textContent = '⚙️';
+      if (themeText) themeText.textContent = 'Auto';
       themeToggle.title = 'Auto theme (follows system) - Click to switch to Dawn';
     } else if (theme === 'dark') {
       themeIcon.textContent = '☀️';
+      if (themeText) themeText.textContent = 'Dark';
       themeToggle.title = 'Moon theme (dark) - Click to switch to Auto';
     } else {
       themeIcon.textContent = '🌙';
+      if (themeText) themeText.textContent = 'Light';
       themeToggle.title = 'Dawn theme (light) - Click to switch to Moon';
     }
   }
@@ -60,7 +63,41 @@ function initializeThemeToggle() {
   });
 }
 
+// Debug toggle functionality
+function initializeDebugToggle() {
+  const debugToggleBtn = document.getElementById('debug-toggle');
+  const debugCheckbox = document.getElementById('debug-mode');
+  const debugStatus = debugToggleBtn.querySelector('.debug-status');
+  
+  // Load saved debug state
+  const savedDebugMode = localStorage.getItem('debugMode') === 'true';
+  debugCheckbox.checked = savedDebugMode;
+  updateDebugUI(savedDebugMode);
+  
+  function updateDebugUI(isActive) {
+    if (isActive) {
+      debugToggleBtn.classList.add('active');
+      debugStatus.textContent = 'On';
+    } else {
+      debugToggleBtn.classList.remove('active');
+      debugStatus.textContent = 'Off';
+    }
+  }
+  
+  debugToggleBtn.addEventListener('click', () => {
+    const newState = !debugCheckbox.checked;
+    debugCheckbox.checked = newState;
+    
+    // Save to localStorage
+    localStorage.setItem('debugMode', newState.toString());
+    
+    // Update UI
+    updateDebugUI(newState);
+  });
+}
+
 // Initialize all UI functionality
 function initializeUI() {
   initializeThemeToggle();
+  initializeDebugToggle();
 }

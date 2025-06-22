@@ -22,21 +22,6 @@
   transition: transform 0.3s ease;
 }
 
-/* Auto theme icon animation */
-.theme-icon.auto-icon {
-  animation: autoRotate 3s linear infinite;
-}
-
-/* Auto theme rotation animation */
-@keyframes autoRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* Button styles */
 .btn-primary, .btn-secondary, .btn-send {
   padding: 0.5rem 1rem;
@@ -764,4 +749,134 @@ textarea:focus {
   margin-bottom: 1rem;
   font-size: 1rem;
   color: var(--text-primary);
+}
+
+/* Options section styles */
+.options-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.option-group {
+  margin-bottom: 1.5rem;
+}
+
+.option-group:last-child {
+  margin-bottom: 0;
+}
+
+.option-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+/* Theme toggle in options section */
+.options-section .theme-toggle,
+.options-section .debug-toggle-btn {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.options-section .theme-toggle {
+  justify-content: center;
+}
+
+.options-section .debug-toggle-btn {
+  justify-content: space-between;
+}
+
+.options-section .theme-toggle:hover,
+.options-section .debug-toggle-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.options-section .theme-icon,
+.options-section .debug-icon {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.options-section .theme-text,
+.options-section .debug-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  flex: 1;
+  text-align: left;
+  margin-left: 0.25rem;
+}
+
+.options-section .debug-status {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  background: var(--background-alt);
+  color: var(--text-secondary);
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.options-section .debug-toggle-btn.active {
+  background: var(--primary-bg);
+  border-color: var(--primary-color);
+}
+
+.options-section .debug-toggle-btn.active .debug-status {
+  background: var(--primary-color);
+  color: var(--background);
+}
+
+/* Inline option groups for compact layout */
+.option-group.option-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.option-group.option-inline label {
+  margin-bottom: 0;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Compact versions for inline layout */
+.options-section .theme-toggle.compact,
+.options-section .debug-toggle-btn.compact {
+  width: auto;
+  padding: 0.4rem 0.75rem;
+  min-width: 75px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+.options-section .debug-toggle-btn.compact {
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.options-section .compact .theme-icon,
+.options-section .compact .debug-icon {
+  font-size: 1rem;
+}
+
+.options-section .compact .theme-text,
+.options-section .compact .debug-status {
+  font-size: 0.75rem;
 }
