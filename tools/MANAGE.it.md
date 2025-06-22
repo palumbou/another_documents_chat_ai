@@ -51,6 +51,50 @@ NETWORK_NAME=another-chat-network
 RESTART_POLICY=unless-stopped
 ```
 
+## Gestione Configurazione
+
+### Gestione Timezone
+
+Per gestire il fuso orario dei container:
+
+```bash
+# Mostra configurazione timezone corrente
+./tools/timezone_manager.sh show
+
+# Rileva automaticamente il timezone dell'host
+./tools/timezone_manager.sh auto
+
+# Imposta un timezone specifico
+./tools/timezone_manager.sh set Europe/Rome
+./tools/timezone_manager.sh set America/New_York
+
+# Elenca timezone comuni
+./tools/timezone_manager.sh list
+
+# Riavvia i container per applicare le modifiche
+./tools/timezone_manager.sh restart
+```
+
+### Gestione Utente e Permessi
+
+Per gestire i permessi utente e garantire la corretta proprietà dei file:
+
+```bash
+# Mostra configurazione utente corrente
+./tools/user_manager.sh show
+
+# Aggiorna la configurazione utente dal sistema host
+./tools/user_manager.sh update
+
+# Aggiorna e ricostruisce i container
+./tools/user_manager.sh rebuild
+
+# Testa la proprietà dei file
+./tools/user_manager.sh test
+```
+
+La gestione utente è importante per evitare problemi di permessi con i file creati dai container.
+
 ## Risoluzione Problemi
 
 1. **Script non funziona**: Assicurati che sia eseguibile: `chmod +x manage.sh`

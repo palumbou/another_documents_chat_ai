@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
       // Ensure chatHistory is available globally
       if (typeof chatHistory !== 'undefined') {
         window.chatHistory = chatHistory;
-        console.log('Chat history initialized:', !!window.chatHistory);
       }
       
       if (typeof initializeStatusMonitoring === 'function') {

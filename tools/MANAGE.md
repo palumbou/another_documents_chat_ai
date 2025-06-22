@@ -51,6 +51,71 @@ NETWORK_NAME=another-chat-network
 RESTART_POLICY=unless-stopped
 ```
 
+## Configuration Management
+
+### Timezone Management
+
+Use the timezone manager script to handle timezone settings:
+
+```bash
+# Show current timezone configuration
+./tools/timezone_manager.sh show
+
+# Automatically detect host timezone
+./tools/timezone_manager.sh auto
+
+# Set specific timezone
+./tools/timezone_manager.sh set Europe/Rome
+./tools/timezone_manager.sh set America/New_York
+
+# List common timezones
+./tools/timezone_manager.sh list
+
+# Restart containers to apply changes
+./tools/timezone_manager.sh restart
+```
+
+### User and Permissions Management
+
+Use the user manager script to handle user permissions and file ownership:
+
+```bash
+# Show current user configuration
+./tools/user_manager.sh show
+
+# Update user configuration from host system
+./tools/user_manager.sh update
+
+# Update configuration and rebuild containers
+./tools/user_manager.sh rebuild
+
+# Test file ownership
+./tools/user_manager.sh test
+```
+
+User management is important to avoid permission issues with files created by containers.
+
+### Advanced Examples
+
+```bash
+# Timezone management examples
+./tools/timezone_manager.sh auto
+./tools/timezone_manager.sh set Europe/Rome
+./tools/timezone_manager.sh list
+
+# User management examples  
+./tools/user_manager.sh rebuild
+./tools/user_manager.sh test
+```
+
+### Why User Configuration Matters
+
+The user configuration ensures that files created by Docker containers have the correct ownership:
+- Without proper user config: files are owned by `root` (UID 0)
+- With proper user config: files match your host user (usually UID 1000)
+
+This prevents permission issues when accessing files from both inside and outside containers.
+
 ## Troubleshooting
 
 1. **Script not working**: Make sure it's executable: `chmod +x manage.sh`

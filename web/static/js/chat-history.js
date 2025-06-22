@@ -19,15 +19,12 @@ class ChatHistory {
 
     handleResize() {
         const width = window.innerWidth;
-        console.log('Window resize:', width);
         
         // For now, keep desktop behavior simple
         if (width > 1024) {
             // Desktop - keep current toggle state
-            console.log('Desktop mode, current sidebar state:', this.rightSidebarVisible);
         } else {
             // Mobile/tablet - could add special handling here
-            console.log('Mobile/tablet mode');
         }
     }
 
@@ -37,13 +34,11 @@ class ChatHistory {
         if (projectSelect && projectSelect.value) {
             this.currentProject = projectSelect.value;
         }
-        console.log('Initialized with project:', this.currentProject);
         
         // Initialize sidebar state
         const appContainer = document.querySelector('.app-container');
         const rightSidebar = document.getElementById('right-sidebar');
         if (appContainer && rightSidebar) {
-            console.log('Initial sidebar setup');
             if (!this.rightSidebarVisible) {
                 appContainer.classList.add('right-sidebar-hidden');
                 rightSidebar.style.display = 'none';
@@ -216,14 +211,12 @@ class ChatHistory {
 
     async loadChatMessages(chatId) {
         try {
-            console.log('Loading messages for chat:', chatId);
             const response = await fetch(`/chats/${this.currentProject}/${chatId}/messages`);
             if (!response.ok) {
                 throw new Error('Failed to load chat messages');
             }
 
             const messages = await response.json();
-            console.log('Loaded messages:', messages);
             this.displayMessages(messages);
             
         } catch (error) {
@@ -331,7 +324,6 @@ class ChatHistory {
     showChatActions() {
         // This method can be used to show/hide UI elements based on chat state
         // For example, enable share button, show chat options etc.
-        console.log('Chat actions updated for chat:', this.currentChatId);
     }
 
     async renameChatPrompt() {
@@ -431,23 +423,17 @@ class ChatHistory {
         // Toggle the state
         this.rightSidebarVisible = !this.rightSidebarVisible;
         
-        console.log('Toggling sidebar. New state:', this.rightSidebarVisible);
-        console.log('Current app container classes:', appContainer.className);
         
         if (this.rightSidebarVisible) {
             // Show sidebar
             appContainer.classList.remove('right-sidebar-hidden');
             rightSidebar.style.display = 'block';
-            console.log('Showing sidebar');
         } else {
             // Hide sidebar
             appContainer.classList.add('right-sidebar-hidden');
             rightSidebar.style.display = 'none';
-            console.log('Hiding sidebar');
         }
         
-        console.log('Final app container classes:', appContainer.className);
-        console.log('Right sidebar display:', rightSidebar.style.display);
     }
 
     toggleLeftSidebar() {
@@ -551,28 +537,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Global test function for debugging
 window.testSidebarToggle = function() {
-    console.log('=== SIDEBAR TOGGLE TEST ===');
     const container = document.querySelector('.app-container');
     const sidebar = document.getElementById('right-sidebar');
     
-    console.log('Container:', container);
-    console.log('Sidebar:', sidebar);
-    console.log('Current classes:', container.className);
-    console.log('Current grid:', window.getComputedStyle(container).gridTemplateColumns);
     
     if (container.classList.contains('right-sidebar-hidden')) {
-        console.log('Removing hidden class...');
         container.classList.remove('right-sidebar-hidden');
         container.style.gridTemplateColumns = '380px 1fr 320px';
         sidebar.style.display = 'block';
     } else {
-        console.log('Adding hidden class...');
         container.classList.add('right-sidebar-hidden');
         container.style.gridTemplateColumns = '380px 1fr 0';
         sidebar.style.display = 'none';
     }
     
-    console.log('After toggle classes:', container.className);
-    console.log('After toggle grid:', window.getComputedStyle(container).gridTemplateColumns);
-    console.log('=== END TEST ===');
 };

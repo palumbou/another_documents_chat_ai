@@ -27,9 +27,12 @@ services:
       network: host
       args:
         - BUILDKIT_INLINE_CACHE=1
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
     container_name: ${WEB_CONTAINER_NAME:-another-chat-web}
     restart: ${RESTART_POLICY:-unless-stopped}
     env_file: env.conf
+    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
     ports:
       - "${WEB_PORT:-8000}:8000"
     volumes:

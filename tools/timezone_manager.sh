@@ -3,7 +3,7 @@
 # =============================================================================
 # Timezone Manager for Another Documents Chat AI
 # =============================================================================
-# This script helps manage timezone configuration for the Docker containers
+# This script helps manage timezone configuration for Docker containers
 # =============================================================================
 
 set -euo pipefail
@@ -35,6 +35,7 @@ print_warning() {
 print_error() {
     echo -e "${RED}❌ $1${NC}"
 }
+
 
 # Function to validate timezone
 validate_timezone() {
@@ -82,6 +83,8 @@ update_env_conf() {
     fi
 }
 
+
+
 # Function to show current timezone configuration
 show_current_config() {
     print_info "Current timezone configuration:"
@@ -91,16 +94,16 @@ show_current_config() {
     local host_tz=$(get_host_timezone)
     echo "Host timezone: ${host_tz:-"Unknown"}"
     
-    # Current env.conf setting
+    # Current env.conf settings
     if [[ -f "$ENV_FILE" ]]; then
-        local current_tz=$(grep "^TIMEZONE=" "$ENV_FILE" | cut -d'=' -f2 || echo "Not set")
+        local current_tz=$(grep "^TIMEZONE=" "$ENV_FILE" | cut -d'=' -f2 2>/dev/null || echo "Not set")
         echo "Container timezone (env.conf): $current_tz"
     else
-        echo "Container timezone: env.conf file not found"
+        echo "Container configuration: env.conf file not found"
     fi
     
     # Container timezone (if running)
-    if docker compose ps web --format "table {{.Status}}" | grep -q "Up"; then
+    if docker compose ps web --format "table {{.Status}}" | grep -q "Up" 2>/dev/null; then
         echo "Web container:"
         local web_tz=$(docker compose exec web date 2>/dev/null || echo "Container not accessible")
         echo "  Current time: $web_tz"
@@ -110,18 +113,12 @@ show_current_config() {
         echo "Web container: Not running"
     fi
     
-    if docker compose ps ollama --format "table {{.Status}}" | grep -q "Up"; then
+    if docker compose ps ollama --format "table {{.Status}}" | grep -q "Up" 2>/dev/null; then
         echo "Ollama container:"
         local ollama_tz=$(docker compose exec ollama date 2>/dev/null || echo "Container not accessible")
         echo "  Current time: $ollama_tz"
         local ollama_tz_env=$(docker compose exec ollama printenv TZ 2>/dev/null || echo "TZ not set")
         echo "  TZ environment: $ollama_tz_env"
-        
-        # Check if Ollama shows the expected timezone
-        if [[ "$ollama_tz" == *"Europe"* ]] && [[ "$ollama_tz" != *"CEST"* ]] && [[ "$ollama_tz" != *"CET"* ]]; then
-            print_warning "Ollama container shows 'Europe' timezone, which might indicate incomplete timezone configuration"
-            print_info "This is usually fine for functionality, but display may not show the expected timezone name"
-        fi
     else
         echo "Ollama container: Not running"
     fi
@@ -264,7 +261,7 @@ main() {
             echo "  restart  - Restart containers to apply changes"
             echo
             echo "Examples:"
-            echo "  $0 show                    # Show current configuration"
+            echo "  $0 show                    # Show current timezone"
             echo "  $0 auto                    # Auto-detect timezone"
             echo "  $0 set Europe/Rome         # Set to Rome timezone"
             echo "  $0 set America/New_York    # Set to New York timezone"

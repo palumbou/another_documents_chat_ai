@@ -55,19 +55,14 @@ async function sendMessage() {
   try {
     // Use chat history service if available, otherwise use regular chat
     let response;
-    console.log('Chat history available:', !!window.chatHistory);
-    console.log('Current chat ID:', window.chatHistory?.currentChatId);
     
     if (window.chatHistory && window.chatHistory.currentChatId) {
-      console.log('Using existing chat session:', window.chatHistory.currentChatId);
       // Send through chat history for persistence
       response = await window.chatHistory.sendMessageInCurrentChat(query, null, debugMode);
     } else if (window.chatHistory) {
-      console.log('Creating new chat session for message');
       // Create new chat and send message
       response = await window.chatHistory.sendMessageInCurrentChat(query, null, debugMode);
     } else {
-      console.log('Using fallback chat endpoint');
       // Fallback to regular chat endpoint
       response = await sendChatRequest(query, debugMode);
     }
