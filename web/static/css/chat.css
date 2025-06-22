@@ -171,6 +171,11 @@
   color: var(--success-color);
 }
 
+/* Show model name when available */
+.message.message-ai[data-model]::before {
+  content: "🤖 AI Assistant (" attr(data-model) ")";
+}
+
 .message-thinking::before {
   content: "💭 AI is thinking";
   text-align: left;

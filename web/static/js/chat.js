@@ -50,7 +50,8 @@ async function sendMessage() {
   }
   
   // Add regular thinking message
-  const processingId = addMessageToChat('ai', 'Thinking... (this may take a while)', true);
+  const currentModel = getCurrentModel();
+  const processingId = addMessageToChat('ai', 'Thinking... (this may take a while)', true, currentModel);
   
   try {
     // Use chat history service if available, otherwise use regular chat
@@ -61,16 +62,19 @@ async function sendMessage() {
     if (window.chatHistory && window.chatHistory.currentChatId) {
       console.log('Using existing chat session:', window.chatHistory.currentChatId);
       // Send through chat history for persistence
-      response = await window.chatHistory.sendMessageInCurrentChat(query, null, debugMode);
+      response = await window.chatHistory.sendMessageInCurrentChat(query, currentModel, debugMode);
     } else if (window.chatHistory) {
       console.log('Creating new chat session for message');
       // Create new chat and send message
-      response = await window.chatHistory.sendMessageInCurrentChat(query, null, debugMode);
+      response = await window.chatHistory.sendMessageInCurrentChat(query, currentModel, debugMode);
     } else {
       console.log('Using fallback chat endpoint');
       // Fallback to regular chat endpoint
       response = await sendChatRequest(query, debugMode);
     }
+    
+    // IMPORTANT: Don't let chat history reload messages, we handle the display manually
+    // This ensures our model display logic works correctly
     
     // Remove thinking bubble if it exists
     if (thinkingId) {
@@ -95,7 +99,14 @@ async function sendMessage() {
         }
       }
       
+      // Update the content
       processingMsg.querySelector('.message-content').innerHTML = responseContent;
+      
+      // Update the model attribute if available in response
+      if (response.model) {
+        processingMsg.setAttribute('data-model', response.model);
+      }
+      
       processingMsg.classList.remove('thinking');
     }
     
@@ -153,7 +164,7 @@ async function sendChatRequest(query, debugMode) {
 }
 
 // Add message to chat function
-function addMessageToChat(sender, content, isTemporary = false) {
+function addMessageToChat(sender, content, isTemporary = false, model = null) {
   const messageId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   const messageDiv = document.createElement('div');
   messageDiv.id = messageId;
@@ -161,6 +172,11 @@ function addMessageToChat(sender, content, isTemporary = false) {
   
   if (isTemporary) {
     messageDiv.classList.add('thinking');
+  }
+  
+  // Add model info as data attribute for AI messages
+  if (sender === 'ai' && model) {
+    messageDiv.setAttribute('data-model', model);
   }
   
   messageDiv.innerHTML = `
@@ -205,6 +221,27 @@ function updateThinkingBubble(messageId, newStatus) {
   if (statusElement) {
     statusElement.innerHTML = newStatus;
   }
+}
+
+// Get current active model
+function getCurrentModel() {
+  const localSelect = document.getElementById('local-select');
+  const engineInfo = document.getElementById('engine-info');
+  
+  // Try to get from engine info first
+  if (engineInfo && engineInfo.textContent) {
+    const match = engineInfo.textContent.match(/\(Engine: ([^\s\)]+)/);
+    if (match) {
+      return match[1];
+    }
+  }
+  
+  // Fallback to selected value in local select
+  if (localSelect && localSelect.value) {
+    return localSelect.value;
+  }
+  
+  return null;
 }
 
 // Function to add debug information to the response

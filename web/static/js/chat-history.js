@@ -255,7 +255,7 @@ class ChatHistory {
                     content = this.addDebugInfoToResponse(content, msg.debug_info);
                 }
                 
-                this.addMessageToDisplay('ai', content);
+                this.addMessageToDisplay('ai', content, msg.model);
             }
         });
 
@@ -263,12 +263,17 @@ class ChatHistory {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    addMessageToDisplay(sender, content) {
+    addMessageToDisplay(sender, content, model = null) {
         const chatMessages = document.getElementById('chat-messages');
         if (!chatMessages) return;
 
         const messageDiv = document.createElement('div');
         messageDiv.className = `message message-${sender}`;
+        
+        // Add model info as data attribute for AI messages
+        if (sender === 'ai' && model) {
+            messageDiv.setAttribute('data-model', model);
+        }
         
         messageDiv.innerHTML = `
             <div class="message-content">${content}</div>
@@ -527,8 +532,9 @@ class ChatHistory {
 
             const result = await response.json();
             
-            // Load chat messages to update the UI immediately
-            await this.loadChatMessages(this.currentChatId);
+            // Don't automatically reload chat messages here
+            // Let the calling code handle the UI update to preserve model info
+            // await this.loadChatMessages(this.currentChatId);
             
             this.loadProjectChats(); // Update chat list timestamps
             return result;
