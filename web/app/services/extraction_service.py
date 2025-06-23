@@ -6,7 +6,7 @@ Handles extraction from PDF, DOCX, and TXT files with optimization for large fil
 import os
 from docx import Document
 
-from app.config import DOCS_DIR
+from app.config import DOCS_DIR, GLOBAL_DOCS_DIR, PROJECTS_DIR
 from app.utils.file_helpers import get_file_size_mb
 from app.utils.pdf_helpers import extract_pdf_text_optimized
 from app.utils.text_processing import clean_text
@@ -157,12 +157,38 @@ def load_existing_documents() -> dict:
     """Load documents that are already in the docs folder, including project subfolders."""
     from app.utils.file_helpers import get_supported_files_in_dir
     from app.services.processing_service import initialize_document_processing_status, document_status
+    from app.config import GLOBAL_DOCS_DIR, PROJECTS_DIR
     
     documents = {}
     
-    # Load documents from main docs folder (global documents)
+    # Load documents from global docs folder
+    if os.path.exists(GLOBAL_DOCS_DIR):
+        supported_files = get_supported_files_in_dir(GLOBAL_DOCS_DIR)
+        for filename in supported_files:
+            file_path = os.path.join(GLOBAL_DOCS_DIR, filename)
+            try:
+                documents[filename] = extract_text(file_path)
+                
+                # Initialize processing status as completed
+                initialize_document_processing_status(filename)
+                document_status[filename]["status"] = "completed"
+                document_status[filename]["progress"] = 100
+                
+                print(f"Loaded existing global document: {filename}")
+            except Exception as e:
+                print(f"Error loading {filename}: {e}")
+                # Initialize status as error if loading failed
+                initialize_document_processing_status(filename)
+                document_status[filename]["status"] = "error"
+                document_status[filename]["error"] = str(e)
+    
+    # Load documents from old location for backward compatibility
     supported_files = get_supported_files_in_dir(DOCS_DIR)
     for filename in supported_files:
+        # Skip if already loaded from global folder
+        if filename in documents:
+            continue
+            
         file_path = os.path.join(DOCS_DIR, filename)
         try:
             documents[filename] = extract_text(file_path)
@@ -172,7 +198,7 @@ def load_existing_documents() -> dict:
             document_status[filename]["status"] = "completed"
             document_status[filename]["progress"] = 100
             
-            print(f"Loaded existing document: {filename}")
+            print(f"Loaded existing document from old location: {filename}")
         except Exception as e:
             print(f"Error loading {filename}: {e}")
             # Initialize status as error if loading failed
@@ -181,10 +207,9 @@ def load_existing_documents() -> dict:
             document_status[filename]["error"] = str(e)
     
     # Load documents from project folders
-    projects_dir = os.path.join(DOCS_DIR, "projects")
-    if os.path.exists(projects_dir):
-        for project_name in os.listdir(projects_dir):
-            project_path = os.path.join(projects_dir, project_name)
+    if os.path.exists(PROJECTS_DIR):
+        for project_name in os.listdir(PROJECTS_DIR):
+            project_path = os.path.join(PROJECTS_DIR, project_name)
             if os.path.isdir(project_path):
                 project_files = get_supported_files_in_dir(project_path)
                 for filename in project_files:
@@ -218,7 +243,16 @@ def load_existing_documents_async() -> dict:
     import threading
     
     documents = {}
-    supported_files = get_supported_files_in_dir(DOCS_DIR)
+    
+    # Get supported files from global docs folder
+    global_files = get_supported_files_in_dir(GLOBAL_DOCS_DIR) if os.path.exists(GLOBAL_DOCS_DIR) else []
+    
+    # Get supported files from old location for backward compatibility  
+    old_files = get_supported_files_in_dir(DOCS_DIR)
+    # Remove duplicates (prioritize global folder)
+    old_files = [f for f in old_files if f not in global_files]
+    
+    supported_files = global_files + old_files
     
     if not supported_files:
         return documents

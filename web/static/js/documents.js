@@ -674,12 +674,23 @@ async function createProject() {
     });
     
     if (res.ok) {
+      const result = await res.json();
       document.getElementById('new-project-modal').style.display = 'none';
       document.getElementById('new-project-name').value = '';
       document.getElementById('project-msg').textContent = '';
+      
+      // Switch to the new project
       window.currentProject = name;
       await loadProjects();
       await loadExistingDocuments();
+      
+      // Update chat history for the new project
+      if (window.chatHistory) {
+        window.chatHistory.currentProject = window.currentProject;
+        await window.chatHistory.loadProjectChats();
+      }
+      
+      console.log(`Created and switched to new project: "${name}"`);
     } else {
       const error = await res.json();
       document.getElementById('project-msg').textContent = error.detail || 'Error creating project';
@@ -703,9 +714,18 @@ async function deleteCurrentProject() {
     });
     
     if (res.ok) {
+      // Switch back to global project
       window.currentProject = 'global';
       await loadProjects();
       await loadExistingDocuments();
+      
+      // Update chat history back to global
+      if (window.chatHistory) {
+        window.chatHistory.currentProject = 'global';
+        await window.chatHistory.loadProjectChats();
+      }
+      
+      console.log(`Deleted project and switched back to global`);
     } else {
       const error = await res.json();
       alert(error.detail || 'Error deleting project');
@@ -719,6 +739,7 @@ async function deleteCurrentProject() {
 function initializeProjectManagement() {
   // Event listeners for project management
   document.getElementById('project-select').addEventListener('change', async function() {
+    const previousProject = window.currentProject;
     window.currentProject = this.value;
     document.getElementById('upload-project').value = window.currentProject;
     
@@ -726,7 +747,16 @@ function initializeProjectManagement() {
     const deleteBtn = document.getElementById('delete-project-btn');
     deleteBtn.style.display = window.currentProject === 'global' ? 'none' : 'inline-flex';
     
+    // Update documents and chats for the new project
     await loadExistingDocuments();
+    
+    // Update chat history for the new project
+    if (window.chatHistory) {
+      window.chatHistory.currentProject = window.currentProject;
+      await window.chatHistory.loadProjectChats();
+    }
+    
+    console.log(`Switched from project "${previousProject}" to "${window.currentProject}"`);
   });
   
   document.getElementById('new-project-btn').addEventListener('click', function() {

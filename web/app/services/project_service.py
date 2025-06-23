@@ -8,7 +8,7 @@ import shutil
 from typing import List, Dict, Any
 from fastapi import HTTPException
 
-from app.config import DOCS_DIR, PROJECTS_DIR, DEFAULT_PROJECT_NAME, MAX_PROJECT_NAME_LENGTH, ALLOWED_PROJECT_NAME_CHARS
+from app.config import DOCS_DIR, GLOBAL_DOCS_DIR, PROJECTS_DIR, DEFAULT_PROJECT_NAME, MAX_PROJECT_NAME_LENGTH, ALLOWED_PROJECT_NAME_CHARS
 from app.shared_state import get_documents
 
 def get_projects() -> List[str]:
@@ -87,21 +87,34 @@ def delete_project(project_name: str, force: bool = False) -> Dict[str, Any]:
 def get_project_path(project_name: str) -> str:
     """Get the full path for a project directory."""
     if project_name == DEFAULT_PROJECT_NAME:
-        return DOCS_DIR
+        return GLOBAL_DOCS_DIR  # Global documents now go in docs/global/
     return os.path.join(PROJECTS_DIR, project_name)
 
 def get_project_documents(project_name: str) -> List[str]:
-    """Get list of documents in a specific project."""
-    project_path = get_project_path(project_name)
-    
-    if not os.path.exists(project_path):
-        return []
-    
+    """Get list of documents in a specific project, including inherited global documents."""
     documents = []
-    for filename in os.listdir(project_path):
-        file_path = os.path.join(project_path, filename)
-        if os.path.isfile(file_path):
-            documents.append(filename)
+    
+    # First, add documents from global directory (if not global project itself)
+    if project_name != DEFAULT_PROJECT_NAME:
+        global_path = GLOBAL_DOCS_DIR
+        if os.path.exists(global_path):
+            for filename in os.listdir(global_path):
+                file_path = os.path.join(global_path, filename)
+                if os.path.isfile(file_path):
+                    documents.append(filename)
+    
+    # Then, add project-specific documents (these override global ones)
+    project_path = get_project_path(project_name)
+    if os.path.exists(project_path):
+        project_documents = []
+        for filename in os.listdir(project_path):
+            file_path = os.path.join(project_path, filename)
+            if os.path.isfile(file_path):
+                project_documents.append(filename)
+                # If this document exists in global too, remove global version
+                if filename in documents:
+                    documents.remove(filename)
+        documents.extend(project_documents)
     
     return sorted(documents)
 
@@ -111,17 +124,22 @@ def get_document_project(filename: str) -> str:
     if "/" in filename:
         return filename.split("/")[0]
     
-    # Check global documents
-    global_path = os.path.join(DOCS_DIR, filename)
-    if os.path.exists(global_path):
-        return DEFAULT_PROJECT_NAME
-    
-    # Check project directories
+    # Check project directories first (project-specific files have priority)
     for project in get_projects():
         if project != DEFAULT_PROJECT_NAME:
             project_path = os.path.join(get_project_path(project), filename)
             if os.path.exists(project_path):
                 return project
+    
+    # Check global documents
+    global_path = os.path.join(GLOBAL_DOCS_DIR, filename)
+    if os.path.exists(global_path):
+        return DEFAULT_PROJECT_NAME
+    
+    # Fallback to checking old location for backward compatibility
+    old_global_path = os.path.join(DOCS_DIR, filename)
+    if os.path.exists(old_global_path):
+        return DEFAULT_PROJECT_NAME
     
     return DEFAULT_PROJECT_NAME
 

@@ -15,10 +15,13 @@ from app.schemas import ChatMessage, ChatSession
 class ChatHistoryService:
     """Service for managing chat history and sessions."""
     
-    def __init__(self, base_path: str = "/app/docs"):
+    def __init__(self, base_path: str = "/app/data"):
         self.base_path = Path(base_path)
         self.chats_dir = self.base_path / "chats"
         self.chats_dir.mkdir(exist_ok=True)
+        # Ensure subdirectories exist
+        (self.chats_dir / "global").mkdir(exist_ok=True)
+        (self.chats_dir / "projects").mkdir(exist_ok=True)
     
     def _get_project_chat_dir(self, project_name: str) -> Path:
         """Get the chat directory for a specific project."""
@@ -34,18 +37,125 @@ class ChatHistoryService:
         return chat_dir
     
     def generate_chat_name(self, first_message: str) -> str:
-        """Generate a chat name from the first message."""
-        # Clean and truncate the message
-        clean_message = first_message.strip()[:50]
-        # Remove special characters and limit length
+        """Generate a meaningful chat name from the first message using AI."""
         import re
-        clean_message = re.sub(r'[^\w\s-]', '', clean_message)
-        clean_message = clean_message.strip()
+        import requests
+        from app.config import DEFAULT_MODEL, OLLAMA_BASE_URL
+        
+        # Clean the message
+        clean_message = first_message.strip()
         
         if not clean_message:
-            return f"Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+            return f"Chat {datetime.now().strftime('%d/%m %H:%M')}"
         
-        return clean_message
+        # If message is very short, use it directly
+        if len(clean_message) <= 30:
+            # Just clean special characters and capitalize
+            clean_name = re.sub(r'[^\w\s-]', '', clean_message)
+            return clean_name.strip().title() if clean_name.strip() else f"Chat {datetime.now().strftime('%d/%m %H:%M')}"
+        
+        try:
+            # Use Ollama to generate a concise title
+            # Prepare the prompt for title generation
+            prompt = f"""Generate a short, meaningful title (maximum 4-5 words) for a chat conversation that starts with this message:
+
+"{clean_message}"
+
+Requirements:
+- Maximum 40 characters
+- No quotation marks
+- Capture the main topic/question
+- Be concise and clear
+- Use the same language as the input
+
+Title:"""
+
+            # Call Ollama API
+            response = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={
+                    "model": DEFAULT_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.3,  # Low temperature for more consistent results
+                        "top_p": 0.8,
+                        "max_tokens": 20     # Limit tokens for short response
+                    }
+                },
+                timeout=10  # Short timeout for title generation
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                generated_title = result.get('response', '').strip()
+                
+                # Clean and validate the generated title
+                if generated_title:
+                    # Remove quotes, newlines, and extra spaces
+                    clean_title = re.sub(r'["\n\r]', '', generated_title).strip()
+                    # Remove common prefixes like "Title:", "Chat:", etc.
+                    clean_title = re.sub(r'^(title|chat|conversation|topic):\s*', '', clean_title, flags=re.IGNORECASE)
+                    
+                    # Limit length
+                    if len(clean_title) > 40:
+                        clean_title = clean_title[:37] + '...'
+                    
+                    # Validate that it's not empty and contains meaningful content
+                    if clean_title and len(clean_title.strip()) > 2:
+                        return clean_title.strip()
+            
+        except Exception as e:
+            print(f"Error generating AI title: {e}")
+            # Fall through to fallback method
+        
+        # Fallback: Extract key words from the message
+        return self._generate_fallback_title(clean_message)
+    
+    def _generate_fallback_title(self, message: str) -> str:
+        """Generate a fallback title when AI generation fails."""
+        import re
+        
+        # Simple extraction of meaningful words
+        # Remove common question words and extract nouns/topics
+        words = re.findall(r'\b\w+\b', message.lower())
+        
+        # Filter out very common words (basic stopwords in multiple languages)
+        basic_stopwords = {
+            # Italian
+            'il', 'la', 'lo', 'le', 'gli', 'un', 'una', 'di', 'da', 'in', 'con', 'su', 'per', 'a', 'e',
+            'come', 'cosa', 'dove', 'quando', 'perché', 'chi', 'che', 'sono', 'è', 'sei', 'siamo',
+            'ciao', 'salve', 'buongiorno', 'puoi', 'può', 'posso', 'dimmi', 'spiegami', 'aiutami',
+            # English  
+            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+            'how', 'what', 'where', 'when', 'why', 'who', 'which', 'is', 'are', 'was', 'were', 'be',
+            'hello', 'hi', 'good', 'morning', 'can', 'could', 'please', 'tell', 'me', 'help', 'explain'
+        }
+        
+        # Extract meaningful words (longer than 2 chars, not in stopwords)
+        meaningful_words = [
+            word.capitalize() for word in words 
+            if len(word) > 2 and word not in basic_stopwords
+        ]
+        
+        # Take first 3-4 words
+        if meaningful_words:
+            title = ' '.join(meaningful_words[:4])
+            # Limit length
+            if len(title) > 40:
+                title = title[:37] + '...'
+            return title
+        
+        # Last resort: use first few words of original message
+        first_words = message.split()[:3]
+        if first_words:
+            title = ' '.join(word.capitalize() for word in first_words)
+            if len(title) > 40:
+                title = title[:37] + '...'
+            return title
+            
+        # Ultimate fallback
+        return f"Chat {datetime.now().strftime('%d/%m %H:%M')}"
     
     def create_chat_session(self, project_name: str, chat_name: str = None, first_message: str = None) -> str:
         """Create a new chat session and return its ID."""

@@ -80,12 +80,6 @@ class ChatHistory {
             this.rightSidebarVisible = false;
             this.updateLayout();
         });
-
-        // Project change listener
-        document.getElementById('project-select')?.addEventListener('change', (e) => {
-            this.currentProject = e.target.value;
-            this.loadProjectChats();
-        });
     }
 
     async createNewChat(firstMessage = null) {
@@ -551,21 +545,3 @@ window.chatHistory = chatHistory; // Make available globally
 document.addEventListener('DOMContentLoaded', () => {
     chatHistory.loadProjectChats();
 });
-
-// Global test function for debugging
-window.testSidebarToggle = function() {
-    const container = document.querySelector('.app-container');
-    const sidebar = document.getElementById('right-sidebar');
-    
-    
-    if (container.classList.contains('right-sidebar-hidden')) {
-        container.classList.remove('right-sidebar-hidden');
-        container.style.gridTemplateColumns = '380px 1fr 320px';
-        sidebar.style.display = 'block';
-    } else {
-        container.classList.add('right-sidebar-hidden');
-        container.style.gridTemplateColumns = '380px 1fr 0';
-        sidebar.style.display = 'none';
-    }
-    
-};
