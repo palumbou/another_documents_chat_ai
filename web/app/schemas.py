@@ -193,10 +193,11 @@ class MoveDocumentResponse(BaseModel):
     new_project: str
 
 class ChatMessage(BaseModel):
-    role: str  # "user" or "assistant"
-    content: str
-    timestamp: str
+    user_message: str
+    ai_response: str
     model: Optional[str] = None
+    timestamp: Any  # datetime
+    debug_info: Optional[DebugInfo] = None
 
 class ChatSession(BaseModel):
     id: str

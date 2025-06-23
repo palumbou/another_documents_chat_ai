@@ -238,8 +238,9 @@ class ChatHistory {
             if (msg.ai_response) {
                 let content = msg.ai_response;
                 
-                // Add debug info if available
-                if (msg.debug_info && msg.debug_info.query) {
+                // Add debug info if available and debug mode is enabled
+                const debugMode = document.getElementById('debug-mode')?.checked;
+                if (msg.debug_info && debugMode) {
                     content = this.addDebugInfoToResponse(content, msg.debug_info);
                 }
                 
@@ -272,23 +273,36 @@ class ChatHistory {
     }
 
     addDebugInfoToResponse(response, debugInfo) {
-        let debugHtml = '<div class="debug-info" style="margin-top: 1rem; padding: 0.75rem; background: var(--background-light); border-radius: 6px; font-size: 0.85rem;">';
+        let debugHtml = '<div class="debug-info" style="margin-top: 1rem; padding: 0.75rem; background: var(--background-light); border-radius: 6px; font-size: 0.85rem; border-left: 3px solid var(--accent);">';
+        
+        debugHtml += '<div style="margin-bottom: 0.75rem;"><strong>🧠 AI Thinking Process:</strong></div>';
         
         if (debugInfo.thinking_process) {
-            debugHtml += `<div><strong>🧠 AI Thinking:</strong> <em>${this.escapeHtml(debugInfo.thinking_process)}</em></div>`;
+            debugHtml += `<div style="margin-bottom: 1rem; padding: 0.5rem; background: var(--background); border-radius: 4px;"><em>${this.escapeHtml(debugInfo.thinking_process)}</em></div>`;
         }
         
-        if (debugInfo.prompt_used) {
-            debugHtml += `<div style="margin-top: 0.5rem;"><strong>🔍 Query to Ollama:</strong> <details style="margin-top: 0.25rem;"><summary>View prompt</summary><pre style="white-space: pre-wrap; font-size: 0.75rem; margin-top: 0.5rem;">${this.escapeHtml(debugInfo.prompt_used)}</pre></details></div>`;
+        debugHtml += '<div style="margin-bottom: 0.5rem;"><strong>💬 AI Response:</strong></div>';
+        debugHtml += `<div style="margin-bottom: 1rem; padding: 0.5rem; background: var(--background); border-radius: 4px;">${response}</div>`;
+        
+        if (debugInfo.ollama_url) {
+            debugHtml += `<div style="margin-bottom: 0.5rem;"><strong>🌐 Ollama URL:</strong> <code style="background: var(--background); padding: 0.2rem 0.4rem; border-radius: 3px;">${this.escapeHtml(debugInfo.ollama_url)}</code></div>`;
         }
         
         if (debugInfo.ollama_request_payload) {
-            debugHtml += `<div style="margin-top: 0.5rem;"><strong>⚙️ Technical:</strong> ${debugInfo.ollama_request_payload.model || 'Unknown model'} used</div>`;
+            debugHtml += `<div style="margin-bottom: 0.5rem;"><strong>⚙️ Model Used:</strong> <code style="background: var(--background); padding: 0.2rem 0.4rem; border-radius: 3px;">${debugInfo.ollama_request_payload.model || 'Unknown'}</code></div>`;
+        }
+        
+        if (debugInfo.prompt_used) {
+            debugHtml += `<div style="margin-top: 0.75rem;"><details style="cursor: pointer;"><summary style="font-weight: bold; color: var(--accent);">🔍 View Full Prompt</summary><pre style="white-space: pre-wrap; font-size: 0.75rem; margin-top: 0.5rem; padding: 0.5rem; background: var(--background); border-radius: 4px; overflow-x: auto; max-height: 200px; border: 1px solid var(--border-color);">${this.escapeHtml(debugInfo.prompt_used)}</pre></details></div>`;
+        }
+        
+        if (debugInfo.ollama_request_payload) {
+            debugHtml += `<div style="margin-top: 0.75rem;"><details style="cursor: pointer;"><summary style="font-weight: bold; color: var(--accent);">⚙️ Technical Details</summary><pre style="white-space: pre-wrap; font-size: 0.75rem; margin-top: 0.5rem; padding: 0.5rem; background: var(--background); border-radius: 4px; overflow-x: auto; max-height: 200px; border: 1px solid var(--border-color);">${this.escapeHtml(JSON.stringify(debugInfo.ollama_request_payload, null, 2))}</pre></details></div>`;
         }
         
         debugHtml += '</div>';
         
-        return response + debugHtml;
+        return debugHtml;
     }
 
     clearChatMessages() {
