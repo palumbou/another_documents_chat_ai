@@ -710,6 +710,73 @@ textarea:focus {
   color: var(--success-color);
 }
 
+.file-input-label.has-errors {
+  border-color: var(--error-color);
+  background: var(--error-bg);
+}
+
+.file-input-label.has-errors .upload-text {
+  color: var(--error-color);
+  font-weight: 600;
+}
+
+.file-input-label.has-errors .upload-hint {
+  color: var(--error-color);
+  font-weight: 500;
+}
+
+/* Upload button states */
+.btn-upload-cancel {
+  background: linear-gradient(135deg, var(--error-color) 0%, #d32f2f 100%);
+  color: white;
+  animation: pulse-cancel 2s infinite;
+  position: relative;
+}
+
+@keyframes pulse-cancel {
+  0% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(211, 47, 47, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+  }
+}
+
+.btn-upload-cancel:hover {
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  transform: translateY(-1px);
+  animation: none; /* Stop pulsing on hover */
+}
+
+/* Upload progress bar */
+.upload-progress {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--background-alt);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--background-light);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
 /* Right Sidebar Styles */
 .right-sidebar {
   width: 100%;

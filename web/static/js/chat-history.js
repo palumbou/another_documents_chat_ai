@@ -9,8 +9,10 @@ class ChatHistory {
         this.currentProject = 'global';
         this.chats = [];
         this.rightSidebarVisible = true; // Start with sidebar visible
+        this.leftSidebarVisible = true;  // Start with left sidebar visible
         this.setupEventListeners();
         this.initializeCurrentProject();
+        this.initializeSidebarStates();
         
         // Simple responsive handling
         window.addEventListener('resize', () => this.handleResize());
@@ -46,6 +48,18 @@ class ChatHistory {
         }
     }
 
+    initializeSidebarStates() {
+        // Load saved left sidebar state
+        const leftHidden = localStorage.getItem('leftSidebarHidden') === 'true';
+        if (leftHidden) {
+            this.leftSidebarVisible = false;
+            const appContainer = document.querySelector('.app-container');
+            const toggleBtn = document.getElementById('toggle-left-sidebar');
+            if (appContainer) appContainer.classList.add('left-sidebar-hidden');
+            if (toggleBtn) toggleBtn.style.opacity = '0.6';
+        }
+    }
+
     setupEventListeners() {
         // New chat button
         document.getElementById('new-chat-btn')?.addEventListener('click', () => {
@@ -67,7 +81,14 @@ class ChatHistory {
 
         // Right sidebar toggle
         document.getElementById('toggle-right-sidebar')?.addEventListener('click', () => {
+            console.log('Right sidebar toggle clicked');
             this.toggleRightSidebar();
+        });
+        
+        // Left sidebar toggle
+        document.getElementById('toggle-left-sidebar')?.addEventListener('click', () => {
+            console.log('Left sidebar toggle clicked');
+            this.toggleLeftSidebar();
         });
         
         // Mobile menu toggle
@@ -79,6 +100,26 @@ class ChatHistory {
         document.getElementById('close-right-sidebar')?.addEventListener('click', () => {
             this.rightSidebarVisible = false;
             this.updateLayout();
+        });
+        
+        // Close right sidebar (desktop)
+        document.getElementById('close-right-sidebar-desktop')?.addEventListener('click', () => {
+            console.log('Right sidebar close button clicked (desktop)');
+            this.closeRightSidebar();
+        });
+        
+        // ESC key to close right sidebar
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.rightSidebarVisible) {
+                console.log('ESC pressed - closing right sidebar');
+                this.closeRightSidebar();
+            }
+        });
+
+        // Project change listener
+        document.getElementById('project-select')?.addEventListener('change', (e) => {
+            this.currentProject = e.target.value;
+            this.loadProjectChats();
         });
     }
 
@@ -462,9 +503,12 @@ class ChatHistory {
 
     toggleLeftSidebar() {
         const leftSidebar = document.querySelector('.left-sidebar');
+        const appContainer = document.querySelector('.app-container');
+        const toggleBtn = document.getElementById('toggle-left-sidebar');
         const isMobile = window.innerWidth <= 768;
         
         if (isMobile && leftSidebar) {
+            // Mobile behavior (existing)
             const isVisible = leftSidebar.classList.contains('visible');
             
             if (isVisible) {
@@ -473,6 +517,26 @@ class ChatHistory {
             } else {
                 leftSidebar.classList.add('visible');
                 this.showOverlay();
+            }
+        } else {
+            // Desktop behavior (new)
+            if (!appContainer || !toggleBtn) {
+                console.error('Elements not found for left sidebar toggle');
+                return;
+            }
+            
+            this.leftSidebarVisible = !this.leftSidebarVisible;
+            
+            if (this.leftSidebarVisible) {
+                // Show sidebar
+                appContainer.classList.remove('left-sidebar-hidden');
+                toggleBtn.style.opacity = '1';
+                localStorage.setItem('leftSidebarHidden', 'false');
+            } else {
+                // Hide sidebar
+                appContainer.classList.add('left-sidebar-hidden');
+                toggleBtn.style.opacity = '0.6';
+                localStorage.setItem('leftSidebarHidden', 'true');
             }
         }
     }
@@ -548,6 +612,21 @@ class ChatHistory {
             console.error('Error sending message:', error);
             throw error;
         }
+    }
+
+    closeRightSidebar() {
+        const appContainer = document.querySelector('.app-container');
+        const rightSidebar = document.getElementById('right-sidebar');
+        
+        if (!appContainer || !rightSidebar) {
+            console.error('Elements not found for close');
+            return;
+        }
+        
+        // Force close the sidebar
+        this.rightSidebarVisible = false;
+        appContainer.classList.add('right-sidebar-hidden');
+        rightSidebar.style.display = 'none';
     }
 }
 

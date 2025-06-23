@@ -3,6 +3,57 @@
 // Global variables
 window.currentProject = 'global';
 window.autoRefreshInterval = null;
+window.currentUploadController = null; 
+window.currentProgressInterval = null;
+
+// Supported file types configuration
+const SUPPORTED_FILE_TYPES = {
+    // Extensions
+    extensions: ['.pdf', '.docx', '.doc', '.txt', '.md'],
+    // MIME types
+    mimeTypes: [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/msword', // .doc
+        'text/plain', // .txt
+        'text/markdown', // .md
+        'text/x-markdown' // .md alternative
+    ],
+    // Max file size (100MB)
+    maxSize: 100 * 1024 * 1024
+};
+
+// Validate file types and size
+function validateFiles(files) {
+    const errors = [];
+    const validFiles = [];
+    
+    for (let file of files) {
+        // Check file size
+        if (file.size > SUPPORTED_FILE_TYPES.maxSize) {
+            errors.push(`${file.name}: File too large (max 100MB)`);
+            continue;
+        }
+        
+        // Check file extension
+        const fileName = file.name.toLowerCase();
+        const hasValidExtension = SUPPORTED_FILE_TYPES.extensions.some(ext => 
+            fileName.endsWith(ext)
+        );
+        
+        // Check MIME type
+        const hasValidMimeType = SUPPORTED_FILE_TYPES.mimeTypes.includes(file.type);
+        
+        if (!hasValidExtension && !hasValidMimeType) {
+            errors.push(`${file.name}: Unsupported file type. Supported: ${SUPPORTED_FILE_TYPES.extensions.join(', ')}`);
+            continue;
+        }
+        
+        validFiles.push(file);
+    }
+    
+    return { validFiles, errors };
+}
 
 // Setup improved file upload with drag & drop
 function setupImprovedFileUpload() {
@@ -48,24 +99,141 @@ function setupImprovedFileUpload() {
 
     function updateFileDisplay(files, label, btn) {
         if (files.length > 0) {
+            // Validate files
+            const validation = validateFiles(files);
+            
+            if (validation.errors.length > 0) {
+                // Show validation errors
+                label.classList.add('has-errors');
+                label.classList.remove('has-files');
+                label.querySelector('.upload-text').textContent = 'Invalid files detected';
+                label.querySelector('.upload-hint').textContent = validation.errors[0]; // Show first error
+                
+                // Show all errors in a message
+                const uploadMsg = document.getElementById('upload-msg');
+                showMessage(validation.errors.join('\n'), 'error', uploadMsg);
+                
+                if (btn) {
+                    btn.style.display = 'none';
+                }
+                return;
+            }
+            
+            // Valid files - show individual file list
+            createFileUploadList(validation.validFiles);
+            
+            // Update label to show ready state
             label.classList.add('has-files');
-            const fileNames = Array.from(files).map(f => f.name).join(', ');
-            label.querySelector('.upload-text').textContent = `${files.length} file(s) selected`;
-            label.querySelector('.upload-hint').textContent = fileNames.length > 50 ? 
-                fileNames.substring(0, 50) + '...' : fileNames;
+            label.classList.remove('has-errors');
+            label.querySelector('.upload-text').textContent = `${validation.validFiles.length} file(s) ready`;
+            label.querySelector('.upload-hint').textContent = 'Click "Upload Files" to start';
             
             if (btn) {
                 btn.style.display = 'block';
-                btn.textContent = `Upload ${files.length} file(s)`;
+                btn.textContent = `Upload ${validation.validFiles.length} file(s)`;
             }
         } else {
-            label.classList.remove('has-files');
-            label.querySelector('.upload-text').textContent = 'Choose files or drag & drop';
-            label.querySelector('.upload-hint').textContent = 'PDF, DOCX, DOC, TXT, MD';
+            // Reset to original state
+            resetUploadArea(label, btn);
+            hideFileUploadList();
+        }
+    }
+
+    function resetUploadArea(label, btn) {
+        label.classList.remove('has-files', 'has-errors');
+        label.querySelector('.upload-text').textContent = 'Choose files or drag & drop';
+        label.querySelector('.upload-hint').textContent = 'PDF, DOCX, DOC, TXT, MD';
+        
+        if (btn) {
+            btn.style.display = 'none';
+        }
+    }
+
+    function createFileUploadList(files) {
+        const container = document.getElementById('file-upload-list');
+        container.innerHTML = '';
+        container.classList.add('visible');
+        
+        files.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-upload-item';
+            fileItem.setAttribute('data-file-index', index);
             
-            if (btn) {
-                btn.style.display = 'none';
-            }
+            const fileIcon = getFileIcon(file.name);
+            const fileSize = formatFileSize(file.size);
+            
+            fileItem.innerHTML = `
+                <div class="file-icon">${fileIcon}</div>
+                <div class="file-info">
+                    <div class="file-name" title="${file.name}">${file.name}</div>
+                    <div class="file-size">${fileSize}</div>
+                </div>
+                <div class="file-progress">
+                    <div class="file-progress-bar">
+                        <div class="file-progress-fill"></div>
+                    </div>
+                    <div class="file-status">Ready</div>
+                </div>
+            `;
+            
+            container.appendChild(fileItem);
+        });
+    }
+
+    function hideFileUploadList() {
+        const container = document.getElementById('file-upload-list');
+        container.classList.remove('visible');
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 300);
+    }
+
+    function getFileIcon(filename) {
+        const ext = filename.toLowerCase().split('.').pop();
+        switch (ext) {
+            case 'pdf': return '📄';
+            case 'docx':
+            case 'doc': return '📝';
+            case 'txt': return '📃';
+            case 'md': return '📋';
+            default: return '📎';
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function updateFileProgress(fileIndex, progress, status = 'uploading') {
+        const fileItem = document.querySelector(`[data-file-index="${fileIndex}"]`);
+        if (!fileItem) return;
+        
+        const progressFill = fileItem.querySelector('.file-progress-fill');
+        const statusText = fileItem.querySelector('.file-status');
+        
+        // Update progress bar
+        progressFill.style.width = `${progress}%`;
+        
+        // Update status
+        fileItem.className = `file-upload-item ${status}`;
+        
+        switch (status) {
+            case 'uploading':
+                statusText.textContent = `${Math.round(progress)}%`;
+                break;
+            case 'success':
+                statusText.textContent = 'Complete';
+                progressFill.style.width = '100%';
+                break;
+            case 'error':
+                statusText.textContent = 'Error';
+                break;
+            default:
+                statusText.textContent = 'Ready';
         }
     }
 
@@ -73,8 +241,15 @@ function setupImprovedFileUpload() {
         const files = fileInput.files;
         if (files.length === 0) return;
 
+        // Validate files
+        const { validFiles, errors } = validateFiles(files);
+        if (errors.length > 0) {
+            showMessage(errors.join('\n'), 'error', uploadMsg);
+            return;
+        }
+
         const formData = new FormData();
-        for (let file of files) {
+        for (let file of validFiles) {
             formData.append('files', file);
         }
         
@@ -84,21 +259,82 @@ function setupImprovedFileUpload() {
             formData.append('project', projectSelect.value);
         }
 
+        // Create AbortController for cancellation
+        window.currentUploadController = new AbortController();
+
         try {
-            uploadBtn.disabled = true;
-            uploadBtn.textContent = 'Uploading...';
-            showMessage('Uploading files...', 'info', uploadMsg);
+            // Update UI for upload state
+            uploadBtn.disabled = false; // Keep enabled for cancellation
+            uploadBtn.textContent = '❌ Cancel Upload (or press ESC)';
+            uploadBtn.classList.add('btn-upload-cancel');
+            uploadBtn.onclick = () => cancelUpload();
+            
+            // Add ESC key listener for cancellation
+            const escKeyHandler = (event) => {
+                if (event.key === 'Escape') {
+                    cancelUpload();
+                    document.removeEventListener('keydown', escKeyHandler);
+                }
+            };
+            document.addEventListener('keydown', escKeyHandler);
+            
+            // Store the handler to remove it later
+            window.currentEscHandler = escKeyHandler;
+            
+            // Hide general progress bar (we'll use individual file progress)
+            const progressContainer = document.getElementById('upload-progress');
+            progressContainer.style.display = 'none';
+            
+            // Show cancel hint
+            const cancelHint = document.getElementById('cancel-upload-hint');
+            if (cancelHint) {
+                cancelHint.style.display = 'block';
+            }
+            
+            showMessage('Starting upload...', 'info', uploadMsg);
+
+            // Simulate individual file progress
+            const { validFiles } = validateFiles(fileInput.files);
+            let completedFiles = 0;
+            
+            // Initialize all files as uploading
+            validFiles.forEach((file, index) => {
+                updateFileProgress(index, 0, 'uploading');
+            });
+            
+            // Simulate progress for each file
+            const progressIntervals = validFiles.map((file, index) => {
+                let progress = 0;
+                return setInterval(() => {
+                    progress += Math.random() * 10 + 5; // Random progress increment
+                    if (progress < 95) {
+                        updateFileProgress(index, progress, 'uploading');
+                    }
+                }, 150 + Math.random() * 100); // Slightly different speeds
+            });
 
             const response = await fetch('/upload', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                signal: window.currentUploadController.signal
             });
-
+            
+            // Complete all file progress
+            progressIntervals.forEach(interval => clearInterval(interval));
+            
             const result = await response.json();
 
             if (response.ok) {
                 let message = '';
+                
+                // Mark successful uploads
                 if (result.uploaded && result.uploaded.length > 0) {
+                    result.uploaded.forEach((fileName, index) => {
+                        const fileIndex = validFiles.findIndex(f => f.name === fileName);
+                        if (fileIndex !== -1) {
+                            updateFileProgress(fileIndex, 100, 'success');
+                        }
+                    });
                     message += `Uploaded: ${result.uploaded.join(', ')}`;
                     if (result.processing && result.processing.length > 0) {
                         message += ` (processing in background...)`;
@@ -113,22 +349,54 @@ function setupImprovedFileUpload() {
                     
                     if (overwrite) {
                         formData.append('overwrite', 'true');
-                        const overwriteRes = await fetch('/upload', { method: 'POST', body: formData });
+                        const overwriteRes = await fetch('/upload', { 
+                            method: 'POST', 
+                            body: formData,
+                            signal: window.currentUploadController.signal 
+                        });
                         const overwriteData = await overwriteRes.json();
                         
                         if (overwriteData.uploaded) {
                             message += (message ? '\n' : '') + `Overwritten: ${overwriteData.uploaded.join(', ')}`;
+                            // Update progress for overwritten files
+                            overwriteData.uploaded.forEach((fileName) => {
+                                const fileIndex = validFiles.findIndex(f => f.name === fileName);
+                                if (fileIndex !== -1) {
+                                    updateFileProgress(fileIndex, 100, 'success');
+                                }
+                            });
                         }
                     } else {
                         message += (message ? '\n' : '') + `Skipped: ${result.existing.join(', ')}`;
+                        // Mark skipped files
+                        result.existing.forEach((fileName) => {
+                            const fileIndex = validFiles.findIndex(f => f.name === fileName);
+                            if (fileIndex !== -1) {
+                                updateFileProgress(fileIndex, 100, 'error');
+                            }
+                        });
                     }
                 }
 
                 showMessage(message || 'Upload completed', 'success', uploadMsg);
                 
-                // Reset form
+                // Reset form and restore original upload area
                 fileInput.value = '';
-                updateFileDisplay([], fileLabel, uploadBtn);
+                
+                // Delay reset to show completion status, then restore original state
+                setTimeout(() => {
+                    // Hide the file upload list
+                    hideFileUploadList();
+                    // Reset upload area to original state
+                    resetUploadArea(fileLabel, uploadBtn);
+                    
+                    // Clear upload message after a delay
+                    setTimeout(() => {
+                        const uploadMsg = document.getElementById('upload-msg');
+                        uploadMsg.textContent = '';
+                        uploadMsg.className = 'status-msg';
+                    }, 2000);
+                }, 3000);
                 
                 // Refresh documents list
                 loadExistingDocuments();
@@ -140,11 +408,93 @@ function setupImprovedFileUpload() {
             }
 
         } catch (error) {
-            console.error('Upload error:', error);
-            showMessage('Upload failed: ' + error.message, 'error', uploadMsg);
+            if (error.name === 'AbortError') {
+                showMessage('Upload cancelled', 'info', uploadMsg);
+                // Mark all files as cancelled and reset after delay
+                const { validFiles } = validateFiles(fileInput.files);
+                validFiles.forEach((file, index) => {
+                    updateFileProgress(index, 0, 'error');
+                });
+                
+                // Reset to original state after showing cancellation
+                setTimeout(() => {
+                    fileInput.value = '';
+                    hideFileUploadList();
+                    resetUploadArea(fileLabel, uploadBtn);
+                }, 2000);
+            } else {
+                console.error('Upload error:', error);
+                showMessage('Upload failed: ' + error.message, 'error', uploadMsg);
+                // Mark all files as error and reset after delay
+                const { validFiles } = validateFiles(fileInput.files);
+                validFiles.forEach((file, index) => {
+                    updateFileProgress(index, 0, 'error');
+                });
+                
+                // Reset to original state after showing error
+                setTimeout(() => {
+                    fileInput.value = '';
+                    hideFileUploadList();
+                    resetUploadArea(fileLabel, uploadBtn);
+                }, 3000);
+            }
         } finally {
-            uploadBtn.disabled = false;
-            uploadBtn.textContent = 'Upload Files';
+            // Always clean up event listeners and reset upload state
+            if (window.currentEscHandler) {
+                document.removeEventListener('keydown', window.currentEscHandler);
+                window.currentEscHandler = null;
+            }
+            
+            // Hide cancel hint
+            const cancelHint = document.getElementById('cancel-upload-hint');
+            if (cancelHint) {
+                cancelHint.style.display = 'none';
+            }
+            
+            // Reset upload state
+            resetUploadButton();
+            
+            window.currentUploadController = null;
+        }
+    }
+    
+    function cancelUpload() {
+        if (window.currentUploadController) {
+            window.currentUploadController.abort();
+        }
+        if (window.currentProgressInterval) {
+            clearInterval(window.currentProgressInterval);
+            window.currentProgressInterval = null;
+        }
+        
+        // Clean up ESC key listener
+        if (window.currentEscHandler) {
+            document.removeEventListener('keydown', window.currentEscHandler);
+            window.currentEscHandler = null;
+        }
+        
+        // Hide cancel hint immediately
+        const cancelHint = document.getElementById('cancel-upload-hint');
+        if (cancelHint) {
+            cancelHint.style.display = 'none';
+        }
+        
+        // Show immediate feedback
+        showMessage('Upload cancelled by user', 'info', document.getElementById('upload-msg'));
+    }
+    
+    function resetUploadButton() {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload Files';
+        uploadBtn.classList.remove('btn-upload-cancel');
+        uploadBtn.onclick = async function() {
+            await uploadSelectedFiles();
+        };
+        
+        // Clean up any remaining ESC handler
+        if (window.currentEscHandler) {
+            document.removeEventListener('keydown', window.currentEscHandler);
+            window.currentEscHandler = null;
         }
     }
 }

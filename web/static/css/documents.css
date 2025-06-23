@@ -351,3 +351,194 @@
   background-color: var(--accent-color);
   transform: translateY(-1px);
 }
+
+/* File upload horizontal layout - Override any previous styles */
+.file-input-label {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  padding: 0.75rem 1rem !important;
+  border: 2px dashed var(--border-color) !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  background: var(--background-alt) !important;
+  text-align: left !important;
+}
+
+.file-input-label:hover {
+  border-color: var(--primary-color) !important;
+  background: var(--hover-bg) !important;
+}
+
+.upload-icon {
+  font-size: 1.5rem !important;
+  margin-bottom: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.upload-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
+  flex: 1 !important;
+}
+
+.upload-text {
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.upload-hint {
+  font-size: 0.85rem !important;
+  color: var(--text-secondary) !important;
+}
+
+.file-input-label.has-files {
+  border-color: var(--success-color) !important;
+  background: var(--success-bg) !important;
+}
+
+/* Individual file upload progress */
+.file-upload-list {
+  margin-top: 1rem;
+  display: none;
+}
+
+.file-upload-list.visible {
+  display: block;
+}
+
+.file-upload-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--background-light);
+  transition: all 0.2s ease;
+}
+
+.file-upload-item.uploading {
+  border-color: var(--primary-color);
+  background: var(--primary-bg);
+}
+
+.file-upload-item.success {
+  border-color: var(--success-color);
+  background: var(--success-bg);
+}
+
+.file-upload-item.error {
+  border-color: var(--error-color);
+  background: var(--error-bg);
+}
+
+.file-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.file-size {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.file-progress {
+  flex-shrink: 0;
+  width: 80px;
+  text-align: right;
+}
+
+.file-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.file-progress-fill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.file-upload-item.success .file-progress-fill {
+  background: var(--success-color);
+}
+
+.file-upload-item.error .file-progress-fill {
+  background: var(--error-color);
+}
+
+.file-status {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.file-upload-item.success .file-status {
+  color: var(--success-color);
+}
+
+.file-upload-item.error .file-status {
+  color: var(--error-color);
+}
+
+/* Cancel upload hint */
+.cancel-upload-hint {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--background-light);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.cancel-upload-hint kbd {
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 0.1rem 0.3rem;
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
