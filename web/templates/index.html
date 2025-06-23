@@ -113,14 +113,18 @@
                    accept=".pdf,.docx,.doc,.txt,.md"
                    class="file-input">
             <label for="file-input" class="file-input-label">
-              <span class="upload-icon">📎</span>
               <div class="upload-content">
+                <span class="upload-icon">📎</span>
                 <span class="upload-text">Choose files or drag & drop</span>
                 <span class="upload-hint">PDF, DOCX, DOC, TXT, MD</span>
+                <!-- Upload buttons inside the drag & drop area -->
+                <div class="upload-buttons" style="display: none;">
+                  <button type="button" id="upload-btn" class="btn-primary btn-small">Upload Files</button>
+                  <button type="button" id="cancel-upload-btn" class="btn-secondary btn-small">Cancel</button>
+                </div>
               </div>
             </label>
             <input type="hidden" name="project" id="upload-project" value="global" aria-label="Upload project selector">
-            <button id="upload-btn" class="btn-primary" style="display: none;">Upload Files</button>
             
             <!-- Progress bar for upload -->
             <div id="upload-progress" class="upload-progress" style="display: none;">
@@ -133,11 +137,6 @@
           
           <!-- Individual file upload progress -->
           <div id="file-upload-list" class="file-upload-list"></div>
-          
-          <!-- Cancel upload hint -->
-          <div id="cancel-upload-hint" class="cancel-upload-hint" style="display: none;">
-            💡 Press <kbd>ESC</kbd> or click the cancel button to stop upload
-          </div>
           
           <div id="upload-msg" class="status-msg"></div>
         </div>

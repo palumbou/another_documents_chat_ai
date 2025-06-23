@@ -59,6 +59,8 @@ function validateFiles(files) {
 function setupImprovedFileUpload() {
     const fileInput = document.getElementById('file-input');
     const uploadBtn = document.getElementById('upload-btn');
+    const cancelBtn = document.getElementById('cancel-upload-btn');
+    const uploadButtons = document.querySelector('.upload-buttons');
     const fileLabel = document.querySelector('.file-input-label');
     const uploadMsg = document.getElementById('upload-msg');
 
@@ -67,7 +69,7 @@ function setupImprovedFileUpload() {
     // Handle file selection
     fileInput.addEventListener('change', function() {
         const files = this.files;
-        updateFileDisplay(files, fileLabel, uploadBtn);
+        updateFileDisplay(files, fileLabel, uploadButtons);
     });
 
     // Handle drag and drop
@@ -87,17 +89,49 @@ function setupImprovedFileUpload() {
         
         const files = e.dataTransfer.files;
         fileInput.files = files;
-        updateFileDisplay(files, fileLabel, uploadBtn);
+        updateFileDisplay(files, fileLabel, uploadButtons);
     });
+
+    // Prevent label click when clicking buttons
+    if (uploadButtons) {
+        uploadButtons.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
 
     // Handle upload button
     if (uploadBtn) {
-        uploadBtn.addEventListener('click', async function() {
+        uploadBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             await uploadSelectedFiles();
         });
     }
 
-    function updateFileDisplay(files, label, btn) {
+    // Handle cancel button
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            cancelUpload();
+        });
+    }
+
+    function cancelUpload() {
+        // Reset file input
+        fileInput.value = '';
+        
+        // Reset display
+        const label = document.querySelector('.file-input-label');
+        const buttons = document.querySelector('.upload-buttons');
+        resetUploadArea(label, buttons);
+        hideFileUploadList();
+        
+        // Show message
+        showMessage('Upload cancelled', 'info', uploadMsg);
+    }
+
+    function updateFileDisplay(files, label, buttonsContainer) {
         if (files.length > 0) {
             // Validate files
             const validation = validateFiles(files);
@@ -113,8 +147,8 @@ function setupImprovedFileUpload() {
                 const uploadMsg = document.getElementById('upload-msg');
                 showMessage(validation.errors.join('\n'), 'error', uploadMsg);
                 
-                if (btn) {
-                    btn.style.display = 'none';
+                if (buttonsContainer) {
+                    buttonsContainer.style.display = 'none';
                 }
                 return;
             }
@@ -128,30 +162,45 @@ function setupImprovedFileUpload() {
             label.querySelector('.upload-text').textContent = `${validation.validFiles.length} file(s) ready`;
             label.querySelector('.upload-hint').textContent = 'Click "Upload Files" to start';
             
-            if (btn) {
-                btn.style.display = 'block';
-                btn.textContent = `Upload ${validation.validFiles.length} file(s)`;
+            // Show buttons and update upload button text
+            if (buttonsContainer) {
+                buttonsContainer.style.display = 'flex';
+                const uploadBtn = buttonsContainer.querySelector('#upload-btn');
+                if (uploadBtn) {
+                    uploadBtn.textContent = `Upload ${validation.validFiles.length} file(s)`;
+                }
             }
         } else {
             // Reset to original state
-            resetUploadArea(label, btn);
+            resetUploadArea(label, buttonsContainer);
             hideFileUploadList();
         }
     }
 
-    function resetUploadArea(label, btn) {
+    function resetUploadArea(label, buttonsContainer) {
         label.classList.remove('has-files', 'has-errors');
         label.querySelector('.upload-text').textContent = 'Choose files or drag & drop';
         label.querySelector('.upload-hint').textContent = 'PDF, DOCX, DOC, TXT, MD';
         
-        if (btn) {
-            btn.style.display = 'none';
+        if (buttonsContainer) {
+            buttonsContainer.style.display = 'none';
         }
     }
 
     function createFileUploadList(files) {
         const container = document.getElementById('file-upload-list');
-        container.innerHTML = '';
+        
+        // Add header if files exist
+        let headerHTML = '';
+        if (files.length > 0) {
+            headerHTML = `
+                <div class="file-list-header">
+                    <h4>Files to Upload (${files.length})</h4>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = headerHTML;
         container.classList.add('visible');
         
         files.forEach((file, index) => {
@@ -263,33 +312,21 @@ function setupImprovedFileUpload() {
         window.currentUploadController = new AbortController();
 
         try {
-            // Update UI for upload state
-            uploadBtn.disabled = false; // Keep enabled for cancellation
-            uploadBtn.textContent = '❌ Cancel Upload (or press ESC)';
-            uploadBtn.classList.add('btn-upload-cancel');
-            uploadBtn.onclick = () => cancelUpload();
-            
-            // Add ESC key listener for cancellation
-            const escKeyHandler = (event) => {
-                if (event.key === 'Escape') {
+            // Update UI for upload state - change upload button to cancel
+            const uploadButton = document.getElementById('upload-btn');
+            if (uploadButton) {
+                uploadButton.textContent = '❌ Cancel Upload';
+                uploadButton.classList.add('btn-danger');
+                uploadButton.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     cancelUpload();
-                    document.removeEventListener('keydown', escKeyHandler);
-                }
-            };
-            document.addEventListener('keydown', escKeyHandler);
-            
-            // Store the handler to remove it later
-            window.currentEscHandler = escKeyHandler;
+                };
+            }
             
             // Hide general progress bar (we'll use individual file progress)
             const progressContainer = document.getElementById('upload-progress');
             progressContainer.style.display = 'none';
-            
-            // Show cancel hint
-            const cancelHint = document.getElementById('cancel-upload-hint');
-            if (cancelHint) {
-                cancelHint.style.display = 'block';
-            }
             
             showMessage('Starting upload...', 'info', uploadMsg);
 
@@ -388,7 +425,9 @@ function setupImprovedFileUpload() {
                     // Hide the file upload list
                     hideFileUploadList();
                     // Reset upload area to original state
-                    resetUploadArea(fileLabel, uploadBtn);
+                    const label = document.querySelector('.file-input-label');
+                    const buttons = document.querySelector('.upload-buttons');
+                    resetUploadArea(label, buttons);
                     
                     // Clear upload message after a delay
                     setTimeout(() => {
@@ -420,7 +459,9 @@ function setupImprovedFileUpload() {
                 setTimeout(() => {
                     fileInput.value = '';
                     hideFileUploadList();
-                    resetUploadArea(fileLabel, uploadBtn);
+                    const label = document.querySelector('.file-input-label');
+                    const buttons = document.querySelector('.upload-buttons');
+                    resetUploadArea(label, buttons);
                 }, 2000);
             } else {
                 console.error('Upload error:', error);
@@ -435,29 +476,35 @@ function setupImprovedFileUpload() {
                 setTimeout(() => {
                     fileInput.value = '';
                     hideFileUploadList();
-                    resetUploadArea(fileLabel, uploadBtn);
+                    const label = document.querySelector('.file-input-label');
+                    const buttons = document.querySelector('.upload-buttons');
+                    resetUploadArea(label, buttons);
                 }, 3000);
             }
         } finally {
-            // Always clean up event listeners and reset upload state
-            if (window.currentEscHandler) {
-                document.removeEventListener('keydown', window.currentEscHandler);
-                window.currentEscHandler = null;
-            }
-            
-            // Hide cancel hint
-            const cancelHint = document.getElementById('cancel-upload-hint');
-            if (cancelHint) {
-                cancelHint.style.display = 'none';
-            }
-            
-            // Reset upload state
+            // Always clean up and reset upload state
             resetUploadButton();
-            
             window.currentUploadController = null;
         }
     }
     
+    function resetUploadButton() {
+        const uploadBtn = document.getElementById('upload-btn');
+        const buttonsContainer = document.querySelector('.upload-buttons');
+        
+        if (uploadBtn) {
+            uploadBtn.textContent = 'Upload Files';
+            uploadBtn.classList.remove('btn-danger');
+            uploadBtn.classList.add('btn-primary');
+            uploadBtn.onclick = async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                await uploadSelectedFiles();
+            };
+        }
+    }
+
+    // Define cancelUpload in the closure scope
     function cancelUpload() {
         if (window.currentUploadController) {
             window.currentUploadController.abort();
@@ -467,35 +514,17 @@ function setupImprovedFileUpload() {
             window.currentProgressInterval = null;
         }
         
-        // Clean up ESC key listener
-        if (window.currentEscHandler) {
-            document.removeEventListener('keydown', window.currentEscHandler);
-            window.currentEscHandler = null;
-        }
+        // Reset to original upload state
+        const fileInput = document.getElementById('file-input');
+        const label = document.querySelector('.file-input-label');
+        const buttons = document.querySelector('.upload-buttons');
         
-        // Hide cancel hint immediately
-        const cancelHint = document.getElementById('cancel-upload-hint');
-        if (cancelHint) {
-            cancelHint.style.display = 'none';
-        }
+        fileInput.value = '';
+        resetUploadArea(label, buttons);
+        hideFileUploadList();
         
         // Show immediate feedback
         showMessage('Upload cancelled by user', 'info', document.getElementById('upload-msg'));
-    }
-    
-    function resetUploadButton() {
-        uploadBtn.disabled = false;
-        uploadBtn.textContent = 'Upload Files';
-        uploadBtn.classList.remove('btn-upload-cancel');
-        uploadBtn.onclick = async function() {
-            await uploadSelectedFiles();
-        };
-        
-        // Clean up any remaining ESC handler
-        if (window.currentEscHandler) {
-            document.removeEventListener('keydown', window.currentEscHandler);
-            window.currentEscHandler = null;
-        }
     }
 }
 

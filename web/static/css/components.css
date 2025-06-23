@@ -606,17 +606,24 @@ textarea:focus {
   font-size: 0.85rem;
 }
 
-/* Chat Header Styles */
+/* Chat Header Styles - Perfect 3-column layout */
 .chat-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 2.5rem;
   align-items: center;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
   background: var(--background-alt);
   min-height: 60px;
+  gap: 1rem;
 }
 
+/* Left column - toggle button aligned to start */
+.chat-header > #toggle-left-sidebar {
+  justify-self: start;
+}
+
+/* Center column - title perfectly centered */
 .chat-title {
   display: flex;
   align-items: center;
@@ -624,14 +631,53 @@ textarea:focus {
   font-weight: 600;
   font-size: 1.1rem;
   color: var(--text-primary);
+  justify-self: center;
+  text-align: center;
+}
+
+/* Right column - toggle button aligned to end */
+.chat-header > #toggle-right-sidebar {
+  justify-self: end;
+}
+
+/* Hide mobile menu button from grid flow on desktop */
+.chat-header .mobile-only {
+  display: none;
+}
+
+/* Mobile header layout override */
+@media (max-width: 768px) {
+  .chat-header {
+    grid-template-columns: 2.5rem 2.5rem 1fr 2.5rem;
+    gap: 0.5rem;
+  }
+  
+  .chat-header .mobile-only {
+    display: flex;
+    justify-self: start;
+  }
+  
+  .chat-header > #toggle-left-sidebar {
+    justify-self: start;
+  }
+  
+  .chat-title {
+    justify-self: center;
+  }
+  
+  .chat-header > #toggle-right-sidebar {
+    justify-self: end;
+  }
 }
 
 .chat-actions {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
 }
 
-.btn-icon {
+/* Chat header specific button styles - consistent sizing for perfect alignment */
+.chat-header .btn-icon {
   background: none;
   border: none;
   padding: 0.5rem;
@@ -640,14 +686,20 @@ textarea:focus {
   color: var(--text-secondary);
   transition: all 0.2s ease;
   font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
 }
 
-.btn-icon:hover {
+.chat-header .btn-icon:hover {
   background-color: var(--hover-bg);
   color: var(--text-primary);
 }
 
-.btn-icon.btn-danger:hover {
+.chat-header .btn-icon.btn-danger:hover {
   background-color: var(--error-bg);
   color: var(--error-color);
 }
@@ -706,75 +758,48 @@ textarea:focus {
   background: var(--success-bg);
 }
 
-.file-input-label.has-files .upload-text {
-  color: var(--success-color);
-}
-
-.file-input-label.has-errors {
-  border-color: var(--error-color);
-  background: var(--error-bg);
-}
-
-.file-input-label.has-errors .upload-text {
-  color: var(--error-color);
-  font-weight: 600;
-}
-
-.file-input-label.has-errors .upload-hint {
-  color: var(--error-color);
-  font-weight: 500;
-}
-
-/* Upload button states */
-.btn-upload-cancel {
-  background: linear-gradient(135deg, var(--error-color) 0%, #d32f2f 100%);
-  color: white;
-  animation: pulse-cancel 2s infinite;
-  position: relative;
-}
-
-@keyframes pulse-cancel {
-  0% {
-    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(211, 47, 47, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
-  }
-}
-
-.btn-upload-cancel:hover {
-  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
-  transform: translateY(-1px);
-  animation: none; /* Stop pulsing on hover */
-}
-
-/* Upload progress bar */
-.upload-progress {
+/* Upload buttons inside drag & drop area */
+.upload-buttons {
+  display: flex;
+  gap: 0.5rem;
   margin-top: 1rem;
-  padding: 0.75rem;
-  background: var(--background-alt);
-  border-radius: 8px;
+  justify-content: center;
+}
+
+.upload-buttons .btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  pointer-events: auto; /* Ensure buttons are clickable even inside label */
+}
+
+.upload-buttons .btn-primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.upload-buttons .btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.upload-buttons .btn-secondary {
+  background: var(--background);
+  color: var(--text-primary);
   border: 1px solid var(--border-color);
 }
 
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: var(--background-light);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
+.upload-buttons .btn-secondary:hover {
+  background: var(--hover-bg);
 }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-  width: 0%;
+/* Prevent label click when clicking buttons */
+.upload-buttons button {
+  position: relative;
+  z-index: 10;
 }
 
 /* Right Sidebar Styles */

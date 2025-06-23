@@ -403,12 +403,33 @@
 
 /* Individual file upload progress */
 .file-upload-list {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
   display: none;
+  border-top: 1px solid var(--border-color);
 }
 
 .file-upload-list.visible {
   display: block;
+}
+
+.file-list-header {
+  margin-bottom: 0.75rem;
+}
+
+.file-list-header h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.file-list-header h4::before {
+  content: "📋";
+  font-size: 1rem;
 }
 
 .file-upload-item {

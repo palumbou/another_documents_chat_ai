@@ -152,10 +152,13 @@ body {
 }
 
 .sidebar-header {
-  padding: 1.5rem 1.5rem 1rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   color: var(--background);
+  min-height: 60px;
+  display: flex;
+  align-items: center;
 }
 
 .header-content {
@@ -226,49 +229,6 @@ body {
   flex-direction: column;
   height: 100vh;
   background: var(--background);
-}
-
-/* Chat header with title and actions */
-.chat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--background-alt);
-}
-
-.chat-title {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.chat-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-icon {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
-  background-color: var(--hover-bg);
-  color: var(--text-primary);
-}
-
-.btn-icon.btn-danger:hover {
-  background-color: var(--error-bg);
-  color: var(--error-color);
 }
 
 /* Section headers with actions */
@@ -483,9 +443,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     border-bottom: 1px solid var(--border-color);
     background: var(--background-light);
+    min-height: 60px;
   }
   
   .right-sidebar .sidebar-header.desktop-only h3 {
