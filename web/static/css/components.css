@@ -729,11 +729,26 @@ textarea:focus {
 .btn-upload-cancel {
   background: linear-gradient(135deg, var(--error-color) 0%, #d32f2f 100%);
   color: white;
+  animation: pulse-cancel 2s infinite;
+  position: relative;
+}
+
+@keyframes pulse-cancel {
+  0% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(211, 47, 47, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+  }
 }
 
 .btn-upload-cancel:hover {
   background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
   transform: translateY(-1px);
+  animation: none; /* Stop pulsing on hover */
 }
 
 /* Upload progress bar */
@@ -760,13 +775,6 @@ textarea:focus {
   border-radius: 4px;
   transition: width 0.3s ease;
   width: 0%;
-}
-
-.progress-text {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  text-align: center;
-  font-weight: 500;
 }
 
 /* Right Sidebar Styles */
