@@ -80,12 +80,6 @@ class ChatHistory {
             this.rightSidebarVisible = false;
             this.updateLayout();
         });
-
-        // Project change listener
-        document.getElementById('project-select')?.addEventListener('change', (e) => {
-            this.currentProject = e.target.value;
-            this.loadProjectChats();
-        });
     }
 
     async createNewChat(firstMessage = null) {

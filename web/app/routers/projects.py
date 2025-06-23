@@ -140,7 +140,7 @@ async def refresh_project_data(project_name: str):
     from app.services.chat_history_service import ChatHistoryService
     from app.services.extraction_service import load_existing_documents
     from app.config import DEFAULT_PROJECT_NAME
-    from app.shared_state import get_documents, set_documents
+    from app.shared_state import get_documents
     
     # Validate project name
     if project_name != DEFAULT_PROJECT_NAME and not is_valid_project_name(project_name):

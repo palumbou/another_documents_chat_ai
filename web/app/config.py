@@ -6,14 +6,24 @@ Contains all configurable parameters and settings.
 import os
 
 # Directory configuration
-DOCS_DIR = "docs"
-PROJECTS_DIR = "docs/projects"  # Directory for project-specific documents
+BASE_DATA_DIR = "data"  # Base directory for all application data
+DOCS_DIR = "data/docs"  # Legacy location for backward compatibility  
+GLOBAL_DOCS_DIR = "data/docs/global"  # Directory for global documents
+PROJECTS_DIR = "data/docs/projects"  # Directory for project-specific documents
+CHATS_DIR = "data/chats"  # Base directory for chats
+GLOBAL_CHATS_DIR = "data/chats/global"  # Directory for global chats
+PROJECT_CHATS_DIR = "data/chats/projects"  # Directory for project-specific chats
 STATIC_DIR = "static"
 TEMPLATES_DIR = "templates"
 
 # Ensure directories exist
+os.makedirs(BASE_DATA_DIR, exist_ok=True)
 os.makedirs(DOCS_DIR, exist_ok=True)
+os.makedirs(GLOBAL_DOCS_DIR, exist_ok=True)
 os.makedirs(PROJECTS_DIR, exist_ok=True)
+os.makedirs(CHATS_DIR, exist_ok=True)
+os.makedirs(GLOBAL_CHATS_DIR, exist_ok=True)
+os.makedirs(PROJECT_CHATS_DIR, exist_ok=True)
 
 # Processing limits and settings
 MAX_FILE_SIZE_MB = 100  # Maximum file size in MB

@@ -8,7 +8,7 @@ from PyPDF2 import PdfReader
 
 from fastapi import APIRouter, HTTPException
 
-from app.config import DOCS_DIR
+from app.config import DOCS_DIR, GLOBAL_DOCS_DIR
 from app.schemas import DebugPDFInfo, DebugExtractionResponse
 from app.utils.pdf_helpers import extract_with_pypdf2, extract_with_pdfplumber, extract_with_ocr
 from app.utils.file_helpers import get_file_size_mb
@@ -20,12 +20,26 @@ async def debug_pdf_extraction(filename: str):
     """
     Debug endpoint to analyze PDF text extraction issues.
     """
-    file_path = os.path.join(DOCS_DIR, filename)
+    from app.services.project_service import get_document_project, get_project_path
+    from app.config import GLOBAL_DOCS_DIR
+    
+    # Determine the actual file path
+    if "/" in filename:
+        # Project document
+        project_name, file_only = filename.split("/", 1)
+        file_path = os.path.join(get_project_path(project_name), file_only)
+    else:
+        # Global document - check first in global folder, then old location
+        file_path = os.path.join(GLOBAL_DOCS_DIR, filename)
+        if not os.path.exists(file_path):
+            # Fallback to old location
+            file_path = os.path.join(DOCS_DIR, filename)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"File {filename} not found")
     
-    if not filename.lower().endswith('.pdf'):
+    actual_filename = filename.split("/")[-1] if "/" in filename else filename
+    if not actual_filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="File must be a PDF")
     
     try:
@@ -81,12 +95,25 @@ async def debug_pdf_plumber_extraction(filename: str):
     """
     Test pdfplumber extraction on a specific PDF.
     """
-    file_path = os.path.join(DOCS_DIR, filename)
+    from app.services.project_service import get_document_project, get_project_path
+    
+    # Determine the actual file path
+    if "/" in filename:
+        # Project document
+        project_name, file_only = filename.split("/", 1)
+        file_path = os.path.join(get_project_path(project_name), file_only)
+    else:
+        # Global document - check first in global folder, then old location
+        file_path = os.path.join(GLOBAL_DOCS_DIR, filename)
+        if not os.path.exists(file_path):
+            # Fallback to old location
+            file_path = os.path.join(DOCS_DIR, filename)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"File {filename} not found")
     
-    if not filename.lower().endswith('.pdf'):
+    actual_filename = filename.split("/")[-1] if "/" in filename else filename
+    if not actual_filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="File must be a PDF")
     
     try:
@@ -138,12 +165,25 @@ async def debug_pdf_ocr_extraction(filename: str):
     """
     Test OCR extraction on a specific PDF.
     """
-    file_path = os.path.join(DOCS_DIR, filename)
+    from app.services.project_service import get_document_project, get_project_path
+    
+    # Determine the actual file path
+    if "/" in filename:
+        # Project document
+        project_name, file_only = filename.split("/", 1)
+        file_path = os.path.join(get_project_path(project_name), file_only)
+    else:
+        # Global document - check first in global folder, then old location
+        file_path = os.path.join(GLOBAL_DOCS_DIR, filename)
+        if not os.path.exists(file_path):
+            # Fallback to old location
+            file_path = os.path.join(DOCS_DIR, filename)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"File {filename} not found")
     
-    if not filename.lower().endswith('.pdf'):
+    actual_filename = filename.split("/")[-1] if "/" in filename else filename
+    if not actual_filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="File must be a PDF")
     
     try:

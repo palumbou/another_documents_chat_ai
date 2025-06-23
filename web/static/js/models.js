@@ -183,8 +183,15 @@ async function pullModelWithProgress(name, pullMsg) {
     
     for (const line of lines) {
       if (line.startsWith('data: ')) {
+        const jsonData = line.slice(6).trim();
+        
+        // Skip empty lines or incomplete JSON
+        if (!jsonData || jsonData.length < 2) {
+          continue;
+        }
+        
         try {
-          const data = JSON.parse(line.slice(6));
+          const data = JSON.parse(jsonData);
           updatePullProgress(data);
           
           if (data.completed) {
@@ -202,7 +209,11 @@ async function pullModelWithProgress(name, pullMsg) {
             return; // Exit function on completion
           }
         } catch (parseError) {
-          console.warn('Failed to parse progress data:', parseError);
+          // Only log if it's not an empty or truncated line
+          if (jsonData.length > 5) {
+            console.warn('Failed to parse progress data:', parseError);
+            console.warn('Problematic data:', jsonData);
+          }
         }
       }
     }

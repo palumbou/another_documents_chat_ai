@@ -7,7 +7,7 @@ import os
 from typing import List
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, BackgroundTasks, Query
 
-from app.config import DOCS_DIR, DEFAULT_PROJECT_NAME
+from app.config import DOCS_DIR, GLOBAL_DOCS_DIR, DEFAULT_PROJECT_NAME
 from app.schemas import DocumentsResponse, DocumentChunksResponse, DocumentStatusResponse, ProcessingStatusResponse, ReprocessResponse
 from app.services.project_service import get_project_path, get_projects, is_valid_project_name
 from app.services.processing_service import (
@@ -126,8 +126,12 @@ async def delete_document(doc_key: str):
         project_name, filename = doc_key.split("/", 1)
         file_path = os.path.join(get_project_path(project_name), filename)
     else:
-        # Global document
-        file_path = os.path.join(DOCS_DIR, doc_key)
+        # Global document - check first in global folder, then old location for compatibility
+        from app.config import GLOBAL_DOCS_DIR
+        file_path = os.path.join(GLOBAL_DOCS_DIR, doc_key)
+        if not os.path.exists(file_path):
+            # Fallback to old location
+            file_path = os.path.join(DOCS_DIR, doc_key)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"Document {doc_key} not found")
@@ -147,7 +151,20 @@ async def reprocess_document(filename: str):
     """
     Reprocess a document with the improved extraction methods.
     """
-    file_path = os.path.join(DOCS_DIR, filename)
+    from app.services.project_service import get_document_project, get_project_path
+    from app.config import GLOBAL_DOCS_DIR
+    
+    # Determine the actual file path
+    if "/" in filename:
+        # Project document
+        project_name, file_only = filename.split("/", 1)
+        file_path = os.path.join(get_project_path(project_name), file_only)
+    else:
+        # Global document - check first in global folder, then old location
+        file_path = os.path.join(GLOBAL_DOCS_DIR, filename)
+        if not os.path.exists(file_path):
+            # Fallback to old location
+            file_path = os.path.join(DOCS_DIR, filename)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"File {filename} not found")
