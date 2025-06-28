@@ -1,6 +1,6 @@
 /**
  * Chat History Management
- * Handles chat sessions, loading, saving, and UI interactions.
+ * Handles chat sessions, loading, saving, and database interactions.
  */
 
 class ChatHistory {
@@ -8,26 +8,10 @@ class ChatHistory {
         this.currentChatId = null;
         this.currentProject = 'global';
         this.chats = [];
-        this.rightSidebarVisible = true; // Start with sidebar visible
-        this.leftSidebarVisible = true;  // Start with left sidebar visible
+        this.autoRefreshInterval = null;
         this.setupEventListeners();
         this.initializeCurrentProject();
-        this.initializeSidebarStates();
-        
-        // Simple responsive handling
-        window.addEventListener('resize', () => this.handleResize());
-        this.handleResize();
-    }
-
-    handleResize() {
-        const width = window.innerWidth;
-        
-        // For now, keep desktop behavior simple
-        if (width > 1024) {
-            // Desktop - keep current toggle state
-        } else {
-            // Mobile/tablet - could add special handling here
-        }
+        this.startAutoRefresh();
     }
 
     initializeCurrentProject() {
@@ -35,28 +19,6 @@ class ChatHistory {
         const projectSelect = document.getElementById('project-select');
         if (projectSelect && projectSelect.value) {
             this.currentProject = projectSelect.value;
-        }
-        
-        // Initialize sidebar state
-        const appContainer = document.querySelector('.app-container');
-        const rightSidebar = document.getElementById('right-sidebar');
-        if (appContainer && rightSidebar) {
-            if (!this.rightSidebarVisible) {
-                appContainer.classList.add('right-sidebar-hidden');
-                rightSidebar.style.display = 'none';
-            }
-        }
-    }
-
-    initializeSidebarStates() {
-        // Load saved left sidebar state
-        const leftHidden = localStorage.getItem('leftSidebarHidden') === 'true';
-        if (leftHidden) {
-            this.leftSidebarVisible = false;
-            const appContainer = document.querySelector('.app-container');
-            const toggleBtn = document.getElementById('toggle-left-sidebar');
-            if (appContainer) appContainer.classList.add('left-sidebar-hidden');
-            if (toggleBtn) toggleBtn.style.opacity = '0.6';
         }
     }
 
@@ -79,47 +41,16 @@ class ChatHistory {
             this.deleteChatPrompt();
         });
 
-        // Right sidebar toggle
-        document.getElementById('toggle-right-sidebar')?.addEventListener('click', () => {
-            console.log('Right sidebar toggle clicked');
-            this.toggleRightSidebar();
-        });
-        
-        // Left sidebar toggle
-        document.getElementById('toggle-left-sidebar')?.addEventListener('click', () => {
-            console.log('Left sidebar toggle clicked');
-            this.toggleLeftSidebar();
-        });
-        
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
-            this.toggleLeftSidebar();
-        });
-        
-        // Close right sidebar (mobile)
-        document.getElementById('close-right-sidebar')?.addEventListener('click', () => {
-            this.rightSidebarVisible = false;
-            this.updateLayout();
-        });
-        
-        // Close right sidebar (desktop)
-        document.getElementById('close-right-sidebar-desktop')?.addEventListener('click', () => {
-            console.log('Right sidebar close button clicked (desktop)');
-            this.closeRightSidebar();
-        });
-        
-        // ESC key to close right sidebar
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.rightSidebarVisible) {
-                console.log('ESC pressed - closing right sidebar');
-                this.closeRightSidebar();
-            }
-        });
-
         // Project change listener
         document.getElementById('project-select')?.addEventListener('change', (e) => {
             this.currentProject = e.target.value;
+            // Clear current chat when switching projects
+            this.currentChatId = null;
+            this.clearChatMessages();
+            this.updateChatTitle('New Chat');
             this.loadProjectChats();
+            // Also update the current project globally for other modules
+            window.currentProject = this.currentProject;
         });
     }
 
@@ -142,7 +73,8 @@ class ChatHistory {
             this.currentChatId = chat.id;
             this.updateChatTitle(chat.name);
             this.clearChatMessages();
-            this.loadProjectChats(); // Refresh chat list
+            await this.loadProjectChats(); // Refresh chat list
+            this.updateActiveChatInList(); // Highlight the new chat
             this.showChatActions();
 
             return chat.id;
@@ -270,14 +202,10 @@ class ChatHistory {
 
         // Display each message
         messages.forEach(msg => {
-            // Add user message
-            if (msg.user_message) {
-                this.addMessageToDisplay('user', msg.user_message);
-            }
-            
-            // Add AI response
-            if (msg.ai_response) {
-                let content = msg.ai_response;
+            if (msg.role === 'user') {
+                this.addMessageToDisplay('user', msg.content);
+            } else if (msg.role === 'assistant') {
+                let content = msg.content;
                 
                 // Add debug info if available and debug mode is enabled
                 const debugMode = document.getElementById('debug-mode')?.checked;
@@ -285,7 +213,7 @@ class ChatHistory {
                     content = this.addDebugInfoToResponse(content, msg.debug_info);
                 }
                 
-                this.addMessageToDisplay('ai', content, msg.model);
+                this.addMessageToDisplay('assistant', content, msg.model);
             }
         });
 
@@ -297,7 +225,9 @@ class ChatHistory {
         const chatMessages = document.getElementById('chat-messages');
         if (!chatMessages) return;
 
+        const messageId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         const messageDiv = document.createElement('div');
+        messageDiv.id = messageId;
         messageDiv.className = `message message-${sender}`;
         
         // Add model info as data attribute for AI messages
@@ -307,10 +237,13 @@ class ChatHistory {
         
         messageDiv.innerHTML = `
             <div class="message-content">${content}</div>
-            <div class="message-time">${new Date().toLocaleTimeString()}</div>
+            <div class="message-timestamp">${new Date().toLocaleTimeString()}</div>
         `;
 
         chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        return messageId;
     }
 
     addDebugInfoToResponse(response, debugInfo) {
@@ -476,100 +409,6 @@ class ChatHistory {
         }
     }
 
-    toggleRightSidebar() {
-        const appContainer = document.querySelector('.app-container');
-        const rightSidebar = document.getElementById('right-sidebar');
-        
-        if (!appContainer || !rightSidebar) {
-            console.error('Elements not found for toggle');
-            return;
-        }
-        
-        // Toggle the state
-        this.rightSidebarVisible = !this.rightSidebarVisible;
-        
-        
-        if (this.rightSidebarVisible) {
-            // Show sidebar
-            appContainer.classList.remove('right-sidebar-hidden');
-            rightSidebar.style.display = 'block';
-        } else {
-            // Hide sidebar
-            appContainer.classList.add('right-sidebar-hidden');
-            rightSidebar.style.display = 'none';
-        }
-        
-    }
-
-    toggleLeftSidebar() {
-        const leftSidebar = document.querySelector('.left-sidebar');
-        const appContainer = document.querySelector('.app-container');
-        const toggleBtn = document.getElementById('toggle-left-sidebar');
-        const isMobile = window.innerWidth <= 768;
-        
-        if (isMobile && leftSidebar) {
-            // Mobile behavior (existing)
-            const isVisible = leftSidebar.classList.contains('visible');
-            
-            if (isVisible) {
-                leftSidebar.classList.remove('visible');
-                this.hideOverlay();
-            } else {
-                leftSidebar.classList.add('visible');
-                this.showOverlay();
-            }
-        } else {
-            // Desktop behavior (new)
-            if (!appContainer || !toggleBtn) {
-                console.error('Elements not found for left sidebar toggle');
-                return;
-            }
-            
-            this.leftSidebarVisible = !this.leftSidebarVisible;
-            
-            if (this.leftSidebarVisible) {
-                // Show sidebar
-                appContainer.classList.remove('left-sidebar-hidden');
-                toggleBtn.style.opacity = '1';
-                localStorage.setItem('leftSidebarHidden', 'false');
-            } else {
-                // Hide sidebar
-                appContainer.classList.add('left-sidebar-hidden');
-                toggleBtn.style.opacity = '0.6';
-                localStorage.setItem('leftSidebarHidden', 'true');
-            }
-        }
-    }
-
-    showOverlay() {
-        let overlay = document.getElementById('sidebar-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'sidebar-overlay';
-            overlay.className = 'sidebar-overlay';
-            overlay.addEventListener('click', () => {
-                // Close any open sidebar
-                if (window.innerWidth <= 768) {
-                    const leftSidebar = document.querySelector('.left-sidebar');
-                    if (leftSidebar?.classList.contains('visible')) {
-                        this.toggleLeftSidebar();
-                        return;
-                    }
-                }
-                this.toggleRightSidebar();
-            });
-            document.body.appendChild(overlay);
-        }
-        overlay.classList.add('visible');
-    }
-
-    hideOverlay() {
-        const overlay = document.getElementById('sidebar-overlay');
-        if (overlay) {
-            overlay.classList.remove('visible');
-        }
-    }
-
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -577,21 +416,25 @@ class ChatHistory {
     }
 
     // Public method to send message within current chat
-    async sendMessageInCurrentChat(message, model = null, includeDebug = false) {
-        if (!this.currentChatId) {
-            // Create new chat with first message
-            this.currentChatId = await this.createNewChat(message);
-            if (!this.currentChatId) return null;
-        }
-
+    async sendMessageInCurrentChat(message, model = null, debugMode = false) {
         try {
+            // If no current chat, create a new one
+            if (!this.currentChatId) {
+                // Create new chat with first message as title suggestion
+                const chatId = await this.createNewChat(message);
+                if (!chatId) {
+                    throw new Error('Failed to create new chat');
+                }
+            }
+
+            // Send message to current chat
             const response = await fetch(`/chats/${this.currentProject}/${this.currentChatId}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     query: message,
                     model: model,
-                    debug: includeDebug
+                    debug: debugMode
                 })
             });
 
@@ -601,32 +444,44 @@ class ChatHistory {
 
             const result = await response.json();
             
-            // Don't automatically reload chat messages here
-            // Let the calling code handle the UI update to preserve model info
-            // await this.loadChatMessages(this.currentChatId);
+            // Update chat title if this was the first message and we have a suggested name
+            if (result.chat_name && result.chat_name !== 'New Chat') {
+                this.updateChatTitle(result.chat_name);
+            }
             
-            this.loadProjectChats(); // Update chat list timestamps
+            // Refresh chat list to show the updated chat
+            await this.loadProjectChats();
+            this.updateActiveChatInList();
+            
             return result;
 
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('Error sending message in chat:', error);
             throw error;
         }
     }
-
-    closeRightSidebar() {
-        const appContainer = document.querySelector('.app-container');
-        const rightSidebar = document.getElementById('right-sidebar');
+    
+    // Auto-refresh methods
+    startAutoRefresh() {
+        if (this.autoRefreshInterval) return; // Already running
         
-        if (!appContainer || !rightSidebar) {
-            console.error('Elements not found for close');
-            return;
+        this.autoRefreshInterval = setInterval(async () => {
+            try {
+                // Only refresh if we're not currently creating a chat or sending a message
+                if (!this.isOperationInProgress) {
+                    await this.loadProjectChats();
+                }
+            } catch (error) {
+                console.error('Chat auto-refresh error:', error);
+            }
+        }, 15000); // Refresh every 15 seconds
+    }
+    
+    stopAutoRefresh() {
+        if (this.autoRefreshInterval) {
+            clearInterval(this.autoRefreshInterval);
+            this.autoRefreshInterval = null;
         }
-        
-        // Force close the sidebar
-        this.rightSidebarVisible = false;
-        appContainer.classList.add('right-sidebar-hidden');
-        rightSidebar.style.display = 'none';
     }
 }
 
@@ -636,5 +491,10 @@ window.chatHistory = chatHistory; // Make available globally
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Load project chats and set up initial state
     chatHistory.loadProjectChats();
+    
+    // Initialize with a fresh chat interface
+    chatHistory.clearChatMessages();
+    chatHistory.updateChatTitle('New Chat');
 });

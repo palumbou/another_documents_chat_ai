@@ -6,10 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
     // Initialize all modules
     try {
-      // Ensure chatHistory is available globally
-      if (typeof chatHistory !== 'undefined') {
-        window.chatHistory = chatHistory;
-      }
+      // Initialize ChatHistory instance
+      window.chatHistory = new ChatHistory();
       
       if (typeof initializeStatusMonitoring === 'function') {
         initializeStatusMonitoring();
@@ -32,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (typeof setupImprovedFileUpload === 'function') {
         setupImprovedFileUpload();
       }
-      // Initialize chat history last
+      // Load project chats after everything is initialized
       if (window.chatHistory) {
         window.chatHistory.loadProjectChats();
       }

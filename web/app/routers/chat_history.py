@@ -80,8 +80,8 @@ async def get_chat_session(project_name: str, chat_id: str):
             "updated_at": session.updated_at.isoformat(),
             "messages": [
                 {
-                    "user_message": msg.content if msg.role == "user" else None,
-                    "ai_response": msg.content if msg.role == "assistant" else None,
+                    "role": msg.role,
+                    "content": msg.content,
                     "timestamp": msg.timestamp,
                     "model": msg.model,
                     "debug_info": getattr(msg, 'debug_info', None)
@@ -137,8 +137,12 @@ async def chat_in_session(project_name: str, chat_id: str, request: ChatRequest)
             raise HTTPException(status_code=404, detail="Chat session not found")
         
         try:
+            print(f"Debug: Chat request - project: {project_name}, chat_id: {chat_id}")
+            print(f"Debug: Request data - query: {request.query}, model: {request.model}, debug: {request.debug}")
+            
             # Get documents for the current project
             documents = get_documents()
+            print(f"Debug: Documents loaded: {len(documents) if documents else 0}")
             
             # Process the chat request
             result = process_chat_request(
@@ -148,7 +152,9 @@ async def chat_in_session(project_name: str, chat_id: str, request: ChatRequest)
                 include_debug=request.debug
             )
             
+            print(f"Debug: Chat result success: {result.get('success', 'unknown')}")
             if not result["success"]:
+                print(f"Debug: Chat error: {result.get('error', 'unknown')}")
                 if "timed out" in result["error"]:
                     raise HTTPException(status_code=504, detail=result["error"])
                 else:

@@ -5,14 +5,14 @@ Contains all configurable parameters and settings.
 
 import os
 
-# Directory configuration
-BASE_DATA_DIR = "data"  # Base directory for all application data
-DOCS_DIR = "data/docs"  # Legacy location for backward compatibility  
-GLOBAL_DOCS_DIR = "data/docs/global"  # Directory for global documents
-PROJECTS_DIR = "data/docs/projects"  # Directory for project-specific documents
-CHATS_DIR = "data/chats"  # Base directory for chats
-GLOBAL_CHATS_DIR = "data/chats/global"  # Directory for global chats
-PROJECT_CHATS_DIR = "data/chats/projects"  # Directory for project-specific chats
+# Directory configuration - All paths are absolute in container
+BASE_DATA_DIR = "/app/data"  # Base directory for all application data
+DOCS_DIR = "/app/data/documents"  # Directory for documents
+GLOBAL_DOCS_DIR = "/app/data/documents/global"  # Directory for global documents
+PROJECTS_DIR = "/app/data/documents/projects"  # Directory for project-specific documents
+CHATS_DIR = "/app/data/chats"  # Base directory for chats
+GLOBAL_CHATS_DIR = "/app/data/chats/global"  # Directory for global chats
+PROJECT_CHATS_DIR = "/app/data/chats/projects"  # Directory for project-specific chats
 STATIC_DIR = "static"
 TEMPLATES_DIR = "templates"
 
