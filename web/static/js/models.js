@@ -172,21 +172,26 @@ async function pullModelWithProgress(name, pullMsg) {
   
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
+  let buffer = '';
   
   while (true) {
     const { done, value } = await reader.read();
     
     if (done) break;
     
-    const chunk = decoder.decode(value);
-    const lines = chunk.split('\n');
+    // Accumula i dati nel buffer
+    buffer += decoder.decode(value, { stream: true });
+    
+    // Processa le linee complete
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || ''; // Mantieni l'ultima linea incompleta nel buffer
     
     for (const line of lines) {
       if (line.startsWith('data: ')) {
         const jsonData = line.slice(6).trim();
         
-        // Skip empty lines or incomplete JSON
-        if (!jsonData || jsonData.length < 2) {
+        // Skip empty lines
+        if (!jsonData) {
           continue;
         }
         
@@ -209,10 +214,27 @@ async function pullModelWithProgress(name, pullMsg) {
             return; // Exit function on completion
           }
         } catch (parseError) {
-          // Only log if it's not an empty or truncated line
-          if (jsonData.length > 5) {
+          // Solo logga se non è una linea vuota o troppo corta per essere JSON valido
+          if (jsonData.length > 10 && jsonData.includes('{')) {
             console.warn('Failed to parse progress data:', parseError);
-            console.warn('Problematic data:', jsonData);
+            console.warn('Problematic data:', jsonData.substring(0, 100) + '...');
+          }
+        }
+      }
+    }
+  }
+  
+  // Process any remaining data in buffer
+  if (buffer.trim()) {
+    if (buffer.startsWith('data: ')) {
+      const jsonData = buffer.slice(6).trim();
+      if (jsonData) {
+        try {
+          const data = JSON.parse(jsonData);
+          updatePullProgress(data);
+        } catch (parseError) {
+          if (jsonData.length > 10 && jsonData.includes('{')) {
+            console.warn('Failed to parse final buffer data:', parseError);
           }
         }
       }

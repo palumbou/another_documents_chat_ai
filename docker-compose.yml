@@ -37,7 +37,7 @@ services:
       - "${WEB_PORT:-8000}:8000"
     volumes:
       - ./web:/app
-      - ${DOCS_VOLUME:-./web/docs}:/app/docs
+      - ${DATA_VOLUME:-./web/data}:/app/data
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       - ollama

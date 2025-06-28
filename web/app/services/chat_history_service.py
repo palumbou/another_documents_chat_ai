@@ -202,15 +202,43 @@ Title:"""
             with open(session_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            # Convert datetime strings back to datetime objects
+            # Convert datetime strings back to datetime objects safely
             if isinstance(data.get('created_at'), str):
-                data['created_at'] = datetime.fromisoformat(data['created_at'])
+                try:
+                    data['created_at'] = datetime.fromisoformat(data['created_at'].replace('Z', '+00:00'))
+                except (ValueError, TypeError):
+                    # Fallback to current time if parsing fails
+                    data['created_at'] = datetime.now()
+                    
             if isinstance(data.get('updated_at'), str):
-                data['updated_at'] = datetime.fromisoformat(data['updated_at'])
+                try:
+                    data['updated_at'] = datetime.fromisoformat(data['updated_at'].replace('Z', '+00:00'))
+                except (ValueError, TypeError):
+                    # Fallback to current time if parsing fails
+                    data['updated_at'] = datetime.now()
+            
+            # Ensure we have datetime objects if they don't exist
+            if 'created_at' not in data:
+                data['created_at'] = datetime.now()
+            if 'updated_at' not in data:
+                data['updated_at'] = datetime.now()
+            
+            # Convert message dicts to ChatMessage objects
+            if 'messages' in data:
+                messages = []
+                for msg_data in data['messages']:
+                    if isinstance(msg_data, dict):
+                        messages.append(ChatMessage(**msg_data))
+                    else:
+                        messages.append(msg_data)  # Already a ChatMessage object
+                data['messages'] = messages
             
             return ChatSession(**data)
         except Exception as e:
             print(f"Error loading chat session {chat_id}: {e}")
+            # Log more details for debugging
+            import traceback
+            print(f"Full traceback: {traceback.format_exc()}")
             return None
     
     def get_project_chats(self, project_name: str) -> List[Dict[str, Any]]:
@@ -249,6 +277,8 @@ Title:"""
             return False
         
         session.messages.append(message)
+        # Update the timestamp when adding new messages
+        session.updated_at = datetime.now()
         self.save_chat_session(session)
         return True
     

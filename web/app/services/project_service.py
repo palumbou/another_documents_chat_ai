@@ -24,7 +24,7 @@ def get_projects() -> List[str]:
     return sorted(projects)
 
 def create_project(project_name: str) -> Dict[str, Any]:
-    """Create a new project directory."""
+    """Create a new project directory and chat directory."""
     if not is_valid_project_name(project_name):
         raise HTTPException(
             status_code=400, 
@@ -39,12 +39,20 @@ def create_project(project_name: str) -> Dict[str, Any]:
     if os.path.exists(project_path):
         raise HTTPException(status_code=400, detail=f"Project '{project_name}' already exists")
     
+    # Create project documents directory
     os.makedirs(project_path, exist_ok=True)
+    
+    # Create project chat directory
+    from pathlib import Path
+    base_data_path = Path("/app/data")
+    chat_project_dir = base_data_path / "chats" / "projects" / project_name
+    chat_project_dir.mkdir(parents=True, exist_ok=True)
     
     return {
         "message": f"Project '{project_name}' created successfully",
         "project_name": project_name,
-        "project_path": project_path
+        "project_path": project_path,
+        "chat_path": str(chat_project_dir)
     }
 
 def delete_project(project_name: str, force: bool = False) -> Dict[str, Any]:
@@ -68,6 +76,13 @@ def delete_project(project_name: str, force: bool = False) -> Dict[str, Any]:
         )
     
     shutil.rmtree(project_path)
+    
+    # Delete project chat directory
+    from pathlib import Path
+    base_data_path = Path("/app/data")
+    chat_project_dir = base_data_path / "chats" / "projects" / project_name
+    if chat_project_dir.exists():
+        shutil.rmtree(chat_project_dir)
     
     # Remove documents from memory that belong to this project
     documents = get_documents()

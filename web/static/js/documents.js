@@ -290,6 +290,9 @@ function setupImprovedFileUpload() {
         const files = fileInput.files;
         if (files.length === 0) return;
 
+        // Create AbortController for cancellation early
+        window.currentUploadController = new AbortController();
+
         // Validate files
         const { validFiles, errors } = validateFiles(files);
         if (errors.length > 0) {
@@ -307,9 +310,6 @@ function setupImprovedFileUpload() {
         if (projectSelect) {
             formData.append('project', projectSelect.value);
         }
-
-        // Create AbortController for cancellation
-        window.currentUploadController = new AbortController();
 
         try {
             // Update UI for upload state - change upload button to cancel
@@ -386,6 +386,7 @@ function setupImprovedFileUpload() {
                     
                     if (overwrite) {
                         formData.append('overwrite', 'true');
+                        
                         const overwriteRes = await fetch('/upload', { 
                             method: 'POST', 
                             body: formData,
@@ -898,7 +899,7 @@ async function retryProcessing(filename) {
   }
 }
 
-// Auto-refresh documents list every 5 seconds if there are documents being processed
+// Auto-refresh documents list every 10 seconds to detect changes
 
 function startAutoRefresh() {
   if (window.autoRefreshInterval) return; // Already running
@@ -909,17 +910,17 @@ function startAutoRefresh() {
       const data = await res.json();
       const summary = data.processing_summary || {};
       
-      // Check if there are documents still processing
+      // Always refresh to detect new documents added manually or via API
+      await loadExistingDocuments();
+      
+      // If there are documents processing, check more frequently
       if (summary.pending > 0 || summary.processing > 0) {
-        await loadExistingDocuments();
-      } else {
-        // Stop auto-refresh when all processing is complete
-        stopAutoRefresh();
+        // Continue with current interval for processing documents
       }
     } catch (error) {
       console.error('Auto-refresh error:', error);
     }
-  }, 3000); // Refresh every 3 seconds
+  }, 10000); // Refresh every 10 seconds
 }
 
 function stopAutoRefresh() {
@@ -1063,13 +1064,15 @@ async function createProject() {
       await loadProjects();
       await loadExistingDocuments();
       
-      // Update chat history for the new project
+      // Update chat history for the new project and clear current chat
       if (window.chatHistory) {
         window.chatHistory.currentProject = window.currentProject;
+        window.chatHistory.currentChatId = null;
+        window.chatHistory.clearChatMessages();
+        window.chatHistory.updateChatTitle('New Chat');
         await window.chatHistory.loadProjectChats();
       }
       
-      console.log(`Created and switched to new project: "${name}"`);
     } else {
       const error = await res.json();
       document.getElementById('project-msg').textContent = error.detail || 'Error creating project';
@@ -1104,7 +1107,6 @@ async function deleteCurrentProject() {
         await window.chatHistory.loadProjectChats();
       }
       
-      console.log(`Deleted project and switched back to global`);
     } else {
       const error = await res.json();
       alert(error.detail || 'Error deleting project');
@@ -1135,7 +1137,6 @@ function initializeProjectManagement() {
       await window.chatHistory.loadProjectChats();
     }
     
-    console.log(`Switched from project "${previousProject}" to "${window.currentProject}"`);
   });
   
   document.getElementById('new-project-btn').addEventListener('click', function() {

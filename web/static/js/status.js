@@ -7,7 +7,8 @@
 async function checkStatus() {
   try {
     const res = await fetch('/status');
-    const {connected, engine} = await res.json();
+    const data = await res.json();
+    const {connected, engine, local_models} = data;
     
     const connElement = document.getElementById('conn-status');
     if (connElement) {
@@ -37,8 +38,9 @@ async function checkStatus() {
       engineElement.innerText = engineText;
     }
     
-    // Enable/disable chat based on engine status
-    updateChatAvailability(connected && engineOnline);
+    // Enable/disable chat based on engine status and available models
+    const hasModels = local_models && local_models.length > 0;
+    updateChatAvailability(connected && engineOnline && hasModels);
     
   } catch (error) {
     const connElement = document.getElementById('conn-status');

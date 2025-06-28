@@ -8,8 +8,10 @@ class ChatHistory {
         this.currentChatId = null;
         this.currentProject = 'global';
         this.chats = [];
+        this.autoRefreshInterval = null;
         this.setupEventListeners();
         this.initializeCurrentProject();
+        this.startAutoRefresh();
     }
 
     initializeCurrentProject() {
@@ -42,7 +44,13 @@ class ChatHistory {
         // Project change listener
         document.getElementById('project-select')?.addEventListener('change', (e) => {
             this.currentProject = e.target.value;
+            // Clear current chat when switching projects
+            this.currentChatId = null;
+            this.clearChatMessages();
+            this.updateChatTitle('New Chat');
             this.loadProjectChats();
+            // Also update the current project globally for other modules
+            window.currentProject = this.currentProject;
         });
     }
 
@@ -65,7 +73,8 @@ class ChatHistory {
             this.currentChatId = chat.id;
             this.updateChatTitle(chat.name);
             this.clearChatMessages();
-            this.loadProjectChats(); // Refresh chat list
+            await this.loadProjectChats(); // Refresh chat list
+            this.updateActiveChatInList(); // Highlight the new chat
             this.showChatActions();
 
             return chat.id;
@@ -193,14 +202,10 @@ class ChatHistory {
 
         // Display each message
         messages.forEach(msg => {
-            // Add user message
-            if (msg.user_message) {
-                this.addMessageToDisplay('user', msg.user_message);
-            }
-            
-            // Add AI response
-            if (msg.ai_response) {
-                let content = msg.ai_response;
+            if (msg.role === 'user') {
+                this.addMessageToDisplay('user', msg.content);
+            } else if (msg.role === 'assistant') {
+                let content = msg.content;
                 
                 // Add debug info if available and debug mode is enabled
                 const debugMode = document.getElementById('debug-mode')?.checked;
@@ -208,7 +213,7 @@ class ChatHistory {
                     content = this.addDebugInfoToResponse(content, msg.debug_info);
                 }
                 
-                this.addMessageToDisplay('ai', content, msg.model);
+                this.addMessageToDisplay('assistant', content, msg.model);
             }
         });
 
@@ -444,16 +449,38 @@ class ChatHistory {
                 this.updateChatTitle(result.chat_name);
             }
             
-            // Refresh chat list to show the updated chat (with delay to avoid too frequent updates)
-            setTimeout(() => {
-                this.loadProjectChats();
-            }, 500);
+            // Refresh chat list to show the updated chat
+            await this.loadProjectChats();
+            this.updateActiveChatInList();
             
             return result;
 
         } catch (error) {
             console.error('Error sending message in chat:', error);
             throw error;
+        }
+    }
+    
+    // Auto-refresh methods
+    startAutoRefresh() {
+        if (this.autoRefreshInterval) return; // Already running
+        
+        this.autoRefreshInterval = setInterval(async () => {
+            try {
+                // Only refresh if we're not currently creating a chat or sending a message
+                if (!this.isOperationInProgress) {
+                    await this.loadProjectChats();
+                }
+            } catch (error) {
+                console.error('Chat auto-refresh error:', error);
+            }
+        }, 15000); // Refresh every 15 seconds
+    }
+    
+    stopAutoRefresh() {
+        if (this.autoRefreshInterval) {
+            clearInterval(this.autoRefreshInterval);
+            this.autoRefreshInterval = null;
         }
     }
 }
