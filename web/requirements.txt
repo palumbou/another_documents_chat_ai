@@ -3,6 +3,7 @@ uvicorn[standard]
 python-multipart
 jinja2
 requests
+aiohttp
 python-docx
 docx2txt
 PyPDF2

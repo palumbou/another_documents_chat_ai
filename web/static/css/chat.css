@@ -9,7 +9,7 @@
 /* Welcome message */
 .welcome-message {
   max-width: 700px;
-  margin: 3rem auto;
+  margin: 1rem auto;
   text-align: center;
   padding: 2rem;
   background: var(--background-light);
@@ -97,6 +97,54 @@
   color: var(--text-muted);
   font-size: 0.9rem;
   font-style: italic;
+}
+
+/* Welcome message instructions */
+.welcome-instructions {
+  text-align: left;
+  max-width: 100%;
+  margin: 2rem 0;
+}
+
+.welcome-instructions h3 {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.instruction-step {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--background);
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.instruction-step:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--primary-color);
+}
+
+.instruction-step h4 {
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.instruction-step p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.instruction-step strong {
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 /* Chat messages */

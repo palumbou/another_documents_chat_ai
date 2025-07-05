@@ -8,8 +8,8 @@ services:
     container_name: ${OLLAMA_CONTAINER_NAME:-ollama}
     restart: ${RESTART_POLICY:-unless-stopped}
     env_file: env.conf
-    ports:
-      - "${OLLAMA_PORT:-11434}:11434"
+    expose:
+      - "11434"
     volumes:
       - ollama_data:/root/.ollama
       - /etc/localtime:/etc/localtime:ro

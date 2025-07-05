@@ -1,10 +1,16 @@
 /* Sidebar Sections and Components */
 
-/* Sidebar sections */
+/* Sid/* Projects section title uniformity */
+.projects-section h3::before {
+  content: "📂";
+  position: absolute;
+  left: 0;
+  top: 0;
+}ctions */
 .sidebar section {
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 1rem;
+  padding: 1rem 1.5rem; /* Uniform padding for all sections */
 }
 
 .sidebar section:last-child {
@@ -38,6 +44,37 @@
 
 .status-section h3::before {
   content: "📊";
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Projects section title uniformity */
+.projects-section h3::before {
+  content: "📂";
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Make Projects title consistent with other section titles */
+.projects-section h3 {
+  font-size: 1.1rem; /* Slightly larger as requested */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Options section with larger content areas */
+.options-section {
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem; /* Match other sections */
+  border-top: 1px solid var(--border-color);
+}
+
+.options-section h3::before {
+  content: "⚙️";
   position: absolute;
   left: 0;
   top: 0;

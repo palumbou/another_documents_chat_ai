@@ -9,24 +9,57 @@ class ChatHistory {
         this.currentProject = 'global';
         this.chats = [];
         this.autoRefreshInterval = null;
+        this.isOperationInProgress = false;
+        this.isCreatingChat = false;
+        this.lastSentMessage = null; // Track last message to prevent duplicates
+        
+        // Wait for DOM to be ready before setting up
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initialize();
+            });
+        } else {
+            this.initialize();
+        }
+    }
+
+    initialize() {
         this.setupEventListeners();
         this.initializeCurrentProject();
+        this.loadProjectChats();
         this.startAutoRefresh();
     }
 
     initializeCurrentProject() {
-        // Get the current project from the select element
+        // Get the current project from the select element first
         const projectSelect = document.getElementById('project-select');
         if (projectSelect && projectSelect.value) {
             this.currentProject = projectSelect.value;
+            window.currentProject = this.currentProject; // Sync global state
         }
+        
+        // If global currentProject is set, use that instead
+        if (window.currentProject && window.currentProject !== this.currentProject) {
+            this.currentProject = window.currentProject;
+            if (projectSelect) {
+                projectSelect.value = this.currentProject;
+            }
+        }
+        
+        console.log(`ChatHistory initialized with project: ${this.currentProject}`);
     }
 
     setupEventListeners() {
-        // New chat button
-        document.getElementById('new-chat-btn')?.addEventListener('click', () => {
-            this.createNewChat();
-        });
+        // New chat button - prevent double clicks
+        const newChatBtn = document.getElementById('new-chat-btn');
+        if (newChatBtn) {
+            newChatBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!this.isCreatingChat) {
+                    this.createNewChat();
+                }
+            });
+        }
 
         // Chat actions
         document.getElementById('rename-chat-btn')?.addEventListener('click', () => {
@@ -42,20 +75,68 @@ class ChatHistory {
         });
 
         // Project change listener
-        document.getElementById('project-select')?.addEventListener('change', (e) => {
-            this.currentProject = e.target.value;
-            // Clear current chat when switching projects
-            this.currentChatId = null;
-            this.clearChatMessages();
-            this.updateChatTitle('New Chat');
-            this.loadProjectChats();
-            // Also update the current project globally for other modules
-            window.currentProject = this.currentProject;
-        });
+        const projectSelect = document.getElementById('project-select');
+        if (projectSelect) {
+            projectSelect.addEventListener('change', async (e) => {
+                const newProject = e.target.value;
+                console.log(`Switching from project "${this.currentProject}" to "${newProject}"`);
+                
+                // Prevent operations during project switch
+                if (this.isOperationInProgress) {
+                    console.log('Operation in progress, delaying project switch...');
+                    setTimeout(() => {
+                        projectSelect.value = this.currentProject; // Revert selection
+                    }, 100);
+                    return;
+                }
+                
+                const oldProject = this.currentProject;
+                this.currentProject = newProject;
+                
+                // Clear current chat when switching projects
+                this.currentChatId = null;
+                this.clearChatMessages();
+                this.updateChatTitle('New Chat');
+                
+                // Update global project for other modules
+                window.currentProject = this.currentProject;
+                
+                // Load chats for the new project
+                await this.loadProjectChats();
+                
+                console.log(`Project switched from "${oldProject}" to "${newProject}"`);
+            });
+        }
     }
 
     async createNewChat(firstMessage = null) {
+        // Prevent double creation
+        if (this.isCreatingChat) {
+            console.log('Chat creation already in progress, skipping...');
+            return null;
+        }
+        
+        // Check if Ollama is available before creating chat
         try {
+            const statusResponse = await fetch('/status');
+            const statusData = await statusResponse.json();
+            
+            if (!statusData.connected || !statusData.engine?.available) {
+                showMessage('Cannot create chat: AI engine is not available. Please download and run a model first, or check the Ollama connection.', 'error');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error checking engine status:', error);
+            showMessage('Cannot create chat: Unable to verify AI engine status', 'error');
+            return null;
+        }
+
+        this.isCreatingChat = true;
+        this.isOperationInProgress = true;
+
+        try {
+            console.log(`Creating new chat in project: ${this.currentProject} with message: ${firstMessage ? 'yes' : 'no'}`);
+            
             const response = await fetch('/chats/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -72,30 +153,45 @@ class ChatHistory {
             const chat = await response.json();
             this.currentChatId = chat.id;
             this.updateChatTitle(chat.name);
-            this.clearChatMessages();
-            await this.loadProjectChats(); // Refresh chat list
-            this.updateActiveChatInList(); // Highlight the new chat
+            
+            // Only clear messages if no first message (empty new chat)
+            if (!firstMessage) {
+                this.clearChatMessages();
+            }
+            
+            // Load chats for current project to show the new chat
+            await this.loadProjectChats();
+            this.updateActiveChatInList();
             this.showChatActions();
 
+            console.log(`Created new chat: ${chat.id} in project: ${this.currentProject}`);
             return chat.id;
+            
         } catch (error) {
             console.error('Error creating chat:', error);
-            showMessage('Error creating new chat', 'error');
+            showMessage('Error creating new chat: ' + error.message, 'error');
             return null;
+        } finally {
+            this.isCreatingChat = false;
+            this.isOperationInProgress = false;
         }
     }
 
     async loadProjectChats() {
         try {
+            console.log(`Loading chats for project: ${this.currentProject}`);
             const response = await fetch(`/chats/${this.currentProject}`);
             if (!response.ok) {
                 throw new Error('Failed to load chats');
             }
 
-            this.chats = await response.json();
+            const chats = await response.json();
+            this.chats = chats;
+            console.log(`Loaded ${this.chats.length} chats for project: ${this.currentProject}`);
             this.renderChatList();
         } catch (error) {
             console.error('Error loading chats:', error);
+            this.chats = [];
             this.renderEmptyChatList();
         }
     }
@@ -408,7 +504,22 @@ class ChatHistory {
             showMessage('Error deleting chat', 'error');
         }
     }
-
+    
+    // Method to sync current project from global state
+    syncCurrentProject() {
+        const projectSelect = document.getElementById('project-select');
+        if (projectSelect && projectSelect.value !== this.currentProject) {
+            console.log(`Syncing project from ${this.currentProject} to ${projectSelect.value}`);
+            this.currentProject = projectSelect.value;
+            
+            // Update global state
+            window.currentProject = this.currentProject;
+            
+            // Reload chats for the new project
+            this.loadProjectChats();
+        }
+    }
+    
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -417,15 +528,42 @@ class ChatHistory {
 
     // Public method to send message within current chat
     async sendMessageInCurrentChat(message, model = null, debugMode = false) {
+        // Prevent operation if already in progress
+        if (this.isOperationInProgress) {
+            console.log('Operation in progress, waiting...');
+            return null;
+        }
+        
+        // Check for duplicate messages
+        const messageKey = `${message}-${model}-${debugMode}`;
+        if (this.lastSentMessage === messageKey) {
+            console.log('Duplicate message detected, skipping...');
+            return null;
+        }
+        this.lastSentMessage = messageKey;
+
+        this.isOperationInProgress = true;
+
         try {
+            // Check if Ollama is available before proceeding
+            const statusResponse = await fetch('/status');
+            const statusData = await statusResponse.json();
+            
+            if (!statusData.connected || !statusData.engine?.available) {
+                throw new Error('AI engine is not available. Please download and run a model first, or check the Ollama connection.');
+            }
+
             // If no current chat, create a new one
             if (!this.currentChatId) {
-                // Create new chat with first message as title suggestion
+                console.log('No current chat, creating new one...');
                 const chatId = await this.createNewChat(message);
                 if (!chatId) {
                     throw new Error('Failed to create new chat');
                 }
+                // createNewChat already sets this.currentChatId
             }
+
+            console.log(`Sending message to chat: ${this.currentChatId} in project: ${this.currentProject}`);
 
             // Send message to current chat
             const response = await fetch(`/chats/${this.currentProject}/${this.currentChatId}/chat`, {
@@ -449,7 +587,8 @@ class ChatHistory {
                 this.updateChatTitle(result.chat_name);
             }
             
-            // Refresh chat list to show the updated chat
+            // Refresh chat list to show the updated chat, but don't reload messages
+            // to avoid overwriting what's displayed in the UI
             await this.loadProjectChats();
             this.updateActiveChatInList();
             
@@ -457,7 +596,14 @@ class ChatHistory {
 
         } catch (error) {
             console.error('Error sending message in chat:', error);
+            showMessage('Error sending message: ' + error.message, 'error');
             throw error;
+        } finally {
+            this.isOperationInProgress = false;
+            // Clear the last message key after a delay to allow for quick successive different messages
+            setTimeout(() => {
+                this.lastSentMessage = null;
+            }, 1000);
         }
     }
     
@@ -488,13 +634,3 @@ class ChatHistory {
 // Global instance
 const chatHistory = new ChatHistory();
 window.chatHistory = chatHistory; // Make available globally
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Load project chats and set up initial state
-    chatHistory.loadProjectChats();
-    
-    // Initialize with a fresh chat interface
-    chatHistory.clearChatMessages();
-    chatHistory.updateChatTitle('New Chat');
-});

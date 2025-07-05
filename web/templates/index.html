@@ -16,7 +16,7 @@
     
     /* Left sidebar toggle functionality */
     .app-container.left-sidebar-hidden {
-      grid-template-columns: 0 1fr 320px !important;
+      grid-template-columns: 0 1fr 420px !important;
     }
     .app-container.left-sidebar-hidden .left-sidebar {
       display: none !important;
@@ -29,9 +29,9 @@
     
     /* Force proper widths and prevent overflow */
     .app-container .right-sidebar {
-      max-width: 320px !important;
-      min-width: 320px !important;
-      width: 320px !important;
+      max-width: 420px !important;
+      min-width: 420px !important;
+      width: 420px !important;
       overflow-x: hidden !important;
     }
     
@@ -45,11 +45,11 @@
     /* Ensure grid layout works properly */
     @media (min-width: 769px) {
       .app-container {
-        grid-template-columns: 380px 1fr 320px !important;
+        grid-template-columns: 380px 1fr 420px !important;
       }
       
       .app-container.left-sidebar-hidden {
-        grid-template-columns: 0 1fr 320px !important;
+        grid-template-columns: 0 1fr 420px !important;
       }
       
       .app-container.right-sidebar-hidden {
@@ -290,6 +290,10 @@
             <div class="status-item">
               <span class="status-label">Memory:</span>
               <span id="memory-info">Checking…</span>
+            </div>
+            <div class="status-item datetime-item">
+              <span class="status-label">⏰ Time & Date & Zone:</span>
+              <span id="datetime-full-info">--:-- | --/--/---- | --</span>
             </div>
           </div>
         </section>

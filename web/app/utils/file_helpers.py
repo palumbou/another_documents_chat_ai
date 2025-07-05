@@ -11,7 +11,7 @@ def get_file_size_mb(filepath: str) -> float:
 
 def is_supported_file(filename: str) -> bool:
     """Check if file type is supported."""
-    return filename.lower().endswith(('.pdf', '.docx', '.doc', '.txt', '.md'))
+    return filename.lower().endswith(('.pdf', '.docx', '.doc', '.txt', '.md', '.log'))
 
 def get_supported_files_in_dir(directory: str) -> List[str]:
     """Get list of supported files in directory."""

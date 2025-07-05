@@ -57,11 +57,8 @@ async function sendMessage() {
     // Use chat history service if available, otherwise use regular chat
     let response;
     
-    if (window.chatHistory && window.chatHistory.currentChatId) {
-      // Send through chat history for persistence
-      response = await window.chatHistory.sendMessageInCurrentChat(query, currentModel, debugMode);
-    } else if (window.chatHistory) {
-      // Create new chat and send message
+    if (window.chatHistory) {
+      // Always use chat history service - it will handle chat creation if needed
       response = await window.chatHistory.sendMessageInCurrentChat(query, currentModel, debugMode);
     } else {
       // Fallback to regular chat endpoint

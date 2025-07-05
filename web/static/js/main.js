@@ -6,8 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
     // Initialize all modules
     try {
-      // Initialize ChatHistory instance
-      window.chatHistory = new ChatHistory();
       
       if (typeof initializeStatusMonitoring === 'function') {
         initializeStatusMonitoring();
@@ -30,10 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (typeof setupImprovedFileUpload === 'function') {
         setupImprovedFileUpload();
       }
-      // Load project chats after everything is initialized
-      if (window.chatHistory) {
-        window.chatHistory.loadProjectChats();
-      }
     } catch (error) {
       console.error('Error during initialization:', error);
     }
@@ -44,12 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 window.viewDocumentChunks = viewDocumentChunks;
 window.deleteDocument = deleteDocument;
 window.retryProcessing = retryProcessing;
-window.toggleChunkContent = toggleChunkContent;
-window.clearChunkSearch = clearChunkSearch;
-window.copyChunkContent = copyChunkContent;
-window.copyAllChunks = copyAllChunks;
 window.createProject = createProject;
-window.deleteCurrentProject = deleteCurrentProject;
 window.loadProjects = loadProjects;
 window.loadExistingDocuments = loadExistingDocuments;
 window.checkStatus = checkStatus;

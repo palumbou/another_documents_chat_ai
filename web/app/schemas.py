@@ -71,6 +71,11 @@ class ModelInfo(BaseModel):
     name: str
     estimated_ram_gb: int
     category: str
+    description: Optional[str] = ""
+    size: Optional[str] = ""
+    pulls: Optional[str] = ""
+    tags: Optional[str] = ""
+    updated: Optional[str] = ""
 
 class ModelsResponse(BaseModel):
     local: List[ModelInfo]

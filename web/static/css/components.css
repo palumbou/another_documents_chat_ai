@@ -526,19 +526,6 @@ textarea:focus {
   border-top: 1px solid var(--border-color);
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.section-header h3 {
-  margin: 0;
-  font-size: 1rem;
-  color: var(--text-primary);
-}
-
 .chat-list {
   display: flex;
   flex-direction: column;
@@ -704,6 +691,45 @@ textarea:focus {
   color: var(--error-color);
 }
 
+/* Section header with action buttons */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
+.section-header h3 {
+  margin: 0;
+  flex-grow: 1;
+}
+
+.section-header .btn-icon {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.refresh-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.btn-icon:hover .refresh-icon {
+  transform: rotate(180deg);
+}
+
+.btn-icon.refreshing .refresh-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* File Upload Improvements */
 .upload-container {
   position: relative;
@@ -852,6 +878,17 @@ textarea:focus {
 
 .option-group {
   margin-bottom: 1.5rem;
+  padding: 1.2rem;
+  background: var(--background-alt);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.option-group:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .option-group:last-child {
@@ -971,4 +1008,272 @@ textarea:focus {
 .options-section .compact .theme-text,
 .options-section .compact .debug-status {
   font-size: 0.75rem;
+}
+
+/* Model tooltips */
+.model-tooltip {
+  position: fixed;
+  background-color: var(--background);
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  z-index: 99999;
+  max-width: 400px;
+  min-width: 300px;
+  white-space: pre-line;
+  display: none;
+  pointer-events: none;
+  line-height: 1.5;
+  backdrop-filter: blur(12px);
+  animation: tooltipFadeIn 0.3s ease-out;
+  font-family: inherit;
+}
+
+.model-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 20px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--primary-color);
+}
+
+.model-tooltip .tooltip-header {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.model-tooltip .tooltip-section {
+  margin-bottom: 0.75rem;
+}
+
+.model-tooltip .tooltip-section:last-child {
+  margin-bottom: 0;
+}
+
+.model-tooltip .tooltip-label {
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.model-tooltip .tooltip-value {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced select styling for models with softer theme */
+#remote-select, #local-select {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.6rem;
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+#remote-select:focus, #local-select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(215, 130, 126, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Style optgroups to be more prominent and soft */
+#remote-select optgroup, #local-select optgroup {
+  font-weight: 600;
+  color: var(--primary-color);
+  background-color: var(--background-light);
+  border-radius: 8px;
+  margin: 2px 0;
+}
+
+#remote-select option, #local-select option {
+  padding: 0.4rem 0.6rem;
+  color: var(--text-primary);
+  background-color: var(--background);
+  border-radius: 6px;
+  margin: 1px 0;
+}
+
+#remote-select option:hover, #local-select option:hover {
+  background-color: var(--background-light);
+  color: var(--primary-color);
+}
+
+/* Softer theme improvements */
+.model-group {
+  background: var(--background-alt);
+  border-radius: 16px;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.model-group:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.model-group label {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+/* Softer buttons */
+.btn-primary, .btn-secondary {
+  border-radius: 12px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Softer sidebar sections */
+.models-section, .options-section, .status-section {
+  background: var(--background-alt);
+  border-radius: 16px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Softer tooltip improvements */
+.model-tooltip {
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--primary-color);
+  overflow: hidden;
+}
+
+.model-tooltip .tooltip-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  color: white;
+  margin: -1rem -1rem 1rem -1rem;
+  padding: 1rem;
+  font-weight: 600;
+  border-radius: 14px 14px 0 0;
+}
+
+.model-tooltip .tooltip-section {
+  background: var(--background-light);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.model-tooltip .tooltip-section:last-child {
+  margin-bottom: 0;
+}
+
+.model-tooltip .tooltip-label {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.model-tooltip .tooltip-value {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* Softer hint text */
+.tooltip-hint {
+  background: var(--background-light);
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  margin-top: 0.5rem;
+}
+
+/* Model control styles for unified section */
+.model-control-row {
+  margin-bottom: 1.5rem;
+}
+
+.model-control-row:last-child {
+  margin-bottom: 0;
+}
+
+.model-control-row label {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.model-control-inline {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.model-control-inline select {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background);
+  font-size: 0.875rem;
+}
+
+.model-control-inline select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(215, 130, 126, 0.1);
+}
+
+.model-control-inline button {
+  flex-shrink: 0;
+  min-width: 80px;
 }

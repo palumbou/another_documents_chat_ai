@@ -15,41 +15,67 @@ function groupModelsByFamily(models) {
   return families;
 }
 
-// Helper function to create option groups for models with memory info
-function createModelOptions(models) {
+// Helper function to create options for models (different logic for remote vs local)
+function createModelOptions(models, isRemote = false) {
   if (!models || models.length === 0) {
     return '<option value="">-- None Available --</option>';
   }
   
-  // If models are objects with memory info, group them differently
+  // If models are objects with memory info
   if (typeof models[0] === 'object' && models[0].name) {
-    const families = {};
-    
-    models.forEach(model => {
-      const baseName = model.name.split(':')[0];
-      if (!families[baseName]) {
-        families[baseName] = [];
-      }
-      families[baseName].push(model);
-    });
-    
-    let html = '';
-    Object.keys(families).sort().forEach(family => {
-      if (families[family].length === 1) {
-        const model = families[family][0];
-        const memoryInfo = `${model.estimated_ram_gb}GB - ${model.category}`;
-        html += `<option value="${model.name}" title="${memoryInfo}">${model.name} (${model.estimated_ram_gb}GB)</option>`;
-      } else {
-        html += `<optgroup label="${family}">`;
+    // For remote models, group by family (as before)
+    if (isRemote) {
+      const families = {};
+      
+      models.forEach(model => {
+        const baseName = model.name.split(':')[0];
+        if (!families[baseName]) {
+          families[baseName] = [];
+        }
+        families[baseName].push(model);
+      });
+      
+      let html = '';
+      Object.keys(families).sort().forEach(family => {
+        // Always create optgroup, even for single models
+        const representativeModel = families[family][0];
+        let familyTooltip = '';
+        if (representativeModel.description) {
+          familyTooltip += `Description: ${representativeModel.description}`;
+        }
+        if (representativeModel.updated) {
+          if (familyTooltip) familyTooltip += '\n';
+          familyTooltip += `Last updated: ${representativeModel.updated}`;
+        }
+        
+        html += `<optgroup label="${family}" data-family-tooltip="${familyTooltip.replace(/"/g, '&quot;')}">`;
         families[family].sort((a, b) => a.estimated_ram_gb - b.estimated_ram_gb).forEach(model => {
-          const memoryInfo = `${model.estimated_ram_gb}GB - ${model.category}`;
-          html += `<option value="${model.name}" title="${memoryInfo}">${model.name} (${model.estimated_ram_gb}GB)</option>`;
+          const memoryInfo = `${model.estimated_ram_gb}GB RAM required`;
+          const sizeInfo = model.size ? ` - Model size: ${model.size}` : '';
+          const categoryInfo = model.category ? ` - ${model.category}` : '';
+          const pullsInfo = model.pulls ? ` - ${model.pulls} downloads` : '';
+          const variantTooltip = `${memoryInfo}${sizeInfo}${categoryInfo}${pullsInfo}`;
+          
+          const displaySize = model.size ? ` (${model.size})` : '';
+          html += `<option value="${model.name}" data-tooltip="${variantTooltip.replace(/"/g, '&quot;')}">${model.name}${displaySize} - ${model.estimated_ram_gb}GB</option>`;
         });
         html += '</optgroup>';
-      }
-    });
-    
-    return html;
+      });
+      
+      return html;
+    } else {
+      // For local models, simple list
+      return models.map(model => {
+        const memoryInfo = `${model.estimated_ram_gb}GB RAM required`;
+        const sizeInfo = model.size ? ` - Model size: ${model.size}` : '';
+        const categoryInfo = model.category ? ` - ${model.category}` : '';
+        const pullsInfo = model.pulls ? ` - ${model.pulls} downloads` : '';
+        const tooltip = `${memoryInfo}${sizeInfo}${categoryInfo}${pullsInfo}`;
+        
+        const displaySize = model.size ? ` (${model.size})` : '';
+        return `<option value="${model.name}" title="${tooltip.replace(/"/g, '&quot;')}">${model.name}${displaySize} - ${model.estimated_ram_gb}GB</option>`;
+      }).join('');
+    }
   } else {
     // Fallback for simple string arrays
     return models.map(m => `<option value="${m}">${m}</option>`).join('');
@@ -77,13 +103,13 @@ async function loadModels() {
       remoteSel.innerHTML = `<option disabled style="color: #e74c3c; font-style: italic;">${remote_error}</option>`;
       console.error('Remote models error:', remote_error);
     } else if (remote && remote.length > 0) {
-      remoteSel.innerHTML = createModelOptions(remote);
+      remoteSel.innerHTML = createModelOptions(remote, true); // true for remote/grouping
     } else {
       remoteSel.innerHTML = '<option value="">-- None Available --</option>';
     }
     
-    // Local models with grouping
-    localSel.innerHTML = createModelOptions(local);
+    // Local models without grouping
+    localSel.innerHTML = createModelOptions(local, false); // false for local/simple
     
     // Always enable so user sees the state
     remoteSel.disabled = false;
@@ -334,7 +360,25 @@ async function runLocalModel() {
   const btn = document.getElementById('run-btn');
   
   btn.disabled = true; 
-  runMsg.innerText = 'Switching…';
+  
+  // Check if there's already an active model
+  let currentModel = null;
+  try {
+    const statusRes = await fetch('/status');
+    if (statusRes.ok) {
+      const status = await statusRes.json();
+      currentModel = status.active_model;
+    }
+  } catch (e) {
+    console.log('Could not check current model status');
+  }
+  
+  // Set appropriate message based on whether we're switching or activating
+  if (currentModel && currentModel !== 'None' && currentModel !== '') {
+    runMsg.innerText = 'Switching model…';
+  } else {
+    runMsg.innerText = 'Activating model…';
+  }
   
   try {
     const res = await fetch('/models/run', {
@@ -355,6 +399,32 @@ async function runLocalModel() {
   }
 }
 
+// Tooltip system for model selects - simplified
+function initializeModelTooltips() {
+  const remoteSelect = document.getElementById('remote-select');
+  const localSelect = document.getElementById('local-select');
+  
+  // Use native browser tooltips with title attribute
+  // The tooltip content is already set in the title attribute by createModelOptions
+  if (remoteSelect) {
+    // Additional visual cues on hover
+    remoteSelect.addEventListener('mouseenter', () => {
+      remoteSelect.style.backgroundColor = 'rgba(88, 101, 242, 0.1)';
+    });
+    remoteSelect.addEventListener('mouseleave', () => {
+      remoteSelect.style.backgroundColor = '';
+    });
+  }
+  if (localSelect) {
+    localSelect.addEventListener('mouseenter', () => {
+      localSelect.style.backgroundColor = 'rgba(88, 101, 242, 0.1)';
+    });
+    localSelect.addEventListener('mouseleave', () => {
+      localSelect.style.backgroundColor = '';
+    });
+  }
+}
+
 // Initialize models functionality
 function initializeModels() {
   // Pull model button
@@ -362,6 +432,9 @@ function initializeModels() {
   
   // Run model button  
   document.getElementById('run-btn').addEventListener('click', runLocalModel);
+  
+  // Initialize tooltip system
+  initializeModelTooltips();
   
   // Initial load
   loadModels();

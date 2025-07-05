@@ -88,10 +88,36 @@ async function checkMemory() {
   }
 }
 
+// Update current time, date and timezone
+function updateDateTime() {
+  const now = new Date();
+  
+  // Update combined time, date and timezone
+  const datetimeFullElement = document.getElementById('datetime-full-info');
+  if (datetimeFullElement) {
+    const time = now.toLocaleTimeString();
+    const date = now.toLocaleDateString();
+    
+    // Get timezone info
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const offset = now.getTimezoneOffset();
+    const offsetHours = Math.floor(Math.abs(offset) / 60);
+    const offsetMinutes = Math.abs(offset) % 60;
+    const sign = offset <= 0 ? '+' : '-';
+    const offsetString = `${sign}${offsetHours.toString().padStart(2, '0')}:${offsetMinutes.toString().padStart(2, '0')}`;
+    const timezoneShort = `${timezone.split('/').pop()} (UTC${offsetString})`;
+    
+    datetimeFullElement.innerText = `${time} | ${date} | ${timezoneShort}`;
+  }
+}
+
 // Initialize status monitoring
 function initializeStatusMonitoring() {
   checkStatus();
   checkMemory();
+  updateDateTime();
+  
   setInterval(checkStatus, 15000);
   setInterval(checkMemory, 30000);
+  setInterval(updateDateTime, 1000); // Update time every second
 }
