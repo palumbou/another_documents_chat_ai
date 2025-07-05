@@ -1,12 +1,6 @@
 /* Sidebar Sections and Components */
 
-/* Sid/* Projects section title uniformity */
-.projects-section h3::before {
-  content: "📂";
-  position: absolute;
-  left: 0;
-  top: 0;
-}ctions */
+/* Sidebar sections */
 .sidebar section {
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-color);
@@ -50,6 +44,17 @@
 }
 
 /* Projects section title uniformity */
+.projects-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem; /* Same as other titles */
+  font-weight: 600; /* Same as other titles */
+  color: var(--text-primary);
+  position: relative;
+  padding-left: 1.5rem;
+  text-transform: none; /* Remove uppercase */
+  letter-spacing: normal; /* Remove letter spacing */
+}
+
 .projects-section h3::before {
   content: "📂";
   position: absolute;
@@ -57,13 +62,12 @@
   top: 0;
 }
 
-/* Make Projects title consistent with other section titles */
-.projects-section h3 {
-  font-size: 1.1rem; /* Slightly larger as requested */
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  color: var(--text-primary);
+/* Projects section title uniformity */
+.projects-section h3::before {
+  content: "📂";
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 /* Options section with larger content areas */

@@ -301,45 +301,134 @@ For more information, see the main README.md file.
 
 ## User Interface & Themes
 
-### 🎨 Automatic Theme Detection
+### 🎨 Customizable Theme System
 
-The application features a smart theme system that automatically adapts to your system preferences:
+The application features a powerful theme system with multiple built-in themes and support for custom themes:
 
-#### Three Theme Modes
+#### Available Themes
 
-1. **🔄 Auto Mode (Default)**
-   - Automatically follows your system's dark/light mode preference
-   - Updates in real-time when you change your system theme
-   - Shows a rotating 🔄 icon to indicate auto detection
+1. **🎯 Base Theme**
+   - Simple and clean design
+   - Available in Light and Dark variants
+   - Perfect for professional use
 
-2. **☀️ Dawn Mode (Light)**
-   - Rosé Pine Dawn theme with warm, light colors
-   - Perfect for daytime use or bright environments
-   - Shows a 🌙 icon to indicate you can switch to dark mode
+2. **🌸 Catppuccin Theme**
+   - Soothing pastel colors
+   - Mocha, Latte, Frappé, and Macchiato variants
+   - Community favorite for coding environments
 
-3. **🌙 Moon Mode (Dark)**
-   - Rosé Pine Moon theme with cool, dark colors
-   - Easy on the eyes for night-time use
-   - Shows a ☀️ icon to indicate you can switch to light mode
+3. **🧛 Dracula Theme**
+   - Dark theme with vibrant accents
+   - High contrast and eye-friendly
+   - Popular in developer communities
 
-#### How to Use
+4. **🌃 Tokyo Night Theme**
+   - Night and Day variants
+   - Inspired by Tokyo's neon-lit nights
+   - Modern and sleek appearance
 
-- **Click the theme button** in the top-right corner of the sidebar
-- **Cycles through**: Auto → Dawn → Moon → Auto
-- **Theme preference** is automatically saved and remembered
-- **Auto mode** responds instantly to system theme changes
+5. **� Gruvbox Theme**
+   - Retro groove warm color scheme
+   - Dark and Light variants
+   - Inspired by badwolf and jellybeans
 
-#### Theme Indicators
+6. **❄️ Nord Theme**
+   - Arctic, north-bluish color palette
+   - Dark and Light variants
+   - Clean and minimalist design
 
-- **🔄 Rotating icon**: Auto mode is active
-- **🌙 Moon icon**: Currently in Dawn (light) mode, click for Moon (dark)
-- **☀️ Sun icon**: Currently in Moon (dark) mode, click for Auto
+7. **☀️ Solarized Theme**
+   - Precision color scheme
+   - Dark and Light variants
+   - Scientifically designed for eye comfort
 
-### 🎯 Visual Design
+#### How to Use Themes
 
-The interface uses the beautiful **Rosé Pine** color palette:
+1. **Open Settings**: Click the ⚙️ gear icon in the top-left sidebar
+2. **Select Theme**: Use the dropdown menu in the "Options" section
+3. **View Theme Info**: Click the info button (ℹ️) next to any theme to see details and color palette
+4. **Automatic Saving**: Your theme preference is automatically saved
 
-- **Warm, muted colors** that are easy on the eyes
-- **High contrast ratios** for accessibility
-- **Consistent color language** throughout the interface
-- **Smooth transitions** between themes
+#### Creating Custom Themes
+
+You can create your own themes by adding JSON files to the `web/static/themes/` directory:
+
+##### Theme File Structure
+
+```json
+{
+  "name": "My Custom Theme",
+  "description": "A beautiful custom theme",
+  "author": "Your Name",
+  "version": "1.0.0",
+  "variants": {
+    "dark": {
+      "name": "My Custom Dark",
+      "description": "Dark variant description",
+      "type": "dark",
+      "colors": {
+        "--background": "#1a1a1a",
+        "--text-primary": "#ffffff",
+        "--primary-color": "#007bff",
+        // ... add all required CSS variables
+      }
+    },
+    "light": {
+      "name": "My Custom Light",
+      "description": "Light variant description", 
+      "type": "light",
+      "colors": {
+        "--background": "#ffffff",
+        "--text-primary": "#000000",
+        "--primary-color": "#007bff",
+        // ... add all required CSS variables
+      }
+    }
+  }
+}
+```
+
+##### Required CSS Variables
+
+Your theme must include all these CSS variables:
+
+**Backgrounds & Surfaces:**
+- `--background`, `--background-light`, `--background-dark`
+- `--surface`, `--surface-light`, `--surface-dark`
+
+**Colors:**
+- `--primary-color`, `--primary-hover`
+- `--secondary-color`, `--accent-color`
+- `--success-color`, `--warning-color`, `--error-color`, `--info-color`
+
+**Text:**
+- `--text-primary`, `--text-secondary`, `--text-muted`, `--text-inverse`
+
+**Borders & Shadows:**
+- `--border-color`, `--border-light`, `--border-dark`
+- `--shadow-color`, `--shadow-light`, `--shadow-dark`
+
+**Interactive Elements:**
+- `--highlight-color`, `--selection-color`
+- `--input-background`, `--input-border`, `--input-focus`
+- `--button-primary`, `--button-primary-hover`
+- `--button-secondary`, `--button-secondary-hover`
+
+**Layout Specific:**
+- `--sidebar-background`, `--header-background`, `--footer-background`
+- `--modal-background`, `--modal-backdrop`
+- `--code-background`, `--code-border`
+- `--link-color`, `--link-hover`
+
+##### Adding Your Theme
+
+1. Save your theme file as `web/static/themes/your-theme-name.json`
+2. Restart the application or refresh the page
+3. Your theme will appear in the dropdown menu automatically
+
+### 🎯 Visual Design Features
+
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Smooth Transitions**: Elegant animations between themes
+- **High Contrast**: Accessibility-friendly color ratios
+- **Modern UI**: Clean, professional interface design

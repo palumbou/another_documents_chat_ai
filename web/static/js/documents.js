@@ -195,7 +195,7 @@ function updateFileDisplay(files, label, buttonsContainer) {
 function resetUploadArea(label, buttonsContainer) {
     label.classList.remove('has-files', 'has-errors');
     label.querySelector('.upload-text').textContent = 'Choose files or drag & drop';
-    label.querySelector('.upload-hint').textContent = 'PDF, DOCX, DOC, TXT, MD';
+    label.querySelector('.upload-hint').textContent = 'PDF, DOCX, DOC, TXT, MD, LOG';
     
     if (buttonsContainer) {
         buttonsContainer.style.display = 'none';

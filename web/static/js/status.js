@@ -55,24 +55,34 @@ async function checkStatus() {
 function updateChatAvailability(isAvailable) {
   const chatInput = document.getElementById('chat-input');
   const sendBtn = document.getElementById('send-btn');
-  const debugToggle = document.getElementById('debug-mode');
+  const debugToggle = document.getElementById('debug-toggle');
+  const debugMode = document.getElementById('debug-mode');
   
-  if (isAvailable) {
-    chatInput.disabled = false;
-    sendBtn.disabled = false;
-    debugToggle.disabled = false;
-    chatInput.placeholder = "Ask a question about your documents... (Enter to send, Shift+Enter for new line)";
-    chatInput.style.opacity = "1";
-    sendBtn.style.opacity = "1";
-    sendBtn.style.cursor = "pointer";
-  } else {
-    chatInput.disabled = true;
-    sendBtn.disabled = true;
-    debugToggle.disabled = true;
-    chatInput.placeholder = "⚠️ Chat disabled: No AI engine online. Please check Ollama connection and load a model.";
-    chatInput.style.opacity = "0.6";
-    sendBtn.style.opacity = "0.6";
-    sendBtn.style.cursor = "not-allowed";
+  // Chat input and send button
+  if (chatInput && sendBtn) {
+    if (isAvailable) {
+      chatInput.disabled = false;
+      sendBtn.disabled = false;
+      chatInput.placeholder = "Ask a question about your documents... (Enter to send, Shift+Enter for new line)";
+      chatInput.style.opacity = "1";
+      sendBtn.style.opacity = "1";
+      sendBtn.style.cursor = "pointer";
+    } else {
+      chatInput.disabled = true;
+      sendBtn.disabled = true;
+      chatInput.placeholder = "⚠️ Chat disabled: No AI engine online. Please check Ollama connection and load a model.";
+      chatInput.style.opacity = "0.6";
+      sendBtn.style.opacity = "0.6";
+      sendBtn.style.cursor = "not-allowed";
+    }
+  }
+  
+  // Debug toggles (non-essential, don't block on these)
+  if (debugToggle) {
+    debugToggle.disabled = !isAvailable;
+  }
+  if (debugMode) {
+    debugMode.disabled = !isAvailable;
   }
 }
 

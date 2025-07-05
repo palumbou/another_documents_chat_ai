@@ -61,32 +61,50 @@ The application includes a powerful project management system that allows you to
 - 🎯 **Context Focus**: Chat with AI using only relevant project documents
 
 ### UI Design & Theming
-The interface features a beautiful **Rosé Pine** color scheme with two modes:
+The interface features a powerful customizable theme system with multiple built-in themes:
 
-#### 🌅 Rosé Pine Dawn (Light Theme - Default)
-- **Background**: `#faf4ed` (warm cream base)
-- **Sidebar**: `#f2e9e1` (soft rose surface)  
-- **Text**: `#575279` (muted purple text)
-- **Primary**: `#d7827e` (dusty rose)
-- **Success**: `#56949f` (pine green)
-- **Warning**: `#ea9d34` (warm gold)
+#### � Available Themes
 
-#### 🌙 Rosé Pine Moon (Dark Theme)
-- **Background**: `#232136` (deep night base)
-- **Sidebar**: `#2a273f` (darker surface)
-- **Text**: `#e0def4` (soft lavender text)  
-- **Primary**: `#eb6f92` (bright rose)
-- **Success**: `#9ccfd8` (foam blue)
-- **Warning**: `#f6c177` (golden yellow)
+**🎯 Base Theme**: Simple and clean design with Light and Dark variants
+**🌸 Catppuccin**: Soothing pastel colors (Mocha, Latte, Frappé, Macchiato variants)
+**🧛 Dracula**: Dark theme with vibrant accents and high contrast
+**🌃 Tokyo Night**: Night and Day variants inspired by Tokyo's neon-lit nights
+**🍂 Gruvbox**: Retro groove warm color scheme (Dark and Light variants)
+**❄️ Nord**: Arctic, north-bluish color palette with clean minimalist design
+**☀️ Solarized**: Precision color scheme scientifically designed for eye comfort
 
-**Theme Features**:
-- 🔄 **Auto theme detection**: automatically follows system dark/light mode preference
-- 🌅 **Three-mode cycle**: Auto → Dawn (Light) → Moon (Dark) → Auto
-- 💾 **Theme persistence** across browser sessions
-- 🎯 **Consistent color palette** throughout the interface
-- ✨ **Smooth transitions** between light and dark modes
-- 🔄 **Dynamic updates**: auto mode responds to system theme changes in real-time
-- 🎨 **Visual indicators**: rotating icon for auto mode, distinct icons for each theme
+#### Theme Features
+- 🎨 **7 Built-in Themes**: Multiple professionally designed themes with light/dark variants
+- 📱 **Responsive Design**: Themes work perfectly on desktop, tablet, and mobile
+- 🔄 **Dynamic Loading**: Themes loaded dynamically from JSON files
+- ℹ️ **Theme Info Popup**: View theme details and color palette before selection
+- 💾 **Auto-Save**: Theme preference automatically saved and restored
+- 🛠️ **Custom Theme Support**: Add your own themes via JSON configuration files
+- ✨ **Smooth Transitions**: Elegant animations between theme changes
+- 🎯 **Accessibility**: High contrast ratios and accessibility-friendly design
+
+#### Creating Custom Themes
+Add custom themes by placing JSON files in `web/static/themes/`:
+
+```json
+{
+  "name": "My Theme",
+  "description": "A custom theme",
+  "author": "Your Name",
+  "version": "1.0.0",
+  "variants": {
+    "dark": {
+      "name": "My Dark",
+      "type": "dark",
+      "colors": {
+        "--background": "#1a1a1a",
+        "--text-primary": "#ffffff",
+        // ... all required CSS variables
+      }
+    }
+  }
+}
+```
 
 ### Technical features
 - ⚡ **FastAPI backend**: modern Python web framework with async support and modular router architecture

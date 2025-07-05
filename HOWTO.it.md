@@ -301,45 +301,134 @@ Per maggiori informazioni, vedi il file README.md principale.
 
 ## Interfaccia Utente e Temi
 
-### 🎨 Rilevamento Automatico Tema
+### 🎨 Sistema Temi Personalizzabile
 
-L'applicazione presenta un sistema tema intelligente che si adatta automaticamente alle tue preferenze di sistema:
+L'applicazione presenta un potente sistema di temi con diversi temi integrati e supporto per temi personalizzati:
 
-#### Tre Modalità Tema
+#### Temi Disponibili
 
-1. **🔄 Modalità Auto (Default)**
-   - Segue automaticamente le preferenze dark/light del sistema
-   - Si aggiorna in tempo reale quando cambi il tema del sistema
-   - Mostra un'icona 🔄 rotante per indicare il rilevamento automatico
+1. **🎯 Tema Base**
+   - Design semplice e pulito
+   - Disponibile in varianti Chiaro e Scuro
+   - Perfetto per uso professionale
 
-2. **☀️ Modalità Dawn (Chiaro)**
-   - Tema Rosé Pine Dawn con colori caldi e chiari
-   - Perfetto per uso diurno o ambienti luminosi
-   - Mostra un'icona 🌙 per indicare che puoi passare alla modalità scura
+2. **🌸 Tema Catppuccin**
+   - Colori pastello rilassanti
+   - Varianti Mocha, Latte, Frappé e Macchiato
+   - Favorito della community per ambienti di programmazione
 
-3. **🌙 Modalità Moon (Scuro)**
-   - Tema Rosé Pine Moon con colori freschi e scuri
-   - Delicato sugli occhi per uso notturno
-   - Mostra un'icona ☀️ per indicare che puoi passare alla modalità chiara
+3. **🧛 Tema Dracula**
+   - Tema scuro con accenti vibranti
+   - Alto contrasto e delicato sugli occhi
+   - Popolare nelle community di sviluppatori
 
-#### Come Usare
+4. **🌃 Tema Tokyo Night**
+   - Varianti Notte e Giorno
+   - Ispirato alle notti illuminate al neon di Tokyo
+   - Aspetto moderno e raffinato
 
-- **Clicca il pulsante tema** nell'angolo in alto a destra della sidebar
-- **Cicla attraverso**: Auto → Dawn → Moon → Auto
-- **La preferenza tema** viene salvata automaticamente e ricordata
-- **Modalità auto** risponde istantaneamente ai cambi tema sistema
+5. **� Tema Gruvbox**
+   - Schema colori retrò e caldo
+   - Varianti Scuro e Chiaro
+   - Ispirato a badwolf e jellybeans
 
-#### Indicatori Tema
+6. **❄️ Tema Nord**
+   - Palette colori artico e bluastro del nord
+   - Varianti Scuro e Chiaro
+   - Design pulito e minimalista
 
-- **🔄 Icona rotante**: Modalità auto è attiva
-- **🌙 Icona luna**: Attualmente in modalità Dawn (chiaro), clicca per Moon (scuro)
-- **☀️ Icona sole**: Attualmente in modalità Moon (scuro), clicca per Auto
+7. **☀️ Tema Solarized**
+   - Schema colori di precisione
+   - Varianti Scuro e Chiaro
+   - Progettato scientificamente per il comfort degli occhi
 
-### 🎯 Design Visivo
+#### Come Usare i Temi
 
-L'interfaccia usa la bellissima palette di colori **Rosé Pine**:
+1. **Apri Impostazioni**: Clicca l'icona ingranaggio ⚙️ nella sidebar in alto a sinistra
+2. **Seleziona Tema**: Usa il menu a tendina nella sezione "Opzioni"
+3. **Visualizza Info Tema**: Clicca il pulsante info (ℹ️) accanto a qualsiasi tema per vedere dettagli e palette colori
+4. **Salvataggio Automatico**: La tua preferenza tema viene salvata automaticamente
 
-- **Colori caldi e smorzati** che sono delicati sugli occhi
-- **Rapporti di contrasto elevati** per l'accessibilità
-- **Linguaggio colori consistente** in tutta l'interfaccia
-- **Transizioni fluide** tra i temi
+#### Creare Temi Personalizzati
+
+Puoi creare i tuoi temi aggiungendo file JSON alla directory `web/static/themes/`:
+
+##### Struttura File Tema
+
+```json
+{
+  "name": "Il Mio Tema Personalizzato",
+  "description": "Un bellissimo tema personalizzato",
+  "author": "Il Tuo Nome",
+  "version": "1.0.0",
+  "variants": {
+    "dark": {
+      "name": "Il Mio Personalizzato Scuro",
+      "description": "Descrizione variante scura",
+      "type": "dark",
+      "colors": {
+        "--background": "#1a1a1a",
+        "--text-primary": "#ffffff",
+        "--primary-color": "#007bff",
+        // ... aggiungi tutte le variabili CSS richieste
+      }
+    },
+    "light": {
+      "name": "Il Mio Personalizzato Chiaro",
+      "description": "Descrizione variante chiara", 
+      "type": "light",
+      "colors": {
+        "--background": "#ffffff",
+        "--text-primary": "#000000",
+        "--primary-color": "#007bff",
+        // ... aggiungi tutte le variabili CSS richieste
+      }
+    }
+  }
+}
+```
+
+##### Variabili CSS Richieste
+
+Il tuo tema deve includere tutte queste variabili CSS:
+
+**Sfondi e Superfici:**
+- `--background`, `--background-light`, `--background-dark`
+- `--surface`, `--surface-light`, `--surface-dark`
+
+**Colori:**
+- `--primary-color`, `--primary-hover`
+- `--secondary-color`, `--accent-color`
+- `--success-color`, `--warning-color`, `--error-color`, `--info-color`
+
+**Testo:**
+- `--text-primary`, `--text-secondary`, `--text-muted`, `--text-inverse`
+
+**Bordi e Ombre:**
+- `--border-color`, `--border-light`, `--border-dark`
+- `--shadow-color`, `--shadow-light`, `--shadow-dark`
+
+**Elementi Interattivi:**
+- `--highlight-color`, `--selection-color`
+- `--input-background`, `--input-border`, `--input-focus`
+- `--button-primary`, `--button-primary-hover`
+- `--button-secondary`, `--button-secondary-hover`
+
+**Specifici del Layout:**
+- `--sidebar-background`, `--header-background`, `--footer-background`
+- `--modal-background`, `--modal-backdrop`
+- `--code-background`, `--code-border`
+- `--link-color`, `--link-hover`
+
+##### Aggiungere il Tuo Tema
+
+1. Salva il tuo file tema come `web/static/themes/nome-tuo-tema.json`
+2. Riavvia l'applicazione o aggiorna la pagina
+3. Il tuo tema apparirà automaticamente nel menu a tendina
+
+### 🎯 Caratteristiche Design Visivo
+
+- **Design Responsivo**: Funziona su desktop, tablet e mobile
+- **Transizioni Fluide**: Animazioni eleganti tra i temi
+- **Alto Contrasto**: Rapporti colori accessibili
+- **UI Moderna**: Design dell'interfaccia pulito e professionale

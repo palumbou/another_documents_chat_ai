@@ -6,35 +6,8 @@
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
   <link rel="stylesheet" href="/static/style-modular.css">
   <style>
-    /* CSS for sidebar toggle functionality */
-    .app-container.right-sidebar-hidden {
-      grid-template-columns: 380px 1fr 0 !important;
-    }
-    .app-container.right-sidebar-hidden .right-sidebar {
-      display: none !important;
-    }
-    
-    /* Left sidebar toggle functionality */
-    .app-container.left-sidebar-hidden {
-      grid-template-columns: 0 1fr 420px !important;
-    }
-    .app-container.left-sidebar-hidden .left-sidebar {
-      display: none !important;
-    }
-    
-    /* Both sidebars hidden */
-    .app-container.left-sidebar-hidden.right-sidebar-hidden {
-      grid-template-columns: 0 1fr 0 !important;
-    }
-    
+    /* CSS for simplified layout */
     /* Force proper widths and prevent overflow */
-    .app-container .right-sidebar {
-      max-width: 420px !important;
-      min-width: 420px !important;
-      width: 420px !important;
-      overflow-x: hidden !important;
-    }
-    
     .app-container .left-sidebar {
       max-width: 380px !important;
       min-width: 380px !important;
@@ -45,20 +18,296 @@
     /* Ensure grid layout works properly */
     @media (min-width: 769px) {
       .app-container {
-        grid-template-columns: 380px 1fr 420px !important;
+        grid-template-columns: 380px 1fr !important;
       }
-      
-      .app-container.left-sidebar-hidden {
-        grid-template-columns: 0 1fr 420px !important;
+    }
+    
+    /* Settings Modal Styles */
+    .settings-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .settings-modal-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+    
+    .settings-modal-content {
+      position: relative;
+      background: var(--background);
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      animation: settingsModalIn 0.3s ease-out;
+    }
+    
+    .settings-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--background-light);
+      border-radius: 16px 16px 0 0;
+    }
+    
+    .settings-modal-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .settings-modal-body {
+      padding: 1.5rem 2rem 2rem;
+    }
+    
+    /* Button in header */
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      position: relative; /* Per permettere il posizionamento assoluto del pulsante */
+    }
+    
+    .sidebar-header .header-content {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .sidebar-header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .settings-btn {
+      padding: 0.5rem;
+      border-radius: 8px;
+      background: var(--background-light);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: absolute; /* Posizionamento assoluto */
+      right: 1.5rem; /* All'estremo destro */
+      top: 50%; /* Centro verticale */
+      transform: translateY(-50%); /* Perfetto allineamento verticale */
+    }
+    
+    .settings-btn:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: translateY(-1px);
+    }
+    
+    @keyframes settingsModalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
       }
-      
-      .app-container.right-sidebar-hidden {
-        grid-template-columns: 380px 1fr 0 !important;
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
       }
-      
-      .app-container.left-sidebar-hidden.right-sidebar-hidden {
-        grid-template-columns: 0 1fr 0 !important;
-      }
+    }
+    
+    /* Theme Selector Styles */
+    .theme-selector {
+      margin-bottom: 1.5rem;
+    }
+    
+    .theme-selector h3 {
+      margin: 0 0 1rem 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .theme-dropdown-container {
+      margin-bottom: 0.75rem;
+    }
+    
+    .theme-dropdown-container label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    
+    .theme-dropdown {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--input-background);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-dropdown:hover {
+      border-color: var(--primary-color);
+    }
+    
+    .theme-dropdown:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px var(--highlight-color);
+    }
+    
+    .theme-dropdown optgroup {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .theme-dropdown option {
+      padding: 0.5rem;
+      color: var(--text-primary);
+      background: var(--input-background);
+    }
+    
+    .theme-description {
+      padding: 0.5rem;
+      background: var(--background-light);
+      border-radius: 6px;
+      border: 1px solid var(--border-light);
+    }
+    
+    .theme-description small {
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.3;
+    }
+    
+    /* Quick Guide Styles */
+    .quick-guide {
+      margin-top: 1.5rem;
+    }
+    
+    .quick-guide h3 {
+      margin: 0 0 1rem 0;
+      color: var(--primary-color);
+      font-size: 1.1rem;
+    }
+    
+    .guide-steps {
+      margin-bottom: 1.5rem;
+    }
+    
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: var(--background-light);
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+    }
+    
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--primary-color);
+      color: var(--text-inverse);
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    .step-content strong {
+      display: block;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    
+    .step-content p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    
+    .features-highlight {
+      margin-bottom: 1.5rem;
+    }
+    
+    .features-highlight h4 {
+      margin: 0 0 0.75rem 0;
+      color: var(--accent-color);
+      font-size: 1rem;
+    }
+    
+    .features-list {
+      margin: 0;
+      padding-left: 1.2rem;
+      list-style-type: none;
+    }
+    
+    .features-list li {
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      position: relative;
+    }
+    
+    .features-list li::before {
+      content: "•";
+      color: var(--accent-color);
+      position: absolute;
+      left: -1rem;
+      font-weight: bold;
+    }
+    
+    .tips-section h4 {
+      margin: 0 0 0.75rem 0;
+      color: var(--warning-color);
+      font-size: 1rem;
+    }
+    
+    .tips-section ul {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+    
+    .tips-section li {
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    
+    .tips-section strong {
+      color: var(--text-primary);
     }
   </style>
 </head>
@@ -70,6 +319,7 @@
         <div class="header-content">
           <h1>Documents Chat AI</h1>
         </div>
+        <button id="toggle-settings" class="btn-icon settings-btn" title="Open settings">⚙️</button>
       </header>
       
       <!-- Project Management -->
@@ -110,13 +360,15 @@
                    name="files"
                    id="file-input"
                    multiple
-                   accept=".pdf,.docx,.doc,.txt,.md"
+                   accept=".pdf,.docx,.doc,.txt,.md,.log"
                    class="file-input">
             <label for="file-input" class="file-input-label">
               <div class="upload-content">
-                <span class="upload-icon">📎</span>
-                <span class="upload-text">Choose files or drag & drop</span>
-                <span class="upload-hint">PDF, DOCX, DOC, TXT, MD</span>
+                <div class="upload-title">
+                  <span class="upload-icon">📎</span>
+                  <span class="upload-text">Choose files or drag & drop</span>
+                </div>
+                <span class="upload-hint">PDF, DOCX, DOC, TXT, MD, LOG</span>
                 <!-- Upload buttons inside the drag & drop area -->
                 <div class="upload-buttons" style="display: none;">
                   <button type="button" id="upload-btn" class="btn-primary btn-small">Upload Files</button>
@@ -156,53 +408,68 @@
 
     <!-- Main Chat Area -->
     <main class="chat-container">
-      <div class="chat-header">
-        <button id="toggle-left-sidebar" class="btn-icon" title="Toggle documents panel">📁</button>
-        <button id="mobile-menu-btn" class="btn-icon mobile-only" title="Open menu">☰</button>
-        <div class="chat-title">
-          <span id="current-chat-name">New Chat</span>
-          <div class="chat-actions">
-            <button id="rename-chat-btn" class="btn-icon" title="Rename chat">✏️</button>
-            <button id="share-chat-btn" class="btn-icon" title="Share chat">🔗</button>
-            <button id="delete-chat-btn" class="btn-icon btn-danger" title="Delete chat">🗑️</button>
-          </div>
-        </div>
-        <button id="toggle-right-sidebar" class="btn-icon" title="Toggle models panel">⚙️</button>
-      </div>
-      
       <div class="chat-messages" id="chat-messages">
         <div class="welcome-message">
-          <h2>🤖 Welcome to Documents Chat AI</h2>
+          <h2>📄 Welcome to Documents Chat AI</h2>
           <p>Your intelligent document assistant powered by Ollama</p>
-          <div class="welcome-features">
-            <div class="feature-grid">
-              <div class="feature-item">
-                <span class="feature-icon">📁</span>
-                <span>Upload PDFs, DOCX, TXT files</span>
+          
+          <div class="quick-guide">
+            <h3>🚀 Quick Start Guide</h3>
+            <div class="guide-steps">
+              <div class="step-item">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                  <strong>Configure AI Model</strong>
+                  <p>Open settings (⚙️) → Download a model (e.g., llama3.2) → Select "Use" to activate it</p>
+                </div>
               </div>
-              <div class="feature-item">
-                <span class="feature-icon">🔍</span>
-                <span>Advanced OCR for scanned documents</span>
+              
+              <div class="step-item">
+                <span class="step-number">2</span>
+                <div class="step-content">
+                  <strong>Upload Documents</strong>
+                  <p>Drag & drop files (.pdf, .docx, .txt, .log) into the upload area or click to select</p>
+                </div>
               </div>
-              <div class="feature-item">
-                <span class="feature-icon">🧠</span>
-                <span>Intelligent document analysis</span>
+              
+              <div class="step-item">
+                <span class="step-number">3</span>
+                <div class="step-content">
+                  <strong>Create Projects</strong>
+                  <p>Organize documents into projects for better context management</p>
+                </div>
               </div>
-              <div class="feature-item">
-                <span class="feature-icon">💬</span>
-                <span>Context-aware AI responses</span>
+              
+              <div class="step-item">
+                <span class="step-number">4</span>
+                <div class="step-content">
+                  <strong>Start Chatting</strong>
+                  <p>Ask questions about your documents or chat freely with the AI</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="welcome-actions">
-            <p><strong>Get started:</strong></p>
-            <ol>
-              <li>Upload documents using the sidebar</li>
-              <li>Ask questions about your documents</li>
-              <li>Or just chat with the AI without documents!</li>
-            </ol>
-            <div class="theme-info">
-              <p>💡 <em>Click the theme button above to cycle: Auto 🔄 (follows system) → Dawn ☀️ → Moon 🌙!</em></p>
+            
+            <div class="features-highlight">
+              <h4>✨ Key Features</h4>
+              <ul class="features-list">
+                <li>📁 Multi-format support (.pdf, .docx, .txt, .log)</li>
+                <li>🔍 OCR for scanned documents</li>
+                <li>🧠 Intelligent document analysis</li>
+                <li>💬 Context-aware AI responses</li>
+                <li>🗂️ Project-based organization</li>
+                <li>🎨 Customizable themes and UI</li>
+              </ul>
+            </div>
+            
+            <div class="tips-section">
+              <h4>💡 Pro Tips</h4>
+              <ul>
+                <li><strong>🎨 Theme Selection:</strong> Open settings to choose from various themes (Base, Catppuccin, Dracula, Tokyo Night, Gruvbox, Nord, Solarized)</li>
+                <li><strong>🐛 Debug Mode:</strong> Enable in settings for detailed system information and troubleshooting</li>
+                <li><strong>⌨️ Keyboard Shortcuts:</strong> Enter to send, Shift+Enter for new line in chat</li>
+                <li><strong>📄 Document Management:</strong> View document chunks, copy content, and search within files</li>
+                <li><strong>🔧 Project Organization:</strong> Create projects to group related documents and maintain context</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -220,88 +487,118 @@
             </svg>
           </button>
         </div>
+        <div class="input-help">
+          <small>
+            <kbd>Enter</kbd> to send, <kbd>Shift+Enter</kbd> for new line
+          </small>
+          <!-- Hidden debug mode checkbox for JavaScript compatibility -->
+          <input type="checkbox" id="debug-mode" style="display: none;">
+        </div>
       </div>
     </main>
+  </div>
 
-    <!-- Right Sidebar - Models and Status -->
-    <aside class="sidebar right-sidebar visible" id="right-sidebar">
-      <div class="sidebar-header mobile-only">
-        <h3>Settings</h3>
-        <button id="close-right-sidebar" class="btn-icon" title="Close">✕</button>
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="settings-modal" style="display: none;">
+    <div class="settings-modal-backdrop"></div>
+    <div class="settings-modal-content">
+      <div class="settings-modal-header">
+        <h3>⚙️ Settings</h3>
+        <button id="close-settings-modal" class="btn-icon" title="Close settings (ESC)">✕</button>
       </div>
-      <div class="sidebar-header desktop-only">
-        <h3>Settings</h3>
-        <button id="close-right-sidebar-desktop" class="btn-icon" title="Close settings panel (ESC)">✕</button>
-      </div>
-      <div class="sidebar-content">
+      <div class="settings-modal-body">
         <!-- Models Management -->
         <section class="models-section">
-          <h3 class="desktop-only">Models</h3>
-          <div class="model-group">
+          <h3>🤖 AI Models</h3>
+          <div class="model-control-row">
             <label for="remote-select">Available Models:</label>
-            <select id="remote-select"></select>
-            <button id="pull-btn" class="btn-secondary">Download</button>
+            <div class="model-control-inline">
+              <select id="remote-select"></select>
+              <button id="pull-btn" class="btn-primary">Download</button>
+            </div>
             <span id="pull-msg" class="status-msg"></span>
           </div>
-          <div class="model-group">
+          <div class="model-control-row">
             <label for="local-select">Active Model:</label>
-            <select id="local-select"></select>
-            <button id="run-btn" class="btn-primary">Use</button>
+            <div class="model-control-inline">
+              <select id="local-select"></select>
+              <button id="run-btn" class="btn-primary">Use</button>
+            </div>
             <span id="run-msg" class="status-msg"></span>
           </div>
         </section>
 
-        <!-- Settings -->
+        <!-- Options & Configuration -->
         <section class="options-section">
-          <h3>Settings</h3>
+          <h3>⚙️ Options</h3>
           
-          <!-- Theme Controls -->
-          <div class="option-group option-inline">
-            <label>Theme:</label>
-            <button id="theme-toggle" class="theme-toggle compact" title="Switch between Dawn and Moon themes">
-              <span class="theme-icon">⚙️</span>
-              <span class="theme-text">Auto</span>
-            </button>
+          <!-- Theme Selection -->
+          <div class="option-group">
+            <div id="theme-selector-container">
+              <!-- Theme selector will be populated by JavaScript -->
+            </div>
           </div>
           
-          <!-- Debug Controls -->
-          <div class="option-group option-inline">
-            <label>AI Thinking:</label>
-            <button id="debug-toggle" class="debug-toggle-btn compact" title="Toggle AI thinking process display">
-              <span class="debug-icon">🧠</span>
-              <span class="debug-status">Off</span>
-            </button>
-            <input type="checkbox" id="debug-mode" style="display: none;" aria-label="Debug mode toggle" />
+          <!-- Debug Mode -->
+          <div class="option-group">
+            <div class="option-item">
+              <label class="option-label">
+                <input type="checkbox" id="debug-toggle" class="option-checkbox">
+                <span>Debug Mode</span>
+              </label>
+              <small class="option-help">Enable verbose debugging and console output</small>
+            </div>
           </div>
         </section>
 
         <!-- System Status -->
         <section class="status-section">
-          <h3>System Status</h3>
+          <h3>📊 System Status</h3>
           <div id="status">
             <div class="status-item">
-              <span class="status-label">Ollama:</span>
-              <span id="conn-status">Checking…</span>
+              <span class="status-label">Connection:</span>
+              <span id="conn-status">🔴 Checking...</span>
             </div>
             <div class="status-item">
               <span class="status-label">Engine:</span>
-              <span id="engine-info">Loading…</span>
+              <span id="engine-info">--</span>
             </div>
             <div class="status-item">
               <span class="status-label">Memory:</span>
-              <span id="memory-info">Checking…</span>
+              <span id="memory-info">💾 Loading...</span>
             </div>
-            <div class="status-item datetime-item">
-              <span class="status-label">⏰ Time & Date & Zone:</span>
+            <div class="status-item">
+              <span class="status-label">🕐 Time:</span>
               <span id="datetime-full-info">--:-- | --/--/---- | --</span>
             </div>
           </div>
         </section>
       </div>
-    </aside>
+    </div>
+  </div>
+
+  <!-- Theme Info Popup -->
+  <div id="theme-info-popup" class="theme-popup" style="display: none;">
+    <div class="theme-popup-backdrop"></div>
+    <div class="theme-popup-content">
+      <div class="theme-popup-header">
+        <h4 id="theme-popup-title">Theme Information</h4>
+        <button id="close-theme-popup" class="btn-icon">✕</button>
+      </div>
+      <div class="theme-popup-body">
+        <div class="theme-info">
+          <p><strong>Name:</strong> <span id="theme-popup-name">-</span></p>
+          <p><strong>Type:</strong> <span id="theme-popup-type">-</span></p>
+          <p><strong>Author:</strong> <span id="theme-popup-author">-</span></p>
+          <p><strong>Description:</strong> <span id="theme-popup-description">-</span></p>
+          <div id="theme-colors-preview"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modular JavaScript -->
+  <script src="/static/js/themes.js"></script>
   <script src="/static/js/status.js"></script>
   <script src="/static/js/chat.js"></script>
   <script src="/static/js/documents.js"></script>

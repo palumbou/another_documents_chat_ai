@@ -61,32 +61,50 @@ L'applicazione include un potente sistema di gestione progetti che ti permette d
 - 🎯 **Focus Contestuale**: Chatta con l'AI usando solo documenti del progetto rilevante
 
 ### Design UI e Tematizzazione
-L'interfaccia presenta una bellissima palette di colori **Rosé Pine** con due modalità:
+L'interfaccia presenta un potente sistema di temi personalizzabile con diversi temi integrati:
 
-#### 🌅 Rosé Pine Dawn (Tema Chiaro - Default)
-- **Sfondo**: `#faf4ed` (base crema caldo)
-- **Sidebar**: `#f2e9e1` (superficie rosa tenue)
-- **Testo**: `#575279` (viola smorzato)
-- **Primario**: `#d7827e` (rosa polveroso)
-- **Successo**: `#56949f` (verde pino)
-- **Avviso**: `#ea9d34` (oro caldo)
+#### � Temi Disponibili
 
-#### 🌙 Rosé Pine Moon (Tema Scuro)
-- **Sfondo**: `#232136` (base notte profonda)
-- **Sidebar**: `#2a273f` (superficie più scura)
-- **Testo**: `#e0def4` (lavanda tenue)
-- **Primario**: `#eb6f92` (rosa brillante)
-- **Successo**: `#9ccfd8` (blu schiuma)
-- **Avviso**: `#f6c177` (giallo dorato)
+**🎯 Tema Base**: Design semplice e pulito con varianti Chiaro e Scuro
+**🌸 Catppuccin**: Colori pastello rilassanti (varianti Mocha, Latte, Frappé, Macchiato)
+**🧛 Dracula**: Tema scuro con accenti vibranti e alto contrasto
+**🌃 Tokyo Night**: Varianti Notte e Giorno ispirate alle notti illuminate al neon di Tokyo
+**🍂 Gruvbox**: Schema colori retrò caldo (varianti Scuro e Chiaro)
+**❄️ Nord**: Palette colori artico e bluastro del nord con design minimalista pulito
+**☀️ Solarized**: Schema colori di precisione progettato scientificamente per il comfort degli occhi
 
-**Caratteristiche Tema**:
-- 🔄 **Rilevamento tema automatico**: segue automaticamente le preferenze dark/light del sistema
-- 🌅 **Ciclo a tre modalità**: Auto → Dawn (Chiaro) → Moon (Scuro) → Auto
-- 💾 **Persistenza tema** tra le sessioni del browser
-- 🎯 **Palette colori consistente** in tutta l'interfaccia
-- ✨ **Transizioni fluide** tra modalità chiara e scura
-- 🔄 **Aggiornamenti dinamici**: modalità auto risponde ai cambi tema sistema in tempo reale
-- 🎨 **Indicatori visivi**: icona rotante per modalità auto, icone distintive per ogni tema
+#### Caratteristiche Temi
+- 🎨 **7 Temi Integrati**: Diversi temi progettati professionalmente con varianti chiaro/scuro
+- 📱 **Design Responsivo**: I temi funzionano perfettamente su desktop, tablet e mobile
+- 🔄 **Caricamento Dinamico**: Temi caricati dinamicamente da file JSON
+- ℹ️ **Popup Info Tema**: Visualizza dettagli del tema e palette colori prima della selezione
+- 💾 **Salvataggio Automatico**: Preferenza tema salvata automaticamente e ripristinata
+- 🛠️ **Supporto Temi Personalizzati**: Aggiungi i tuoi temi tramite file di configurazione JSON
+- ✨ **Transizioni Fluide**: Animazioni eleganti tra i cambi tema
+- 🎯 **Accessibilità**: Rapporti di contrasto elevati e design accessibile
+
+#### Creare Temi Personalizzati
+Aggiungi temi personalizzati inserendo file JSON in `web/static/themes/`:
+
+```json
+{
+  "name": "Il Mio Tema",
+  "description": "Un tema personalizzato",
+  "author": "Il Tuo Nome",
+  "version": "1.0.0",
+  "variants": {
+    "dark": {
+      "name": "Il Mio Scuro",
+      "type": "dark",
+      "colors": {
+        "--background": "#1a1a1a",
+        "--text-primary": "#ffffff",
+        // ... tutte le variabili CSS richieste
+      }
+    }
+  }
+}
+```
 
 ### Funzionalità tecniche
 - ⚡ **Backend FastAPI**: framework web Python moderno con supporto async e architettura router modulare
