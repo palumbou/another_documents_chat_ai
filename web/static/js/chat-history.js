@@ -1,6 +1,15 @@
 /**
- * Chat History Management
- * Handles chat sessions, loading, saving, and database interactions.
+ * Chat History Management (LEGACY - still in use)
+ * 
+ * ⚠️  NOTE: This file contains the well-structured ChatHistory class and is still being used.
+ * It's already organized as an ES6 class with good documentation.
+ * In the future it might be migrated to the modular system as an ES6 module.
+ * 
+ * Main features:
+ * - Chat session management
+ * - History persistence
+ * - Database interactions
+ * - Auto-refresh and synchronization
  */
 
 class ChatHistory {
@@ -27,6 +36,7 @@ class ChatHistory {
         this.setupEventListeners();
         this.initializeCurrentProject();
         this.loadProjectChats();
+        this.updateExportButtonState(); // Initialize export button state
         this.startAutoRefresh();
     }
 
@@ -265,6 +275,7 @@ class ChatHistory {
             this.updateChatTitle(chatSession.name);
             this.displayMessages(chatSession.messages || []);
             this.updateActiveChatInList();
+            this.updateExportButtonState();
             this.showChatActions();
 
         } catch (error) {
@@ -629,8 +640,45 @@ class ChatHistory {
             this.autoRefreshInterval = null;
         }
     }
+
+    // Export chat functionality
+    exportCurrentChat(format) {
+        if (!this.currentChatId) {
+            this.showMessage('No chat selected to export', 'error');
+            return;
+        }
+
+        const url = `/chats/${this.currentProject}/${this.currentChatId}/export?format=${format}`;
+        
+        // Create a temporary link to trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.showMessage(`Chat exported as ${format.toUpperCase()}`, 'success');
+    }
+
+    // Update export button state
+    updateExportButtonState() {
+        const exportBtn = document.getElementById('export-chat-btn');
+        if (exportBtn) {
+            exportBtn.disabled = !this.currentChatId;
+        }
+    }
 }
 
 // Global instance
 const chatHistory = new ChatHistory();
 window.chatHistory = chatHistory; // Make available globally
+
+// Global function for export (called from HTML)
+function exportCurrentChat(format) {
+    if (window.chatHistory) {
+        window.chatHistory.exportCurrentChat(format);
+    } else {
+        console.error('ChatHistory not initialized');
+    }
+}

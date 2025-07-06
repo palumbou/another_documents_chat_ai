@@ -1,0 +1,156 @@
+{
+  "name": "Theme Template",
+  "description": "Template for creating new themes",
+  "author": "Your Name",
+  "version": "1.0.0",
+  "variants": {
+    "dark": {
+      "name": "My Theme Dark",
+      "description": "Dark variant description",
+      "type": "dark",
+      "colors": {
+        "_comment_backgrounds": "=== BACKGROUND COLORS ===",
+        "--background": "#1a1a1a",
+        "--background-light": "#2d2d2d",
+        "--background-dark": "#0d0d0d",
+        "--surface": "#2d2d2d",
+        "--surface-light": "#404040",
+        "--surface-dark": "#1a1a1a",
+        
+        "_comment_theme": "=== THEME COLORS ===",
+        "--primary-color": "#4dabf7",
+        "--primary-hover": "#339af0",
+        "--secondary-color": "#868e96",
+        "--accent-color": "#22b8cf",
+        
+        "_comment_status": "=== STATUS COLORS ===",
+        "--success-color": "#51cf66",
+        "--warning-color": "#ffd43b",
+        "--error-color": "#ff6b6b",
+        "--info-color": "#22b8cf",
+        
+        "_comment_text": "=== TEXT COLORS ===",
+        "--text-primary": "#f8f9fa",
+        "--text-secondary": "#e9ecef",
+        "--text-muted": "#adb5bd",
+        "--text-inverse": "#1a1a1a",
+        
+        "_comment_borders": "=== BORDER COLORS ===",
+        "--border-color": "#404040",
+        "--border-light": "#555555",
+        "--border-dark": "#2d2d2d",
+        
+        "_comment_shadows": "=== SHADOW COLORS ===",
+        "--shadow-color": "rgba(0, 0, 0, 0.3)",
+        "--shadow-light": "rgba(0, 0, 0, 0.2)",
+        "--shadow-dark": "rgba(0, 0, 0, 0.5)",
+        
+        "_comment_interactive": "=== INTERACTIVE COLORS ===",
+        "--highlight-color": "rgba(77, 171, 247, 0.2)",
+        "--selection-color": "rgba(77, 171, 247, 0.3)",
+        
+        "_comment_inputs": "=== INPUT COLORS ===",
+        "--input-background": "#2d2d2d",
+        "--input-border": "#404040",
+        "--input-focus": "#4dabf7",
+        
+        "_comment_buttons": "=== BUTTON COLORS ===",
+        "--button-primary": "#4dabf7",
+        "--button-primary-hover": "#339af0",
+        "--button-secondary": "#404040",
+        "--button-secondary-hover": "#555555",
+        
+        "_comment_layout": "=== LAYOUT COLORS ===",
+        "--sidebar-background": "#2d2d2d",
+        "--header-background": "#1a1a1a",
+        "--footer-background": "#2d2d2d",
+        
+        "_comment_modal": "=== MODAL COLORS ===",
+        "--modal-background": "#1a1a1a",
+        "--modal-backdrop": "rgba(0, 0, 0, 0.7)",
+        
+        "_comment_code": "=== CODE COLORS ===",
+        "--code-background": "#0d0d0d",
+        "--code-border": "#2d2d2d",
+        
+        "_comment_links": "=== LINK COLORS ===",
+        "--link-color": "#4dabf7",
+        "--link-hover": "#339af0"
+      }
+    },
+    "light": {
+      "name": "My Theme Light",
+      "description": "Light variant description",
+      "type": "light",
+      "colors": {
+        "_comment_backgrounds": "=== BACKGROUND COLORS ===",
+        "--background": "#ffffff",
+        "--background-light": "#f8f9fa",
+        "--background-dark": "#f1f3f4",
+        "--surface": "#ffffff",
+        "--surface-light": "#f8f9fa",
+        "--surface-dark": "#e9ecef",
+        
+        "_comment_theme": "=== THEME COLORS ===",
+        "--primary-color": "#007bff",
+        "--primary-hover": "#0056b3",
+        "--secondary-color": "#6c757d",
+        "--accent-color": "#17a2b8",
+        
+        "_comment_status": "=== STATUS COLORS ===",
+        "--success-color": "#28a745",
+        "--warning-color": "#ffc107",
+        "--error-color": "#dc3545",
+        "--info-color": "#17a2b8",
+        
+        "_comment_text": "=== TEXT COLORS ===",
+        "--text-primary": "#212529",
+        "--text-secondary": "#495057",
+        "--text-muted": "#6c757d",
+        "--text-inverse": "#ffffff",
+        
+        "_comment_borders": "=== BORDER COLORS ===",
+        "--border-color": "#dee2e6",
+        "--border-light": "#e9ecef",
+        "--border-dark": "#adb5bd",
+        
+        "_comment_shadows": "=== SHADOW COLORS ===",
+        "--shadow-color": "rgba(0, 0, 0, 0.1)",
+        "--shadow-light": "rgba(0, 0, 0, 0.05)",
+        "--shadow-dark": "rgba(0, 0, 0, 0.15)",
+        
+        "_comment_interactive": "=== INTERACTIVE COLORS ===",
+        "--highlight-color": "rgba(0, 123, 255, 0.1)",
+        "--selection-color": "rgba(0, 123, 255, 0.2)",
+        
+        "_comment_inputs": "=== INPUT COLORS ===",
+        "--input-background": "#ffffff",
+        "--input-border": "#ced4da",
+        "--input-focus": "#007bff",
+        
+        "_comment_buttons": "=== BUTTON COLORS ===",
+        "--button-primary": "#007bff",
+        "--button-primary-hover": "#0056b3",
+        "--button-secondary": "#6c757d",
+        "--button-secondary-hover": "#545b62",
+        
+        "_comment_layout": "=== LAYOUT COLORS ===",
+        "--sidebar-background": "#f8f9fa",
+        "--header-background": "#ffffff",
+        "--footer-background": "#f8f9fa",
+        
+        "_comment_modal": "=== MODAL COLORS ===",
+        "--modal-background": "#ffffff",
+        "--modal-backdrop": "rgba(0, 0, 0, 0.5)",
+        
+        "_comment_code": "=== CODE COLORS ===",
+        "--code-background": "#f8f9fa",
+        "--code-border": "#e9ecef",
+        
+        "_comment_links": "=== LINK COLORS ===",
+        "--link-color": "#007bff",
+        "--link-hover": "#0056b3"
+      }
+    }
+  }
+}

@@ -18,14 +18,22 @@ class EngineManager:
         self.current_engine: Optional[str] = None
         self.initialize_default_engine()
     
-    def verify_engine_availability(self) -> bool:
+    def verify_engine_availability(self) -> Dict[str, Any]:
         """
         Verify that the current engine is actually available and responding.
         Reset current_engine if it's not working properly.
+        Returns detailed verification result for better error handling.
         """
         if not self.current_engine:
             print("No engine currently set")
-            return False
+            return {
+                "success": False,
+                "error": "No engine currently set",
+                "error_type": "no_engine"
+            }
+        
+        # Store the original model name for error messages
+        original_model_name = self.current_engine
         
         try:
             print(f"Verifying engine availability: {self.current_engine}")
@@ -40,50 +48,96 @@ class EngineManager:
             if self.current_engine not in local_models:
                 print(f"Engine {self.current_engine} not found in local models: {local_models}")
                 self.current_engine = None
-                return False
+                return {
+                    "success": False,
+                    "error": f"Model {original_model_name} not found in local models",
+                    "error_type": "model_not_found",
+                    "available_models": local_models
+                }
             
             # Test if the model actually responds to a simple query
             test_resp = requests.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json={
                     "model": self.current_engine,
-                    "prompt": "Test",
+                    "prompt": "Hi",
                     "stream": False,
                     "options": {
-                        "num_predict": 1,  # Very short response
+                        "num_predict": 3,  # Very short response
                         "temperature": 0.1
                     }
                 },
-                timeout=30  # Short timeout for test
+                timeout=45  # Longer timeout for embedding models
             )
             test_resp.raise_for_status()
             test_data = test_resp.json()
             
             if test_data.get("response"):
-                print(f"Engine {self.current_engine} is responding correctly")
+                print(f"Engine {original_model_name} is responding correctly")
                 log_engine_status(self.current_engine, "verified", "responding correctly")
-                return True
+                return {
+                    "success": True,
+                    "message": f"Model {original_model_name} verified and responding"
+                }
             else:
-                print(f"Engine {self.current_engine} returned empty response")
+                print(f"Engine {original_model_name} returned empty response")
                 log_engine_status(self.current_engine, "failed", "empty response")
                 self.current_engine = None
-                return False
+                return {
+                    "success": False,
+                    "error": f"Model {original_model_name} returned empty response",
+                    "error_type": "empty_response",
+                    "details": "The model may still be loading or could be corrupted"
+                }
                 
         except requests.exceptions.Timeout:
-            print(f"Engine {self.current_engine} timed out during verification")
+            print(f"Engine {original_model_name} timed out during verification")
             log_engine_status(self.current_engine, "timeout", "verification timeout")
             self.current_engine = None
-            return False
+            return {
+                "success": False,
+                "error": f"Model {original_model_name} verification timed out after 45 seconds",
+                "error_type": "timeout",
+                "details": "The model may be too large for your system or still downloading"
+            }
         except requests.exceptions.RequestException as e:
-            print(f"Engine {self.current_engine} failed verification: {e}")
+            error_msg = str(e)
+            print(f"Engine {original_model_name} failed verification: {e}")
             log_engine_status(self.current_engine, "error", str(e))
             self.current_engine = None
-            return False
+            
+            # Provide more specific error messages
+            if "404" in error_msg:
+                return {
+                    "success": False,
+                    "error": f"Model {original_model_name} not found in Ollama",
+                    "error_type": "model_not_found",
+                    "details": "The model may have been removed or corrupted"
+                }
+            elif "500" in error_msg:
+                return {
+                    "success": False,
+                    "error": f"Ollama server error while loading {original_model_name}",
+                    "error_type": "server_error",
+                    "details": "The model may be corrupted or Ollama may be experiencing issues"
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"Network error while verifying {original_model_name}: {error_msg}",
+                    "error_type": "network_error",
+                    "details": "Check your connection to Ollama"
+                }
         except Exception as e:
-            print(f"Unexpected error verifying engine {self.current_engine}: {e}")
+            print(f"Unexpected error verifying engine {original_model_name}: {e}")
             log_engine_status(self.current_engine, "error", f"unexpected: {str(e)}")
             self.current_engine = None
-            return False
+            return {
+                "success": False,
+                "error": f"Unexpected error verifying {original_model_name}: {str(e)}",
+                "error_type": "unexpected_error",
+                "details": "This may indicate a corrupted model or system issue"
+            }
 
     def initialize_default_engine(self) -> None:
         """
@@ -218,6 +272,7 @@ class EngineManager:
             return {
                 "success": False,
                 "error": f"Model {model_name} not found locally",
+                "error_type": "model_not_found",
                 "available_models": local_models
             }
 
@@ -226,7 +281,8 @@ class EngineManager:
         self.current_engine = model_name
         
         # Verify the engine actually works
-        if self.verify_engine_availability():
+        verification_result = self.verify_engine_availability()
+        if verification_result["success"]:
             log_engine_status(model_name, "activated", "verified and working")
             return {
                 "success": True,
@@ -237,10 +293,50 @@ class EngineManager:
         else:
             # Restore old engine if verification failed
             self.current_engine = old_engine
+            
+            # Add specific suggestions based on error type
+            error_type = verification_result.get("error_type", "verification_failed")
+            suggestions = []
+            
+            if error_type == "timeout":
+                suggestions = [
+                    "Wait a few minutes and try again - the model may still be loading",
+                    "Try a smaller model if your system has limited RAM",
+                    "Check if other applications are using too much memory"
+                ]
+            elif error_type == "model_not_found":
+                suggestions = [
+                    "Re-download the model if it appears corrupted",
+                    "Check that the model was fully downloaded",
+                    "Try refreshing the models list"
+                ]
+            elif error_type == "network_error":
+                suggestions = [
+                    "Check your connection to Ollama",
+                    "Ensure Ollama is running and accessible", 
+                    "Verify Ollama is listening on the correct port (default: 11434)"
+                ]
+            elif error_type == "empty_response":
+                suggestions = [
+                    "The model may still be loading - wait and try again",
+                    "Check if the model files are corrupted",
+                    "Try restarting Ollama service"
+                ]
+            else:
+                suggestions = [
+                    "Check Ollama logs for more details",
+                    "Try restarting Ollama service",
+                    "Consider re-downloading the model"
+                ]
+            
             return {
                 "success": False,
-                "error": f"Model {model_name} failed verification test. It may be loading or corrupted.",
-                "previous_engine": old_engine
+                "error": verification_result.get("error", f"Model {model_name} failed verification test"),
+                "error_type": error_type,
+                "details": verification_result.get("details"),
+                "previous_engine": old_engine,
+                "model_name": model_name,
+                "suggestions": suggestions
             }
 
     def get_engine_health(self) -> Dict[str, Any]:

@@ -398,7 +398,16 @@
       <section class="chats-section">
         <div class="section-header">
           <h3>Chat History</h3>
-          <button id="new-chat-btn" class="btn-small" title="Start new chat">+</button>
+          <div class="chat-controls">
+            <div class="export-dropdown">
+              <button id="export-chat-btn" class="btn-small" title="Export current chat">💾</button>
+              <div class="export-dropdown-content">
+                <button onclick="exportCurrentChat('json')">Export as JSON</button>
+                <button onclick="exportCurrentChat('markdown')">Export as Markdown</button>
+              </div>
+            </div>
+            <button id="new-chat-btn" class="btn-small" title="Start new chat">+</button>
+          </div>
         </div>
         <div id="chat-list">
           <div class="chat-placeholder">No chats yet. Start chatting to create your first conversation!</div>
@@ -523,6 +532,7 @@
             <div class="model-control-inline">
               <select id="local-select"></select>
               <button id="run-btn" class="btn-primary">Use</button>
+              <button id="delete-model-btn" class="btn-secondary" title="Delete selected model">🗑️</button>
             </div>
             <span id="run-msg" class="status-msg"></span>
           </div>
@@ -597,15 +607,33 @@
     </div>
   </div>
 
-  <!-- Modular JavaScript -->
+  <!-- Core JavaScript modules -->
   <script src="/static/js/themes.js"></script>
-  <script src="/static/js/status.js"></script>
   <script src="/static/js/chat.js"></script>
-  <script src="/static/js/documents.js"></script>
-  <script src="/static/js/models.js"></script>
-  <script src="/static/js/ui.js"></script>
-  <script src="/static/js/utils.js"></script>
   <script src="/static/js/chat-history.js"></script>
+  
+  <!-- Modular ES6 components -->
+  <script type="module">
+    // Import and initialize modular functionality
+    import initializeModels from '/static/js/modules/models/models-main.js';
+    import '/static/js/modules/ui/ui-main.js'; // UI auto-initializes
+    import '/static/js/modules/chat/chat-main.js'; // Chat modules auto-initialize
+    
+    // Initialize when DOM is loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        // Initialize models system
+        initializeModels();
+        console.log('✅ Modular systems initialized');
+      });
+    } else {
+      // Initialize models system
+      initializeModels();
+      console.log('✅ Modular systems initialized');
+    }
+  </script>
+  
+  <!-- Main application initialization -->
   <script src="/static/js/main.js"></script>
 </body>
 </html>

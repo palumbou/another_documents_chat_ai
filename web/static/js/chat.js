@@ -1,6 +1,15 @@
 /**
- * Chat Module
- * Handles all chat functionality including sending messages and debug features
+ * Chat Module (LEGACY - still in use)
+ * 
+ * ⚠️  NOTE: This file contains core chat logic and is still being used.
+ * It's well structured and documented, but in the future it might be
+ * fully migrated to the modular system (/static/js/modules/chat/).
+ * 
+ * Main features:
+ * - Chat message sending
+ * - Debug mode management
+ * - Chat history integration
+ * - Error handling and user feedback
  */
 
 // Global chat variables
@@ -85,9 +94,19 @@ async function sendMessage() {
       if (response.debug_info && debugMode) {
         responseContent = addDebugInfoToResponse(responseContent, response.debug_info);
         
-        // Update thinking bubble with real AI thinking if available
-        if (thinkingId && response.debug_info.thinking_process) {
-          updateThinkingBubble(thinkingId, `🧠 ${response.debug_info.thinking_process}`);
+        // Update thinking bubble with real AI thinking and prompt if available
+        if (thinkingId && response.debug_info) {
+          let thinkingContent = `🧠 ${response.debug_info.thinking_process}`;
+          
+          // Add prompt preview in thinking mode
+          if (response.debug_info.prompt_used) {
+            const promptPreview = response.debug_info.prompt_used.length > 200 
+              ? response.debug_info.prompt_used.substring(0, 200) + '...'
+              : response.debug_info.prompt_used;
+            thinkingContent += `\n\n🔍 Prompt sent to AI:\n"${promptPreview}"`;
+          }
+          
+          updateThinkingBubble(thinkingId, thinkingContent);
         }
       }
       

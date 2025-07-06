@@ -859,6 +859,96 @@ function stopAutoRefresh() {
     }
 }
 
+// Document auto-refresh functionality
+let documentWatchInterval = null;
+let lastDocumentState = null;
+
+function startDocumentAutoRefresh() {
+    // Clear existing interval
+    if (documentWatchInterval) {
+        clearInterval(documentWatchInterval);
+    }
+    
+    // Check for changes every 5 seconds
+    documentWatchInterval = setInterval(async () => {
+        await checkDocumentChanges();
+    }, 5000);
+    
+    console.log('Document auto-refresh started');
+}
+
+function stopDocumentAutoRefresh() {
+    if (documentWatchInterval) {
+        clearInterval(documentWatchInterval);
+        documentWatchInterval = null;
+        console.log('Document auto-refresh stopped');
+    }
+}
+
+async function checkDocumentChanges() {
+    try {
+        const project = window.currentProject || 'global';
+        const res = await fetch(`/documents/watch?project=${encodeURIComponent(project)}`);
+        
+        if (!res.ok) return;
+        
+        const data = await res.json();
+        const currentState = JSON.stringify(data.documents);
+        
+        // Compare with last known state
+        if (lastDocumentState && lastDocumentState !== currentState) {
+            console.log('Document changes detected, refreshing list...');
+            
+            // Check if there are new files
+            const newFiles = [];
+            for (const [docKey, info] of Object.entries(data.documents)) {
+                if (info.new && info.exists) {
+                    newFiles.push(docKey);
+                }
+            }
+            
+            if (newFiles.length > 0) {
+                showMessage(`New document${newFiles.length > 1 ? 's' : ''} detected: ${newFiles.join(', ')}`, 'info');
+                
+                // Auto-process new documents
+                for (const docKey of newFiles) {
+                    try {
+                        await processNewDocument(docKey);
+                    } catch (error) {
+                        console.error(`Error processing new document ${docKey}:`, error);
+                    }
+                }
+            }
+            
+            // Refresh the documents list
+            await loadExistingDocuments();
+        }
+        
+        lastDocumentState = currentState;
+        
+    } catch (error) {
+        console.error('Error checking document changes:', error);
+    }
+}
+
+async function processNewDocument(docKey) {
+    try {
+        // Extract filename from key
+        const filename = docKey.includes('/') ? docKey.split('/')[1] : docKey;
+        
+        // Trigger processing
+        const res = await fetch(`/documents/${encodeURIComponent(filename)}/process`, {
+            method: 'POST'
+        });
+        
+        if (res.ok) {
+            console.log(`Auto-processing started for ${filename}`);
+        }
+    } catch (error) {
+        console.error(`Error auto-processing ${docKey}:`, error);
+    }
+}
+
 // Project management
 async function createProject() {
     const name = document.getElementById('new-project-name').value.trim();
@@ -913,6 +1003,9 @@ function initializeProjectManagement() {
         
         const deleteBtn = document.getElementById('delete-project-btn');
         deleteBtn.style.display = window.currentProject === 'global' ? 'none' : 'inline-flex';
+        
+        // Reset document auto-refresh for new project
+        lastDocumentState = null;
         
         await loadExistingDocuments();
         
@@ -1084,4 +1177,5 @@ function initializeDocuments() {
     initializeProjectManagement();
     setupImprovedFileUpload();
     loadProjects().then(() => loadExistingDocuments());
+    startDocumentAutoRefresh();
 }

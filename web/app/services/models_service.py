@@ -458,11 +458,17 @@ def pull_model(name: str) -> Dict[str, Any]:
         return asyncio.run(pull_model_async(name))
 
 
+# Global variable to track active downloads for cancellation
+active_downloads = {}
+
 def pull_model_with_progress(name: str):
     """
     Pull a model with progress updates using Ollama API.
     Yields progress data as the model is being downloaded.
     """
+    # Track this download
+    active_downloads[name] = True
+    
     try:
         response = requests.post(
             f"{OLLAMA_BASE_URL}/api/pull",
@@ -514,6 +520,17 @@ def pull_model_with_progress(name: str):
                             bytes_val /= 1024.0
                         return f"{bytes_val:.1f} TB"
                     
+                    # Check if download was cancelled
+                    if name not in active_downloads or not active_downloads[name]:
+                        yield {
+                            "status": "cancelled",
+                            "error": f"Download cancelled for {name}",
+                            "model_name": name,
+                            "completed": True,
+                            "progress_percent": progress_percent
+                        }
+                        return
+                    
                     # Prepare progress data
                     progress_data = {
                         "status": status,
@@ -550,6 +567,74 @@ def pull_model_with_progress(name: str):
             "model_name": name,
             "completed": True,
             "progress_percent": 0
+        }
+    finally:
+        # Clean up tracking
+        if name in active_downloads:
+            del active_downloads[name]
+
+
+async def cancel_model_pull_async(name: str) -> Dict[str, Any]:
+    """
+    Cancel the download of a model and remove partial files.
+    Uses Ollama API to cancel the download and clean up.
+    """
+    try:
+        # First, cancel the active download if it exists
+        download_cancelled = cancel_model_download(name)
+        
+        # Try to cancel the pull operation using Ollama API
+        # Note: Ollama doesn't have a direct cancel endpoint, so we'll use a workaround
+        # We'll send a DELETE request to try to stop the operation
+        async with aiohttp.ClientSession() as session:
+            # First, try to get the model info to see if it's partially downloaded
+            try:
+                async with session.get(f"{OLLAMA_BASE_URL}/api/tags") as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        models = data.get('models', [])
+                        
+                        # Check if the model exists (even partially)
+                        model_exists = any(model['name'].startswith(name) for model in models)
+                        
+                        if model_exists:
+                            # Try to delete the partial model
+                            delete_payload = {"name": name}
+                            async with session.delete(
+                                f"{OLLAMA_BASE_URL}/api/delete",
+                                json=delete_payload,
+                                timeout=30
+                            ) as delete_response:
+                                if delete_response.status == 200:
+                                    # Successfully deleted partial model
+                                    local_models_cache["time"] = 0  # Invalidate cache
+                                    return {
+                                        "success": True,
+                                        "message": f"Successfully cancelled download and removed partial files for {name}"
+                                    }
+                                else:
+                                    # Deletion failed, but we can still report cancellation
+                                    return {
+                                        "success": True,
+                                        "message": f"Download cancelled for {name}, but partial files may remain"
+                                    }
+                        else:
+                            # Model doesn't exist, so cancellation is successful
+                            return {
+                                "success": True,
+                                "message": f"Download cancelled for {name} (no partial files found)"
+                            }
+                            
+            except Exception as e:
+                return {
+                    "success": True,
+                    "message": f"Download cancelled for {name}, but cleanup verification failed: {str(e)}"
+                }
+                
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Failed to cancel download for {name}: {str(e)}"
         }
 
 
@@ -611,3 +696,14 @@ def validate_model_exists(name: str) -> Dict[str, Any]:
         return loop.run_until_complete(validate_model_exists_async(name))
     except RuntimeError:
         return asyncio.run(validate_model_exists_async(name))
+
+
+def cancel_model_download(name: str):
+    """
+    Cancel an active model download.
+    This sets the cancellation flag for the download process.
+    """
+    if name in active_downloads:
+        active_downloads[name] = False
+        return True
+    return False

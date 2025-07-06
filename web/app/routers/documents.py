@@ -4,6 +4,7 @@ Handles document upload, deletion, listing, and processing status.
 """
 
 import os
+import time
 from typing import List
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, BackgroundTasks, Query
 
@@ -232,3 +233,107 @@ async def retry_document_processing_endpoint(filename: str, background_tasks: Ba
     background_tasks.add_task(process_document_async, filename, get_documents())
     
     return result
+
+@router.get("/documents/watch")
+async def watch_documents(project: str = Query(None, description="Filter documents by project name")):
+    """
+    Watch for document changes. Returns document list with timestamps for change detection.
+    This endpoint is used by the frontend to detect when documents are added/removed.
+    """
+    documents = get_documents()
+    
+    # Filter documents by project if specified
+    if project is not None:
+        if project == DEFAULT_PROJECT_NAME:
+            filtered_documents = {key: value for key, value in documents.items() if "/" not in key}
+        else:
+            project_prefix = f"{project}/"
+            filtered_documents = {key: value for key, value in documents.items() 
+                                 if key.startswith(project_prefix)}
+        documents = filtered_documents
+    
+    # Get file modification times for change detection
+    document_info = {}
+    for doc_key in documents.keys():
+        # Determine the actual file path
+        if "/" in doc_key:
+            # Project document
+            project_name = doc_key.split("/", 1)[0]
+            filename = doc_key.split("/", 1)[1]
+            file_path = os.path.join(get_project_path(project_name), filename)
+        else:
+            # Global document
+            file_path = os.path.join(GLOBAL_DOCS_DIR, doc_key)
+        
+        # Get file modification time if file exists
+        try:
+            if os.path.exists(file_path):
+                mtime = os.path.getmtime(file_path)
+                document_info[doc_key] = {
+                    "exists": True,
+                    "mtime": mtime,
+                    "size": os.path.getsize(file_path)
+                }
+            else:
+                document_info[doc_key] = {
+                    "exists": False,
+                    "mtime": 0,
+                    "size": 0
+                }
+        except Exception as e:
+            document_info[doc_key] = {
+                "exists": False,
+                "mtime": 0,
+                "size": 0,
+                "error": str(e)
+            }
+    
+    # Also scan for new files in the directories that aren't in memory yet
+    directories_to_scan = []
+    if project is None or project == DEFAULT_PROJECT_NAME:
+        directories_to_scan.append(("global", GLOBAL_DOCS_DIR))
+    
+    if project is None:
+        # Scan all project directories
+        for project_name in get_projects():
+            if project_name != DEFAULT_PROJECT_NAME:
+                directories_to_scan.append((project_name, get_project_path(project_name)))
+    elif project != DEFAULT_PROJECT_NAME:
+        # Scan specific project directory
+        directories_to_scan.append((project, get_project_path(project)))
+    
+    # Look for new files
+    for proj_name, directory in directories_to_scan:
+        if os.path.exists(directory):
+            for filename in os.listdir(directory):
+                file_path = os.path.join(directory, filename)
+                if os.path.isfile(file_path) and is_supported_file(filename):
+                    # Create document key
+                    if proj_name == "global":
+                        doc_key = filename
+                    else:
+                        doc_key = f"{proj_name}/{filename}"
+                    
+                    # If this file isn't in our documents yet, add it to the info
+                    if doc_key not in document_info:
+                        try:
+                            mtime = os.path.getmtime(file_path)
+                            document_info[doc_key] = {
+                                "exists": True,
+                                "mtime": mtime,
+                                "size": os.path.getsize(file_path),
+                                "new": True  # Mark as newly discovered
+                            }
+                        except Exception as e:
+                            document_info[doc_key] = {
+                                "exists": False,
+                                "mtime": 0,
+                                "size": 0,
+                                "error": str(e),
+                                "new": True
+                            }
+    
+    return {
+        "documents": document_info,
+        "timestamp": int(time.time() * 1000)  # Current timestamp in milliseconds
+    }

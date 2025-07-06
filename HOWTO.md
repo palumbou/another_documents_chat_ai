@@ -367,10 +367,75 @@ You can create your own themes by adding JSON files to the `web/static/themes/` 
       "description": "Dark variant description",
       "type": "dark",
       "colors": {
-        "--background": "#1a1a1a",
-        "--text-primary": "#ffffff",
-        "--primary-color": "#007bff",
-        // ... add all required CSS variables
+        // Background Colors - Main surface colors
+        "--background": "#1a1a1a",           // Main background color
+        "--background-light": "#2d2d2d",     // Lighter background variant
+        "--background-dark": "#0d0d0d",      // Darker background variant
+        
+        // Surface Colors - Component backgrounds
+        "--surface": "#2d2d2d",              // Component surface color
+        "--surface-light": "#404040",        // Lighter surface variant
+        "--surface-dark": "#1a1a1a",         // Darker surface variant
+        
+        // Primary Theme Colors
+        "--primary-color": "#4dabf7",        // Main theme color (buttons, links)
+        "--primary-hover": "#339af0",        // Primary color on hover
+        "--secondary-color": "#868e96",      // Secondary accent color
+        "--accent-color": "#22b8cf",         // Special accent color
+        
+        // Status Colors
+        "--success-color": "#51cf66",        // Success states (green)
+        "--warning-color": "#ffd43b",        // Warning states (yellow/orange)
+        "--error-color": "#ff6b6b",          // Error states (red)
+        "--info-color": "#22b8cf",           // Info states (blue)
+        
+        // Text Colors
+        "--text-primary": "#f8f9fa",         // Main text color
+        "--text-secondary": "#e9ecef",       // Secondary text color
+        "--text-muted": "#adb5bd",           // Muted/disabled text
+        "--text-inverse": "#1a1a1a",         // Text on colored backgrounds
+        
+        // Border Colors
+        "--border-color": "#404040",         // Default border color
+        "--border-light": "#555555",         // Lighter border variant
+        "--border-dark": "#2d2d2d",          // Darker border variant
+        
+        // Shadow Colors
+        "--shadow-color": "rgba(0, 0, 0, 0.3)",       // Default shadow
+        "--shadow-light": "rgba(0, 0, 0, 0.2)",       // Light shadow
+        "--shadow-dark": "rgba(0, 0, 0, 0.5)",        // Dark shadow
+        
+        // Interactive Element Colors
+        "--highlight-color": "rgba(77, 171, 247, 0.2)", // Highlight backgrounds
+        "--selection-color": "rgba(77, 171, 247, 0.3)", // Text selection
+        
+        // Input Field Colors
+        "--input-background": "#2d2d2d",     // Input field background
+        "--input-border": "#404040",         // Input field border
+        "--input-focus": "#4dabf7",          // Input field focus border
+        
+        // Button Colors
+        "--button-primary": "#4dabf7",       // Primary button background
+        "--button-primary-hover": "#339af0", // Primary button hover
+        "--button-secondary": "#404040",     // Secondary button background
+        "--button-secondary-hover": "#555555", // Secondary button hover
+        
+        // Layout Specific Colors
+        "--sidebar-background": "#2d2d2d",   // Sidebar background
+        "--header-background": "#1a1a1a",    // Header background
+        "--footer-background": "#2d2d2d",    // Footer background
+        
+        // Modal Colors
+        "--modal-background": "#1a1a1a",     // Modal dialog background
+        "--modal-backdrop": "rgba(0, 0, 0, 0.7)", // Modal backdrop overlay
+        
+        // Code Display Colors
+        "--code-background": "#0d0d0d",      // Code block background
+        "--code-border": "#2d2d2d",          // Code block border
+        
+        // Link Colors
+        "--link-color": "#4dabf7",           // Default link color
+        "--link-hover": "#339af0"            // Link hover color
       }
     },
     "light": {
@@ -378,47 +443,102 @@ You can create your own themes by adding JSON files to the `web/static/themes/` 
       "description": "Light variant description", 
       "type": "light",
       "colors": {
+        // Same variables as above, but with light theme colors
         "--background": "#ffffff",
-        "--text-primary": "#000000",
-        "--primary-color": "#007bff",
-        // ... add all required CSS variables
+        "--background-light": "#f8f9fa",
+        "--background-dark": "#f1f3f4",
+        // ... all other variables with light theme values
       }
     }
   }
 }
 ```
 
-##### Required CSS Variables
+##### CSS Variables Guide
 
-Your theme must include all these CSS variables:
+All theme files must include exactly these 42 CSS variables:
 
-**Backgrounds & Surfaces:**
-- `--background`, `--background-light`, `--background-dark`
-- `--surface`, `--surface-light`, `--surface-dark`
+**Background Colors (6 variables)**:
+- `--background`: Main application background
+- `--background-light`: Lighter variant for subtle contrast
+- `--background-dark`: Darker variant for depth
+- `--surface`: Component backgrounds (cards, panels)
+- `--surface-light`: Elevated surface elements
+- `--surface-dark`: Recessed surface elements
 
-**Colors:**
-- `--primary-color`, `--primary-hover`
-- `--secondary-color`, `--accent-color`
-- `--success-color`, `--warning-color`, `--error-color`, `--info-color`
+**Theme Colors (4 variables)**:
+- `--primary-color`: Main brand color (buttons, active states)
+- `--primary-hover`: Primary color hover state
+- `--secondary-color`: Secondary brand accent
+- `--accent-color`: Special highlight color
 
-**Text:**
-- `--text-primary`, `--text-secondary`, `--text-muted`, `--text-inverse`
+**Status Colors (4 variables)**:
+- `--success-color`: Success states (✓ operations)
+- `--warning-color`: Warning/caution states
+- `--error-color`: Error/danger states
+- `--info-color`: Informational states
 
-**Borders & Shadows:**
-- `--border-color`, `--border-light`, `--border-dark`
-- `--shadow-color`, `--shadow-light`, `--shadow-dark`
+**Text Colors (4 variables)**:
+- `--text-primary`: Main readable text
+- `--text-secondary`: Less prominent text
+- `--text-muted`: Disabled/placeholder text
+- `--text-inverse`: Text on colored backgrounds
 
-**Interactive Elements:**
-- `--highlight-color`, `--selection-color`
-- `--input-background`, `--input-border`, `--input-focus`
-- `--button-primary`, `--button-primary-hover`
-- `--button-secondary`, `--button-secondary-hover`
+**Border Colors (3 variables)**:
+- `--border-color`: Default borders and dividers
+- `--border-light`: Subtle borders
+- `--border-dark`: Prominent borders
 
-**Layout Specific:**
-- `--sidebar-background`, `--header-background`, `--footer-background`
-- `--modal-background`, `--modal-backdrop`
-- `--code-background`, `--code-border`
-- `--link-color`, `--link-hover`
+**Shadow Colors (3 variables)**:
+- `--shadow-color`: Standard drop shadows
+- `--shadow-light`: Subtle elevation
+- `--shadow-dark`: Strong elevation
+
+**Interactive Colors (2 variables)**:
+- `--highlight-color`: Background highlights (semi-transparent)
+- `--selection-color`: Text selection background
+
+**Input Colors (3 variables)**:
+- `--input-background`: Form field backgrounds
+- `--input-border`: Form field borders
+- `--input-focus`: Focused field border
+
+**Button Colors (4 variables)**:
+- `--button-primary`: Primary button background
+- `--button-primary-hover`: Primary button hover
+- `--button-secondary`: Secondary button background
+- `--button-secondary-hover`: Secondary button hover
+
+**Layout Colors (3 variables)**:
+- `--sidebar-background`: Side navigation background
+- `--header-background`: Top navigation background
+- `--footer-background`: Footer background
+
+**Modal Colors (2 variables)**:
+- `--modal-background`: Dialog/popup background
+- `--modal-backdrop`: Semi-transparent overlay
+
+**Code Colors (2 variables)**:
+- `--code-background`: Code block background
+- `--code-border`: Code block border
+
+**Link Colors (2 variables)**:
+- `--link-color`: Default link color
+- `--link-hover`: Link hover color
+
+##### Color Guidelines
+
+**For Dark Themes**:
+- Use dark backgrounds (#1a1a1a to #2d2d2d range)
+- Use light text (#e9ecef to #ffffff range)
+- Keep sufficient contrast (4.5:1 minimum for text)
+- Use rgba() for semi-transparent overlays
+
+**For Light Themes**:
+- Use light backgrounds (#f8f9fa to #ffffff range)
+- Use dark text (#212529 to #495057 range)
+- Ensure accessibility compliance
+- Use subtle shadows with low opacity
 
 ##### Adding Your Theme
 
@@ -426,9 +546,13 @@ Your theme must include all these CSS variables:
 2. Restart the application or refresh the page
 3. Your theme will appear in the dropdown menu automatically
 
-### 🎯 Visual Design Features
+##### Theme System Benefits
 
-- **Responsive Design**: Works on desktop, tablet, and mobile
-- **Smooth Transitions**: Elegant animations between themes
-- **High Contrast**: Accessibility-friendly color ratios
-- **Modern UI**: Clean, professional interface design
+**🎨 Standardized**: All themes use exactly the same 42 CSS variables
+**🔧 Easy Creation**: Use the template.json file as a starting point  
+**📱 Responsive**: Themes automatically work on all devices
+**♿ Accessible**: Guidelines ensure proper contrast ratios
+**🔄 Hot Reload**: Themes load dynamically without code changes
+**📊 Organized**: Variables grouped by purpose with clear naming
+**💾 Persistent**: Theme selection saved across browser sessions
+**🎯 Consistent**: Unified color system across the entire interface

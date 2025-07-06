@@ -99,12 +99,16 @@ Aggiungi temi personalizzati inserendo file JSON in `web/static/themes/`:
       "colors": {
         "--background": "#1a1a1a",
         "--text-primary": "#ffffff",
-        // ... tutte le variabili CSS richieste
+        // ... tutte le 42 variabili CSS richieste
       }
     }
   }
 }
 ```
+
+**📝 File Template**: Usa `web/static/themes/template.json` come punto di partenza - include tutte le variabili richieste con commenti esplicativi.
+
+**📚 Guida Completa**: Vedi `HOWTO.it.md` per la documentazione dettagliata di tutte le 42 variabili CSS e i loro scopi.
 
 ### Funzionalità tecniche
 - ⚡ **Backend FastAPI**: framework web Python moderno con supporto async e architettura router modulare

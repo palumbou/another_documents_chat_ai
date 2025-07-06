@@ -367,10 +367,75 @@ Puoi creare i tuoi temi aggiungendo file JSON alla directory `web/static/themes/
       "description": "Descrizione variante scura",
       "type": "dark",
       "colors": {
-        "--background": "#1a1a1a",
-        "--text-primary": "#ffffff",
-        "--primary-color": "#007bff",
-        // ... aggiungi tutte le variabili CSS richieste
+        // Colori di Sfondo - Colori delle superfici principali
+        "--background": "#1a1a1a",           // Colore di sfondo principale
+        "--background-light": "#2d2d2d",     // Variante di sfondo più chiara
+        "--background-dark": "#0d0d0d",      // Variante di sfondo più scura
+        
+        // Colori Superficie - Sfondi componenti
+        "--surface": "#2d2d2d",              // Colore superficie componenti
+        "--surface-light": "#404040",        // Variante superficie più chiara
+        "--surface-dark": "#1a1a1a",         // Variante superficie più scura
+        
+        // Colori Tema Primari
+        "--primary-color": "#4dabf7",        // Colore tema principale (pulsanti, link)
+        "--primary-hover": "#339af0",        // Colore primario al passaggio mouse
+        "--secondary-color": "#868e96",      // Colore accento secondario
+        "--accent-color": "#22b8cf",         // Colore accento speciale
+        
+        // Colori di Stato
+        "--success-color": "#51cf66",        // Stati di successo (verde)
+        "--warning-color": "#ffd43b",        // Stati di avviso (giallo/arancione)
+        "--error-color": "#ff6b6b",          // Stati di errore (rosso)
+        "--info-color": "#22b8cf",           // Stati informativi (blu)
+        
+        // Colori Testo
+        "--text-primary": "#f8f9fa",         // Colore testo principale
+        "--text-secondary": "#e9ecef",       // Colore testo secondario
+        "--text-muted": "#adb5bd",           // Testo disattivato/attenuato
+        "--text-inverse": "#1a1a1a",         // Testo su sfondi colorati
+        
+        // Colori Bordi
+        "--border-color": "#404040",         // Colore bordo predefinito
+        "--border-light": "#555555",         // Variante bordo più chiara
+        "--border-dark": "#2d2d2d",          // Variante bordo più scura
+        
+        // Colori Ombra
+        "--shadow-color": "rgba(0, 0, 0, 0.3)",       // Ombra predefinita
+        "--shadow-light": "rgba(0, 0, 0, 0.2)",       // Ombra leggera
+        "--shadow-dark": "rgba(0, 0, 0, 0.5)",        // Ombra scura
+        
+        // Colori Elementi Interattivi
+        "--highlight-color": "rgba(77, 171, 247, 0.2)", // Sfondi evidenziazione
+        "--selection-color": "rgba(77, 171, 247, 0.3)", // Selezione testo
+        
+        // Colori Campi Input
+        "--input-background": "#2d2d2d",     // Sfondo campi input
+        "--input-border": "#404040",         // Bordo campi input
+        "--input-focus": "#4dabf7",          // Bordo campo input attivo
+        
+        // Colori Pulsanti
+        "--button-primary": "#4dabf7",       // Sfondo pulsante primario
+        "--button-primary-hover": "#339af0", // Hover pulsante primario
+        "--button-secondary": "#404040",     // Sfondo pulsante secondario
+        "--button-secondary-hover": "#555555", // Hover pulsante secondario
+        
+        // Colori Specifici Layout
+        "--sidebar-background": "#2d2d2d",   // Sfondo sidebar
+        "--header-background": "#1a1a1a",    // Sfondo header
+        "--footer-background": "#2d2d2d",    // Sfondo footer
+        
+        // Colori Modal
+        "--modal-background": "#1a1a1a",     // Sfondo finestra modale
+        "--modal-backdrop": "rgba(0, 0, 0, 0.7)", // Overlay backdrop modale
+        
+        // Colori Visualizzazione Codice
+        "--code-background": "#0d0d0d",      // Sfondo blocchi codice
+        "--code-border": "#2d2d2d",          // Bordo blocchi codice
+        
+        // Colori Link
+        "--link-color": "#4dabf7",           // Colore link predefinito
+        "--link-hover": "#339af0"            // Colore link al passaggio mouse
       }
     },
     "light": {
@@ -378,53 +443,119 @@ Puoi creare i tuoi temi aggiungendo file JSON alla directory `web/static/themes/
       "description": "Descrizione variante chiara", 
       "type": "light",
       "colors": {
+        // Stesse variabili di sopra, ma con colori tema chiaro
         "--background": "#ffffff",
-        "--text-primary": "#000000",
-        "--primary-color": "#007bff",
-        // ... aggiungi tutte le variabili CSS richieste
+        "--background-light": "#f8f9fa",
+        "--background-dark": "#f1f3f4",
+        // ... tutte le altre variabili con valori tema chiaro
       }
     }
   }
 }
 ```
 
-##### Variabili CSS Richieste
+##### Guida Variabili CSS
 
-Il tuo tema deve includere tutte queste variabili CSS:
+Tutti i file tema devono includere esattamente queste 42 variabili CSS:
 
-**Sfondi e Superfici:**
-- `--background`, `--background-light`, `--background-dark`
-- `--surface`, `--surface-light`, `--surface-dark`
+**Colori di Sfondo (6 variabili)**:
+- `--background`: Sfondo principale applicazione
+- `--background-light`: Variante più chiara per contrasto sottile
+- `--background-dark`: Variante più scura per profondità
+- `--surface`: Sfondi componenti (card, pannelli)
+- `--surface-light`: Elementi superficie elevata
+- `--surface-dark`: Elementi superficie incassata
 
-**Colori:**
-- `--primary-color`, `--primary-hover`
-- `--secondary-color`, `--accent-color`
-- `--success-color`, `--warning-color`, `--error-color`, `--info-color`
+**Colori Tema (4 variabili)**:
+- `--primary-color`: Colore brand principale (pulsanti, stati attivi)
+- `--primary-hover`: Stato hover colore primario
+- `--secondary-color`: Accento brand secondario
+- `--accent-color`: Colore evidenziazione speciale
 
-**Testo:**
-- `--text-primary`, `--text-secondary`, `--text-muted`, `--text-inverse`
+**Colori di Stato (4 variabili)**:
+- `--success-color`: Stati di successo (operazioni ✓)
+- `--warning-color`: Stati di avviso/attenzione
+- `--error-color`: Stati di errore/pericolo
+- `--info-color`: Stati informativi
 
-**Bordi e Ombre:**
-- `--border-color`, `--border-light`, `--border-dark`
-- `--shadow-color`, `--shadow-light`, `--shadow-dark`
+**Colori Testo (4 variabili)**:
+- `--text-primary`: Testo principale leggibile
+- `--text-secondary`: Testo meno prominente
+- `--text-muted`: Testo disabilitato/placeholder
+- `--text-inverse`: Testo su sfondi colorati
 
-**Elementi Interattivi:**
-- `--highlight-color`, `--selection-color`
-- `--input-background`, `--input-border`, `--input-focus`
-- `--button-primary`, `--button-primary-hover`
-- `--button-secondary`, `--button-secondary-hover`
+**Colori Bordi (3 variabili)**:
+- `--border-color`: Bordi e divisori predefiniti
+- `--border-light`: Bordi sottili
+- `--border-dark`: Bordi prominenti
 
-**Specifici del Layout:**
-- `--sidebar-background`, `--header-background`, `--footer-background`
-- `--modal-background`, `--modal-backdrop`
-- `--code-background`, `--code-border`
-- `--link-color`, `--link-hover`
+**Colori Ombra (3 variabili)**:
+- `--shadow-color`: Ombre standard
+- `--shadow-light`: Elevazione sottile
+- `--shadow-dark`: Elevazione forte
+
+**Colori Interattivi (2 variabili)**:
+- `--highlight-color`: Evidenziazioni sfondo (semi-trasparenti)
+- `--selection-color`: Sfondo selezione testo
+
+**Colori Input (3 variabili)**:
+- `--input-background`: Sfondi campi form
+- `--input-border`: Bordi campi form
+- `--input-focus`: Bordo campo attivo
+
+**Colori Pulsanti (4 variabili)**:
+- `--button-primary`: Sfondo pulsante primario
+- `--button-primary-hover`: Hover pulsante primario
+- `--button-secondary`: Sfondo pulsante secondario
+- `--button-secondary-hover`: Hover pulsante secondario
+
+**Colori Layout (3 variabili)**:
+- `--sidebar-background`: Sfondo navigazione laterale
+- `--header-background`: Sfondo navigazione superiore
+- `--footer-background`: Sfondo footer
+
+**Colori Modal (2 variabili)**:
+- `--modal-background`: Sfondo dialog/popup
+- `--modal-backdrop`: Overlay semi-trasparente
+
+**Colori Codice (2 variabili)**:
+- `--code-background`: Sfondo blocchi codice
+- `--code-border`: Bordo blocchi codice
+
+**Colori Link (2 variabili)**:
+- `--link-color`: Colore link predefinito
+- `--link-hover`: Colore link al passaggio mouse
+
+##### Linee Guida Colori
+
+**Per Temi Scuri**:
+- Usa sfondi scuri (gamma #1a1a1a a #2d2d2d)
+- Usa testo chiaro (gamma #e9ecef a #ffffff)
+- Mantieni contrasto sufficiente (minimo 4.5:1 per il testo)
+- Usa rgba() per overlay semi-trasparenti
+
+**Per Temi Chiari**:
+- Usa sfondi chiari (gamma #f8f9fa a #ffffff)
+- Usa testo scuro (gamma #212529 a #495057)
+- Assicura conformità accessibilità
+- Usa ombre sottili con bassa opacità
 
 ##### Aggiungere il Tuo Tema
 
 1. Salva il tuo file tema come `web/static/themes/nome-tuo-tema.json`
 2. Riavvia l'applicazione o aggiorna la pagina
 3. Il tuo tema apparirà automaticamente nel menu a tendina
+
+##### Vantaggi Sistema Temi
+
+**🎨 Standardizzato**: Tutti i temi usano esattamente le stesse 42 variabili CSS
+**🔧 Creazione Facile**: Usa il file template.json come punto di partenza
+**📱 Responsivo**: I temi funzionano automaticamente su tutti i dispositivi
+**♿ Accessibile**: Le linee guida assicurano rapporti di contrasto appropriati
+**🔄 Ricarica Live**: I temi si caricano dinamicamente senza modifiche al codice
+**📊 Organizzato**: Variabili raggruppate per scopo con denominazione chiara
+**💾 Persistente**: Selezione tema salvata tra le sessioni del browser
+**🎯 Consistente**: Sistema colori unificato in tutta l'interfaccia
 
 ### 🎯 Caratteristiche Design Visivo
 

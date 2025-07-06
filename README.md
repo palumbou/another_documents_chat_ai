@@ -99,12 +99,16 @@ Add custom themes by placing JSON files in `web/static/themes/`:
       "colors": {
         "--background": "#1a1a1a",
         "--text-primary": "#ffffff",
-        // ... all required CSS variables
+        // ... all 42 required CSS variables
       }
     }
   }
 }
 ```
+
+**📝 Template File**: Use `web/static/themes/template.json` as a starting point - it includes all required variables with explanatory comments.
+
+**📚 Complete Guide**: See `HOWTO.md` for detailed documentation of all 42 CSS variables and their purposes.
 
 ### Technical features
 - ⚡ **FastAPI backend**: modern Python web framework with async support and modular router architecture

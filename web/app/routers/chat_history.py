@@ -1,282 +1,339 @@
 """
-Chat History Router
-Handles chat session management, storage, and sharing.
+Chat History router.
+Handles chat sessions, history management, and export functionality.
 """
 
-from typing import List, Dict, Any, Optional
+import os
+import json
+import uuid
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import JSONResponse
+from typing import List, Optional
+from fastapi import APIRouter, HTTPException, Form, Query
+from fastapi.responses import Response
 
-from app.schemas import (
-    ChatSession, ChatMessage, ChatSessionRequest, ChatSessionResponse,
-    ShareChatRequest, ChatRequest, ChatResponse
-)
-from app.services.chat_history_service import ChatHistoryService
-from app.services.chat_service import process_chat_request
-from app.shared_state import get_documents
+from app.config import CHATS_DIR, GLOBAL_CHATS_DIR, PROJECT_CHATS_DIR
+from app.schemas import ChatSession, ChatMessage, ChatSessionRequest, ChatSessionResponse
 
 router = APIRouter()
 
-# Initialize services
-chat_history_service = ChatHistoryService()
+def get_chat_file_path(project_name: str, chat_id: str) -> str:
+    """Get the file path for a chat session."""
+    if project_name == "global":
+        return os.path.join(GLOBAL_CHATS_DIR, f"{chat_id}.json")
+    else:
+        project_dir = os.path.join(PROJECT_CHATS_DIR, project_name)
+        os.makedirs(project_dir, exist_ok=True)
+        return os.path.join(project_dir, f"{chat_id}.json")
 
-@router.post("/chats/create", response_model=ChatSessionResponse)
-async def create_chat_session(request: ChatSessionRequest):
-    """Create a new chat session."""
+def load_chat_session(project_name: str, chat_id: str) -> Optional[ChatSession]:
+    """Load a chat session from disk."""
     try:
-        chat_id = chat_history_service.create_chat_session(
-            project_name=request.project_name,
-            chat_name=request.chat_name,
-            first_message=request.first_message
-        )
+        file_path = get_chat_file_path(project_name, chat_id)
+        if not os.path.exists(file_path):
+            return None
         
-        # Load the created session to return details
-        session = chat_history_service.load_chat_session(chat_id, request.project_name)
-        if not session:
-            raise HTTPException(status_code=500, detail="Failed to create chat session")
-        
-        return ChatSessionResponse(
-            id=session.id,
-            name=session.name,
-            created_at=session.created_at.isoformat(),
-            updated_at=session.updated_at.isoformat(),
-            message_count=len(session.messages)
-        )
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return ChatSession(**data)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error creating chat session: {str(e)}")
+        print(f"Error loading chat session {chat_id}: {e}")
+        return None
 
-@router.get("/chats/{project_name}", response_model=List[ChatSessionResponse])
-async def get_project_chats(project_name: str):
+def save_chat_session(chat: ChatSession) -> bool:
+    """Save a chat session to disk."""
+    try:
+        file_path = get_chat_file_path(chat.project_name, chat.id)
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
+        # Convert to dict for JSON serialization
+        chat_data = chat.dict()
+        
+        # Convert datetime objects to ISO strings
+        if chat_data.get('created_at'):
+            if hasattr(chat_data['created_at'], 'isoformat'):
+                chat_data['created_at'] = chat_data['created_at'].isoformat()
+        if chat_data.get('updated_at'):
+            if hasattr(chat_data['updated_at'], 'isoformat'):
+                chat_data['updated_at'] = chat_data['updated_at'].isoformat()
+        
+        for message in chat_data.get('messages', []):
+            if message.get('timestamp') and hasattr(message['timestamp'], 'isoformat'):
+                message['timestamp'] = message['timestamp'].isoformat()
+        
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(chat_data, f, indent=2, ensure_ascii=False)
+        
+        return True
+    except Exception as e:
+        print(f"Error saving chat session {chat.id}: {e}")
+        return False
+
+def list_project_chats(project_name: str) -> List[ChatSessionResponse]:
+    """List all chat sessions for a project."""
+    try:
+        chats = []
+        
+        if project_name == "global":
+            chat_dir = GLOBAL_CHATS_DIR
+        else:
+            chat_dir = os.path.join(PROJECT_CHATS_DIR, project_name)
+        
+        if not os.path.exists(chat_dir):
+            return []
+        
+        for filename in os.listdir(chat_dir):
+            if filename.endswith('.json'):
+                chat_id = filename[:-5]  # Remove .json extension
+                chat = load_chat_session(project_name, chat_id)
+                if chat:
+                    chats.append(ChatSessionResponse(
+                        id=chat.id,
+                        name=chat.name,
+                        created_at=chat.created_at.isoformat() if hasattr(chat.created_at, 'isoformat') else str(chat.created_at),
+                        updated_at=chat.updated_at.isoformat() if hasattr(chat.updated_at, 'isoformat') else str(chat.updated_at),
+                        message_count=len(chat.messages)
+                    ))
+        
+        # Sort by updated_at descending
+        chats.sort(key=lambda x: x.updated_at, reverse=True)
+        return chats
+        
+    except Exception as e:
+        print(f"Error listing chats for project {project_name}: {e}")
+        return []
+
+@router.get("/chats/{project_name}")
+async def get_project_chats(project_name: str) -> List[ChatSessionResponse]:
     """Get all chat sessions for a project."""
-    try:
-        chats = chat_history_service.get_project_chats(project_name)
-        return [
-            ChatSessionResponse(
-                id=chat["id"],
-                name=chat["name"],
-                created_at=chat["created_at"],
-                updated_at=chat["updated_at"],
-                message_count=chat["message_count"]
-            )
-            for chat in chats
-        ]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting chats: {str(e)}")
+    return list_project_chats(project_name)
 
 @router.get("/chats/{project_name}/{chat_id}")
-async def get_chat_session(project_name: str, chat_id: str):
-    """Get a specific chat session with all its messages."""
-    try:
-        session = chat_history_service.load_chat_session(chat_id, project_name)
-        if not session:
-            raise HTTPException(status_code=404, detail="Chat session not found")
-        
-        return {
-            "id": session.id,
-            "name": session.name,
-            "project_name": session.project_name,
-            "created_at": session.created_at.isoformat(),
-            "updated_at": session.updated_at.isoformat(),
-            "messages": [
-                {
-                    "role": msg.role,
-                    "content": msg.content,
-                    "timestamp": msg.timestamp,
-                    "model": msg.model,
-                    "debug_info": getattr(msg, 'debug_info', None)
-                }
-                for msg in session.messages
-            ]
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting chat session: {str(e)}")
+async def get_chat_session(project_name: str, chat_id: str) -> ChatSession:
+    """Get a specific chat session."""
+    chat = load_chat_session(project_name, chat_id)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    return chat
 
-@router.get("/chats/{project_name}/{chat_id}/messages")
-async def get_chat_messages(project_name: str, chat_id: str):
-    """Get messages for a specific chat session."""
-    try:
-        session = chat_history_service.load_chat_session(chat_id, project_name)
-        if not session:
-            raise HTTPException(status_code=404, detail="Chat session not found")
-        
-        # Group messages by conversation pairs (user + ai response)
-        messages = []
-        current_message = {}
-        
-        for msg in session.messages:
-            if msg.role == "user":
-                # Start new message pair
-                if current_message:
-                    messages.append(current_message)
-                current_message = {
-                    "user_message": msg.content,
-                    "timestamp": msg.timestamp,
-                    "model": msg.model
-                }
-            elif msg.role == "assistant" and current_message:
-                # Complete the message pair
-                current_message["ai_response"] = msg.content
-                current_message["debug_info"] = getattr(msg, 'debug_info', None)
-        
-        # Add the last message if exists
-        if current_message:
-            messages.append(current_message)
-        
-        return messages
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting chat messages: {str(e)}")
+@router.post("/chats/{project_name}/new")
+async def create_chat_session(
+    project_name: str, 
+    chat_name: Optional[str] = Form(None),
+    first_message: Optional[str] = Form(None)
+) -> ChatSession:
+    """Create a new chat session."""
+    chat_id = str(uuid.uuid4())
+    now = datetime.now()
+    
+    if not chat_name:
+        chat_name = f"Chat {now.strftime('%Y-%m-%d %H:%M')}"
+    
+    chat = ChatSession(
+        id=chat_id,
+        name=chat_name,
+        project_name=project_name,
+        created_at=now,
+        updated_at=now,
+        messages=[]
+    )
+    
+    if first_message:
+        # Add the first message
+        message = ChatMessage(
+            role="user",
+            content=first_message,
+            timestamp=now
+        )
+        chat.messages.append(message)
+    
+    if save_chat_session(chat):
+        return chat
+    else:
+        raise HTTPException(status_code=500, detail="Failed to create chat session")
 
 @router.post("/chats/{project_name}/{chat_id}/chat")
-async def chat_in_session(project_name: str, chat_id: str, request: ChatRequest):
-    """Send a chat message within an existing session."""
-    try:
-        # Load the chat session
-        session = chat_history_service.load_chat_session(chat_id, project_name)
-        if not session:
-            raise HTTPException(status_code=404, detail="Chat session not found")
+async def add_message_to_chat(
+    project_name: str,
+    chat_id: str,
+    query: str = Form(...),
+    model: str = Form(None),
+    debug: bool = Form(False)
+):
+    """Add a message to a chat session and get AI response."""
+    from app.services.chat_service import process_chat_request
+    from app.shared_state import get_documents
+    from app.config import DEFAULT_PROJECT_NAME
+    
+    # Load the chat session
+    chat = load_chat_session(project_name, chat_id)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    
+    # Add user message
+    now = datetime.now()
+    user_message = ChatMessage(
+        role="user",
+        content=query,
+        timestamp=now
+    )
+    chat.messages.append(user_message)
+    
+    # Get documents for the project
+    documents = get_documents()
+    
+    # Filter documents by project (same logic as chat.py)
+    if project_name != "all":
+        if project_name == DEFAULT_PROJECT_NAME:
+            filtered_documents = {key: value for key, value in documents.items() if "/" not in key}
+        else:
+            project_prefix = f"{project_name}/"
+            project_docs = {key: value for key, value in documents.items() 
+                           if key.startswith(project_prefix)}
+            global_docs = {key: value for key, value in documents.items() if "/" not in key}
+            
+            filtered_documents = global_docs.copy()
+            
+            for key, value in project_docs.items():
+                filename = key.split("/", 1)[1] if "/" in key else key
+                if filename in filtered_documents:
+                    del filtered_documents[filename]
+                filtered_documents[key] = value
         
-        try:
-            print(f"Debug: Chat request - project: {project_name}, chat_id: {chat_id}")
-            print(f"Debug: Request data - query: {request.query}, model: {request.model}, debug: {request.debug}")
-            
-            # Get documents for the current project
-            documents = get_documents()
-            print(f"Debug: Documents loaded: {len(documents) if documents else 0}")
-            
-            # Process the chat request
-            result = process_chat_request(
-                query=request.query,
-                documents=documents,
-                model=request.model,
-                include_debug=request.debug
-            )
-            
-            print(f"Debug: Chat result success: {result.get('success', 'unknown')}")
-            if not result["success"]:
-                print(f"Debug: Chat error: {result.get('error', 'unknown')}")
-                if "timed out" in result["error"]:
-                    raise HTTPException(status_code=504, detail=result["error"])
-                else:
-                    raise HTTPException(status_code=500, detail=result["error"])
-            
-            # Create chat response
-            chat_response = ChatResponse(
-                response=result["response"],
-                model=result["model"],
-                mode=result.get("mode", "chat"),
-                chunks_processed=result.get("chunks_processed", 0),
-                total_chunks_available=result.get("total_chunks_available", 0),
-                context_length=result.get("context_length", 0)
-            )
-            
-            # Add user message to session
-            user_message = ChatMessage(
-                role="user",
-                content=request.query,
-                timestamp=datetime.now().isoformat(),
-                model=None
-            )
-            chat_history_service.add_message_to_chat(chat_id, project_name, user_message)
-            
-            # Add AI response to session
-            ai_message = ChatMessage(
-                role="assistant",
-                content=chat_response.response,
-                timestamp=datetime.now().isoformat(),
-                model=chat_response.model
-            )
-            chat_history_service.add_message_to_chat(chat_id, project_name, ai_message)
-            
-            return chat_response
-            
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error processing chat: {str(e)}")
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing chat: {str(e)}")
+        documents = filtered_documents
+    
+    # Process the chat request
+    result = process_chat_request(query, documents, model, debug)
+    
+    if not result["success"]:
+        if "timed out" in result["error"]:
+            raise HTTPException(status_code=504, detail=result["error"])
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    
+    # Add AI response message
+    ai_message = ChatMessage(
+        role="assistant",
+        content=result["response"],
+        model=result["model"],
+        timestamp=datetime.now()
+    )
+    
+    if debug and result.get("debug_info"):
+        ai_message.debug_info = result["debug_info"]
+    
+    chat.messages.append(ai_message)
+    
+    # Update the chat session
+    chat.updated_at = datetime.now()
+    
+    # Save the updated chat
+    if not save_chat_session(chat):
+        raise HTTPException(status_code=500, detail="Failed to save chat session")
+    
+    return {
+        "response": result["response"],
+        "model": result["model"],
+        "mode": result["mode"],
+        "chunks_processed": result["chunks_processed"],
+        "total_chunks_available": result["total_chunks_available"],
+        "context_length": result["context_length"],
+        "chat_id": chat_id
+    }
 
 @router.delete("/chats/{project_name}/{chat_id}")
 async def delete_chat_session(project_name: str, chat_id: str):
     """Delete a chat session."""
     try:
-        success = chat_history_service.delete_chat_session(chat_id, project_name)
-        if not success:
+        file_path = get_chat_file_path(project_name, chat_id)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return {"success": True, "message": "Chat session deleted"}
+        else:
             raise HTTPException(status_code=404, detail="Chat session not found")
-        
-        return {"message": "Chat session deleted successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error deleting chat session: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete chat session: {str(e)}")
 
-@router.put("/chats/{project_name}/{chat_id}/rename")
-async def rename_chat_session(project_name: str, chat_id: str, request: dict):
-    """Rename a chat session."""
-    try:
-        new_name = request.get("name", "").strip()
-        if not new_name:
-            raise HTTPException(status_code=400, detail="Name cannot be empty")
-        
-        success = chat_history_service.rename_chat_session(chat_id, project_name, new_name)
-        if not success:
-            raise HTTPException(status_code=404, detail="Chat session not found")
-        
-        return {"message": "Chat session renamed successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error renaming chat session: {str(e)}")
-
-@router.post("/chats/{project_name}/{chat_id}/share")
-async def create_share_link(project_name: str, chat_id: str):
-    """Create a shareable link for a chat session."""
-    try:
-        share_token = chat_history_service.generate_share_token(chat_id, project_name)
-        if not share_token:
-            raise HTTPException(status_code=404, detail="Chat session not found")
-        
-        return {
-            "share_token": share_token,
-            "share_url": f"/shared/{share_token}"
+@router.get("/chats/{project_name}/{chat_id}/export")
+async def export_chat_session(
+    project_name: str, 
+    chat_id: str, 
+    format: str = Query("json", regex="^(json|markdown|md)$")
+):
+    """Export a chat session in JSON or Markdown format."""
+    chat = load_chat_session(project_name, chat_id)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    
+    if format.lower() in ["json"]:
+        # Export as JSON
+        content = json.dumps(chat.dict(), indent=2, ensure_ascii=False, default=str)
+        media_type = "application/json"
+        filename = f"{chat.name}_{chat.id}.json"
+    
+    elif format.lower() in ["markdown", "md"]:
+        # Export as Markdown
+        content = convert_chat_to_markdown(chat)
+        media_type = "text/markdown"
+        filename = f"{chat.name}_{chat.id}.md"
+    
+    else:
+        raise HTTPException(status_code=400, detail="Invalid format. Use 'json' or 'markdown'")
+    
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f"attachment; filename=\"{filename}\"",
+            "Content-Type": f"{media_type}; charset=utf-8"
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error creating share link: {str(e)}")
+    )
 
-@router.get("/shared/{share_token}")
-async def get_shared_chat(share_token: str):
-    """Get a shared chat session by token."""
-    try:
-        session = chat_history_service.get_chat_by_share_token(share_token)
-        if not session:
-            raise HTTPException(status_code=404, detail="Shared chat not found")
+def convert_chat_to_markdown(chat: ChatSession) -> str:
+    """Convert a chat session to Markdown format."""
+    lines = []
+    
+    # Header
+    lines.append(f"# {chat.name}")
+    lines.append("")
+    lines.append(f"**Project:** {chat.project_name}")
+    lines.append(f"**Created:** {chat.created_at}")
+    lines.append(f"**Updated:** {chat.updated_at}")
+    lines.append(f"**Messages:** {len(chat.messages)}")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+    
+    # Messages
+    for i, message in enumerate(chat.messages, 1):
+        if message.role == "user":
+            lines.append(f"## 👤 User Message #{i}")
+        else:
+            model_info = f" ({message.model})" if message.model else ""
+            lines.append(f"## 🤖 AI Response #{i}{model_info}")
         
-        return {
-            "id": session.id,
-            "name": session.name,
-            "project_name": session.project_name,
-            "created_at": session.created_at.isoformat(),
-            "updated_at": session.updated_at.isoformat(),
-            "messages": [
-                {
-                    "role": msg.role,
-                    "content": msg.content,
-                    "timestamp": msg.timestamp,
-                    "model": msg.model
-                }
-                for msg in session.messages
-            ],
-            "is_shared": True
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting shared chat: {str(e)}")
-
-@router.get("/chats/overview")
-async def get_chats_overview():
-    """Get overview of all projects with their chat counts."""
-    try:
-        return chat_history_service.get_all_projects_with_chats()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting chats overview: {str(e)}")
+        lines.append("")
+        lines.append(message.content)
+        lines.append("")
+        
+        # Add timestamp
+        timestamp = message.timestamp
+        if hasattr(timestamp, 'strftime'):
+            lines.append(f"*Timestamp: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}*")
+        else:
+            lines.append(f"*Timestamp: {timestamp}*")
+        
+        # Add debug info if available
+        if hasattr(message, 'debug_info') and message.debug_info:
+            lines.append("")
+            lines.append("### Debug Information")
+            lines.append("```json")
+            lines.append(json.dumps(message.debug_info.dict() if hasattr(message.debug_info, 'dict') else message.debug_info, indent=2))
+            lines.append("```")
+        
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+    
+    return "\n".join(lines)

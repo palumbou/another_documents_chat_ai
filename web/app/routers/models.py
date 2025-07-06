@@ -5,16 +5,21 @@ Handles model listing, pulling, and running operations.
 
 from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import StreamingResponse
+from typing import List
 import json
+import requests
 
+from app.config import OLLAMA_BASE_URL
 from app.schemas import ModelsResponse, ModelPullRequest, ModelRunRequest
+from app.services import models_service
 from app.services.models_service import (
     get_models_with_memory_info_async,
     pull_model_async, 
     pull_model_with_progress, 
     validate_model_exists_async,
     refresh_models_cache,
-    get_remote_models_grouped
+    get_remote_models_grouped,
+    cancel_model_pull_async
 )
 from app.services.engine_manager import engine_manager
 
@@ -78,16 +83,71 @@ async def run_model(name: str = Body(..., embed=True)):
     result = engine_manager.set_engine(name)
     
     if not result["success"]:
-        if "not found locally" in result.get("error", ""):
-            raise HTTPException(status_code=404, detail=result["error"])
+        error_type = result.get("error_type", "unknown")
+        error_details = result.get("details", "")
+        
+        # Customize HTTP status codes based on error type
+        if error_type == "model_not_found":
+            status_code = 404
+        elif error_type in ["timeout", "server_error"]:
+            status_code = 503  # Service Unavailable
         else:
-            raise HTTPException(status_code=500, detail=result["error"])
+            status_code = 500
+        
+        # Create detailed error message
+        error_message = result["error"]
+        if error_details:
+            error_message += f" Details: {error_details}"
+        
+        raise HTTPException(
+            status_code=status_code,
+            detail={
+                "error": error_message,
+                "error_type": error_type,
+                "model_name": name,
+                "details": error_details,
+                "suggestions": get_error_suggestions(error_type)
+            }
+        )
     
     return {
         "running": result["running"],
         "verified": result["verified"],
         "message": result["message"]
     }
+
+
+def get_error_suggestions(error_type: str) -> List[str]:
+    """Get user-friendly suggestions based on error type."""
+    suggestions = {
+        "model_not_found": [
+            "The model may have been deleted or corrupted",
+            "Try refreshing the models list",
+            "Consider re-downloading the model"
+        ],
+        "timeout": [
+            "The model may be too large for your system",
+            "Try a smaller model variant",
+            "Wait a few minutes for the model to finish loading",
+            "Check if Ollama has enough memory available"
+        ],
+        "empty_response": [
+            "The model may still be loading",
+            "Wait a few minutes and try again",
+            "The model files might be corrupted - consider re-downloading"
+        ],
+        "server_error": [
+            "Ollama may be experiencing issues",
+            "Try restarting Ollama",
+            "Check Ollama logs for more details"
+        ],
+        "network_error": [
+            "Check your connection to Ollama",
+            "Ensure Ollama is running and accessible",
+            "Verify Ollama is listening on the correct port"
+        ]
+    }
+    return suggestions.get(error_type, ["Try again later or contact support"])
 
 @router.post("/models/validate")
 async def validate_model_endpoint(name: str = Body(..., embed=True)):
@@ -122,3 +182,73 @@ async def get_grouped_models():
         return {"grouped_models": grouped_models}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching grouped models: {str(e)}")
+
+@router.post("/models/cancel")
+async def cancel_model_pull(name: str = Body(..., embed=True)):
+    """
+    Cancel the download of a model and remove partial files.
+    """
+    result = await cancel_model_pull_async(name)
+    
+    if not result["success"]:
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    return {"cancelled": True, "message": result["message"]}
+
+@router.delete("/models/{model_name}")
+async def delete_model(model_name: str):
+    """
+    Delete a locally installed model.
+    If the model is currently active, it will be deactivated first.
+    """
+    try:
+        # Check if model exists locally
+        local_models = await models_service.get_local_models_async()
+        if model_name not in local_models:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Model {model_name} not found locally"
+            )
+        
+        # Check if this model is currently active
+        current_engine = engine_manager.current_engine
+        was_active = current_engine == model_name
+        
+        if was_active:
+            # Deactivate the current engine
+            engine_manager.current_engine = None
+            print(f"Deactivated model {model_name} before deletion")
+        
+        # Delete the model using Ollama API
+        response = requests.delete(
+            f"{OLLAMA_BASE_URL}/api/delete",
+            json={"name": model_name},
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            # Invalidate local models cache
+            models_service.local_models_cache["time"] = 0
+            
+            return {
+                "success": True,
+                "message": f"Model {model_name} deleted successfully",
+                "was_active": was_active
+            }
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to delete model {model_name}: {response.text}"
+            )
+            
+    except requests.RequestException as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error communicating with Ollama: {str(e)}"
+        )
+            
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error deleting model: {str(e)}"
+        )

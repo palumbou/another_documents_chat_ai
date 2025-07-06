@@ -18,7 +18,7 @@ async function loadAvailableThemes() {
   }
 
   // List of theme files to check (can be expanded dynamically later)
-  const themeFiles = ['base.json', 'catppuccin.json', 'dracula.json', 'tokyo-night.json', 'gruvbox.json', 'nord.json', 'solarized.json'];
+  const themeFiles = ['base.json', 'catppuccin.json', 'dracula.json', 'tokyo-night.json', 'gruvbox.json', 'nord.json', 'solarized.json', 'template.json'];
   
   availableThemes = [];
   
