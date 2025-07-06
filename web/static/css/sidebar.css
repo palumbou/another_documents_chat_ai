@@ -46,25 +46,17 @@
 /* Projects section title uniformity */
 .projects-section h3 {
   margin: 0 0 1rem 0;
-  font-size: 1rem; /* Same as other titles */
-  font-weight: 600; /* Same as other titles */
-  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-color); /* Use theme accent color */
   position: relative;
   padding-left: 1.5rem;
-  text-transform: none; /* Remove uppercase */
-  letter-spacing: normal; /* Remove letter spacing */
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .projects-section h3::before {
-  content: "📂";
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-/* Projects section title uniformity */
-.projects-section h3::before {
-  content: "📂";
+  content: "�";
   position: absolute;
   left: 0;
   top: 0;

@@ -8,6 +8,7 @@
 
 import { modalManager } from './modal-manager.js';
 import { settingsManager } from './settings-manager.js';
+import { apiExplorer } from './api-explorer.js';
 import { systemStatus } from '../utils/system-status.js';
 
 /**
@@ -20,7 +21,8 @@ export class UIController {
         this.components = {
             modalManager,
             settingsManager,
-            systemStatus
+            systemStatus,
+            apiExplorer
         };
     }
 
@@ -36,6 +38,9 @@ export class UIController {
         try {
             // Initialize settings modal
             this.initializeSettingsModal();
+            
+            // Initialize API Explorer
+            this.initializeAPIExplorer();
             
             // Initialize settings UI
             this.components.settingsManager.initializeSettingsUI();
@@ -71,6 +76,91 @@ export class UIController {
                 clickOutsideToClose: true
             }
         );
+    }
+
+    /**
+     * Initialize API Explorer
+     */
+    initializeAPIExplorer() {
+        const apiExplorerBtn = document.getElementById('open-api-explorer');
+        if (apiExplorerBtn) {
+            apiExplorerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Open API Explorer in a new window/tab
+                const apiWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+                if (apiWindow) {
+                    this.openAPIExplorerInWindow(apiWindow);
+                } else {
+                    // Fallback to modal if popup is blocked
+                    this.components.apiExplorer.show();
+                }
+            });
+        } else {
+            console.warn('API Explorer button not found');
+        }
+    }
+
+    /**
+     * Open API Explorer in a new window
+     */
+    openAPIExplorerInWindow(apiWindow) {
+        const html = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>🐝 API Explorer - Another Documents Chat AI</title>
+                <style>
+                    :root {
+                        --bg-primary: #1a1a1a;
+                        --bg-secondary: #2d2d2d;
+                        --text-primary: #ffffff;
+                        --text-secondary: #cccccc;
+                        --border-color: #444444;
+                        --accent-color: #3b82f6;
+                    }
+                    body {
+                        margin: 0;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        background: var(--bg-primary);
+                        color: var(--text-primary);
+                    }
+                    #api-explorer-container {
+                        height: 100vh;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                </style>
+            </head>
+            <body>
+                <div id="api-explorer-container"></div>
+                <script type="module">
+                    // Import API Explorer from parent window
+                    import('${window.location.origin}/static/js/modules/ui/api-explorer.js')
+                        .then(module => {
+                            const explorer = new module.APIExplorer();
+                            const container = document.getElementById('api-explorer-container');
+                            const modal = explorer.createModal();
+                            // Remove modal styling and add to container directly
+                            const content = modal.querySelector('.modal-content');
+                            content.style.width = '100%';
+                            content.style.height = '100%';
+                            content.style.maxWidth = 'none';
+                            content.style.border = 'none';
+                            content.style.borderRadius = '0';
+                            content.style.boxShadow = 'none';
+                            container.appendChild(content);
+                        })
+                        .catch(err => {
+                            document.body.innerHTML = '<h1>Error loading API Explorer</h1><p>' + err.message + '</p>';
+                        });
+                </script>
+            </body>
+            </html>
+        `;
+        
+        apiWindow.document.write(html);
+        apiWindow.document.close();
     }
 
     /**

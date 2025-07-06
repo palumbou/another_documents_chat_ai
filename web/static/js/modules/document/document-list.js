@@ -282,6 +282,7 @@ export function filterDocuments(searchTerm) {
 }
 
 // Global functions for HTML onclick handlers
+window.loadDocuments = loadDocuments;
 window.viewDocumentChunks = viewDocumentChunks;
 window.reprocessDocument = reprocessDocument;
 window.deleteDocument = deleteDocument;

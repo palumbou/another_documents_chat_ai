@@ -9,16 +9,52 @@ let currentTheme = null;
 let availableThemes = [];
 
 /**
- * Load available themes from the directory
- * @returns {Promise<Array>} List of available themes
+ * Dynamically discover and load available themes from the themes directory
+ * @returns {Promise<Array>} List of available themes with light/dark variants
  */
 async function loadAvailableThemes() {
   if (availableThemes.length > 0) {
     return availableThemes;
   }
 
-  // List of theme files to check (can be expanded dynamically later)
-  const themeFiles = ['base.json', 'catppuccin.json', 'dracula.json', 'tokyo-night.json', 'gruvbox.json', 'nord.json', 'solarized.json', 'template.json'];
+  // Try to get list of theme files dynamically
+  let themeFiles = [];
+  try {
+    // Try to discover theme files by attempting to load common ones
+    const commonThemes = [
+      'base.json', 
+      'Ayu.json', 
+      'Catppuccin.json', 
+      'Dracula.json', 
+      'Gruvbox.json',
+      'Material_Theme.json',
+      'Monokai_Pro.json',
+      'Nord.json',
+      'One_Dark.json',
+      'One_Light.json',
+      'Palenight.json',
+      'Rose_Pine.json',
+      'Solarized.json',
+      'Tokyo_Night.json'
+    ];
+    
+    // Test which theme files actually exist
+    for (const file of commonThemes) {
+      try {
+        const response = await fetch(`/static/themes/${file}`);
+        if (response.ok) {
+          themeFiles.push(file);
+        }
+      } catch (e) {
+        // File doesn't exist, skip it
+        console.log(`Theme file ${file} not found, skipping`);
+      }
+    }
+  } catch (error) {
+    console.error('Error discovering theme files:', error);
+    // Fallback to base theme only
+    themeFiles = ['base.json'];
+  }
   
   availableThemes = [];
   
@@ -136,11 +172,12 @@ async function applyTheme(themeId) {
 }
 
 /**
- * Create theme selector dropdown with popup preview
+ * Create advanced theme selector with auto/manual modes and separate light/dark themes
  * @param {HTMLElement} container - Container element for the theme selector
  */
 async function createThemeSelector(container) {
   const themes = await loadAvailableThemes();
+  const config = getThemeConfiguration();
   
   // Sort themes: light first, then dark
   const lightThemes = themes.filter(t => t.type === 'light').sort((a, b) => a.name.localeCompare(b.name));
@@ -148,177 +185,309 @@ async function createThemeSelector(container) {
   
   const selectorHTML = `
     <div class="theme-selector">
-      <h3>🎨 Themes</h3>
+      <h3>🎨 Theme Configuration</h3>
+      
+      <!-- Theme Mode Selection -->
+      <div class="theme-mode-section">
+        <label for="theme-mode-select">Theme Mode:</label>
+        <select id="theme-mode-select" class="theme-dropdown">
+          <option value="auto" ${config.mode === 'auto' ? 'selected' : ''}>🌓 Auto (Follow System)</option>
+          <option value="light" ${config.mode === 'light' ? 'selected' : ''}>☀️ Always Light</option>
+          <option value="dark" ${config.mode === 'dark' ? 'selected' : ''}>🌙 Always Dark</option>
+        </select>
+        <small class="mode-description">
+          Auto mode automatically switches between your light and dark theme preferences based on your system settings.
+        </small>
+      </div>
+      
+      <!-- Light Theme Selection -->
       <div class="theme-dropdown-container">
-        <label for="theme-select">Select Theme:</label>
+        <label for="light-theme-select">Light Theme:</label>
         <div class="theme-dropdown-wrapper">
-          <select id="theme-select" class="theme-dropdown">
-            <optgroup label="Light Themes">
-              ${lightThemes.map(theme => `
-                <option value="${theme.id}" title="${theme.description}">
-                  ${theme.name}
-                </option>
-              `).join('')}
-            </optgroup>
-            <optgroup label="Dark Themes">
-              ${darkThemes.map(theme => `
-                <option value="${theme.id}" title="${theme.description}">
-                  ${theme.name}
-                </option>
-              `).join('')}
-            </optgroup>
+          <select id="light-theme-select" class="theme-dropdown">
+            ${lightThemes.map(theme => `
+              <option value="${theme.id}" ${config.lightTheme === theme.id ? 'selected' : ''} title="${theme.description}">
+                ${theme.parentTheme} - ${theme.name}
+              </option>
+            `).join('')}
           </select>
-          <button id="theme-info-btn" class="btn-icon theme-info-btn" title="View theme details">ℹ️</button>
+          <button class="btn-icon theme-info-btn" data-theme-type="light" title="Preview light theme">👁️</button>
         </div>
       </div>
-      <div class="theme-description">
-        <small id="theme-description-text">Select a theme to see its description</small>
+      
+      <!-- Dark Theme Selection -->
+      <div class="theme-dropdown-container">
+        <label for="dark-theme-select">Dark Theme:</label>
+        <div class="theme-dropdown-wrapper">
+          <select id="dark-theme-select" class="theme-dropdown">
+            ${darkThemes.map(theme => `
+              <option value="${theme.id}" ${config.darkTheme === theme.id ? 'selected' : ''} title="${theme.description}">
+                ${theme.parentTheme} - ${theme.name}
+              </option>
+            `).join('')}
+          </select>
+          <button class="btn-icon theme-info-btn" data-theme-type="dark" title="Preview dark theme">👁️</button>
+        </div>
       </div>
-    </div>
-    
-    <!-- Theme Info Popup -->
-    <div id="theme-info-popup" class="theme-popup" style="display: none;">
-      <div class="theme-popup-backdrop"></div>
-      <div class="theme-popup-content">
-        <div class="theme-popup-header">
-          <h4 id="theme-popup-title">Theme Information</h4>
-          <button id="close-theme-popup" class="btn-icon">✕</button>
-        </div>
-        <div class="theme-popup-body">
-          <div class="theme-preview-large" id="theme-preview-large"></div>
-          <div class="theme-info">
-            <p><strong>Name:</strong> <span id="theme-popup-name">-</span></p>
-            <p><strong>Type:</strong> <span id="theme-popup-type">-</span></p>
-            <p><strong>Author:</strong> <span id="theme-popup-author">-</span></p>
-            <p><strong>Description:</strong> <span id="theme-popup-description">-</span></p>
-          </div>
-          <div class="theme-colors-preview" id="theme-colors-preview">
-            <!-- Color swatches will be populated here -->
-          </div>
-        </div>
+      
+      <!-- Current Status -->
+      <div class="theme-status">
+        <small>
+          <strong>Currently active:</strong> <span id="current-theme-status">${config.currentTheme?.name || 'Unknown'}</span>
+        </small>
       </div>
     </div>
   `;
   
   container.innerHTML = selectorHTML;
   
-  const select = container.querySelector('#theme-select');
-  const descriptionText = container.querySelector('#theme-description-text');
-  const infoBtn = container.querySelector('#theme-info-btn');
-  const popup = document.querySelector('#theme-info-popup');
-  const closePopup = document.querySelector('#close-theme-popup');
-  const backdrop = document.querySelector('.theme-popup-backdrop');
-  
-  // Update description on hover/selection
-  function updateDescription() {
-    const selectedId = select.value;
-    const selectedTheme = themes.find(t => t.id === selectedId);
-    if (selectedTheme) {
-      descriptionText.textContent = selectedTheme.description;
-    }
+  // Set up event listeners
+  setupThemeSelectorEvents(container);
+}
+
+/**
+ * Set up event listeners for the advanced theme selector
+ */
+function setupThemeSelectorEvents(container) {
+  // Theme mode change
+  const modeSelect = container.querySelector('#theme-mode-select');
+  if (modeSelect) {
+    modeSelect.addEventListener('change', async (e) => {
+      await setThemeMode(e.target.value);
+      updateThemeStatus();
+    });
   }
   
-  // Show theme info popup
-  async function showThemeInfo() {
-    const selectedId = select.value;
-    const selectedTheme = themes.find(t => t.id === selectedId);
-    
-    if (!selectedTheme) return;
-    
-    try {
-      const themeData = await loadThemeFile(selectedTheme.file);
-      const variantData = themeData.variants[selectedTheme.variant];
-      
-      // Populate popup content
-      document.getElementById('theme-popup-title').textContent = selectedTheme.name;
-      document.getElementById('theme-popup-name').textContent = selectedTheme.name;
-      document.getElementById('theme-popup-type').textContent = selectedTheme.type;
-      document.getElementById('theme-popup-author').textContent = themeData.author || 'Unknown';
-      document.getElementById('theme-popup-description').textContent = selectedTheme.description;
-      
-      // Create color preview
-      const colorsPreview = document.getElementById('theme-colors-preview');
-      const colors = variantData.colors;
-      const mainColors = ['--primary-color', '--secondary-color', '--accent-color', '--success-color', '--warning-color', '--error-color'];
-      
-      colorsPreview.innerHTML = `
-        <h5>Color Palette</h5>
-        <div class="color-swatches">
-          ${mainColors.map(colorVar => `
-            <div class="color-swatch" title="${colorVar}">
-              <div class="color-preview" style="background-color: ${colors[colorVar]}"></div>
-              <small>${colorVar.replace('--', '').replace('-', ' ')}</small>
-            </div>
-          `).join('')}
-        </div>
-      `;
-      
-      // Show popup
-      popup.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    } catch (error) {
-      console.error('Failed to load theme info:', error);
-    }
+  // Light theme change
+  const lightSelect = container.querySelector('#light-theme-select');
+  if (lightSelect) {
+    lightSelect.addEventListener('change', async (e) => {
+      await setLightTheme(e.target.value);
+      updateThemeStatus();
+    });
   }
   
-  // Hide theme info popup
-  function hideThemeInfo() {
-    popup.style.display = 'none';
-    document.body.style.overflow = '';
+  // Dark theme change
+  const darkSelect = container.querySelector('#dark-theme-select');
+  if (darkSelect) {
+    darkSelect.addEventListener('change', async (e) => {
+      await setDarkTheme(e.target.value);
+      updateThemeStatus();
+    });
   }
   
-  // Event listeners
-  select.addEventListener('change', async () => {
-    const themeId = select.value;
-    updateDescription();
-    
-    try {
-      await applyTheme(themeId);
-    } catch (error) {
-      console.error('Failed to apply theme:', error);
-    }
+  // Preview buttons
+  const previewButtons = container.querySelectorAll('.theme-info-btn');
+  previewButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const themeType = btn.dataset.themeType;
+      const selectElement = container.querySelector(`#${themeType}-theme-select`);
+      if (selectElement) {
+        const themeId = selectElement.value;
+        previewTheme(themeId);
+      }
+    });
   });
-  
-  select.addEventListener('mouseover', updateDescription);
-  infoBtn.addEventListener('click', showThemeInfo);
-  closePopup.addEventListener('click', hideThemeInfo);
-  backdrop.addEventListener('click', hideThemeInfo);
-  
-  // Close popup with Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && popup.style.display === 'flex') {
-      hideThemeInfo();
-    }
-  });
-  
-  // Set current theme as selected
-  if (currentTheme) {
-    select.value = currentTheme.id;
-    updateDescription();
+}
+
+/**
+ * Update theme status display
+ */
+function updateThemeStatus() {
+  const statusElement = document.getElementById('current-theme-status');
+  if (statusElement && currentTheme) {
+    statusElement.textContent = currentTheme.name;
   }
 }
 
 /**
- * Initialize theme system
+ * Preview a theme temporarily
+ */
+async function previewTheme(themeId) {
+  const originalTheme = currentTheme;
+  try {
+    await applyTheme(themeId);
+    
+    // Show a toast with option to keep or revert
+    showThemePreviewToast(themeId, originalTheme);
+  } catch (error) {
+    console.error('Failed to preview theme:', error);
+  }
+}
+
+/**
+ * Show theme preview toast with keep/revert options
+ */
+function showThemePreviewToast(previewThemeId, originalTheme) {
+  const toast = document.createElement('div');
+  toast.className = 'theme-preview-toast';
+  toast.innerHTML = `
+    <div class="toast-content">
+      <span>Theme preview active</span>
+      <div class="toast-actions">
+        <button id="keep-theme" class="btn-small btn-primary">Keep</button>
+        <button id="revert-theme" class="btn-small btn-secondary">Revert</button>
+      </div>
+    </div>
+  `;
+  
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--accent-color);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    z-index: 2000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  `;
+  
+  document.body.appendChild(toast);
+  
+  // Keep theme
+  toast.querySelector('#keep-theme').addEventListener('click', () => {
+    // Theme is already applied, just clean up
+    toast.remove();
+    updateThemeStatus();
+  });
+  
+  // Revert theme
+  toast.querySelector('#revert-theme').addEventListener('click', async () => {
+    if (originalTheme) {
+      await applyTheme(originalTheme.id);
+    }
+    toast.remove();
+    updateThemeStatus();
+  });
+  
+  // Auto-remove after 10 seconds
+  setTimeout(() => {
+    if (document.body.contains(toast)) {
+      toast.remove();
+    }
+  }, 10000);
+}
+
+// Theme system state
+let themeMode = 'auto'; // 'auto', 'light', 'dark'
+let lightTheme = 'base-light';
+let darkTheme = 'base-dark';
+let systemThemeListener = null;
+
+/**
+ * Advanced theme initialization with auto/manual modes
  */
 async function initializeThemeSystem() {
   try {
     // Load available themes first
     await loadAvailableThemes();
     
-    // Load saved theme or use default
-    const savedTheme = localStorage.getItem('currentTheme');
-    if (savedTheme) {
-      const themeData = JSON.parse(savedTheme);
-      await applyTheme(themeData.id);
-    } else {
-      // Apply default theme (base dark)
-      await applyTheme('base-dark');
-    }
+    // Load saved preferences
+    const savedMode = localStorage.getItem('themeMode') || 'auto';
+    const savedLightTheme = localStorage.getItem('lightTheme') || 'base-light';
+    const savedDarkTheme = localStorage.getItem('darkTheme') || 'base-dark';
+    
+    themeMode = savedMode;
+    lightTheme = savedLightTheme;
+    darkTheme = savedDarkTheme;
+    
+    // Apply theme based on mode
+    await applyCurrentTheme();
+    
+    // Set up system theme listener for auto mode
+    setupSystemThemeListener();
+    
   } catch (error) {
     console.error('Failed to initialize theme system:', error);
     // Fallback to CSS defaults
   }
+}
+
+/**
+ * Set up listener for system theme changes
+ */
+function setupSystemThemeListener() {
+  if (!window.matchMedia) return;
+  
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  
+  const handleSystemThemeChange = (e) => {
+    if (themeMode === 'auto') {
+      applyCurrentTheme();
+    }
+  };
+  
+  // Remove existing listener if any
+  if (systemThemeListener) {
+    mediaQuery.removeListener(systemThemeListener);
+  }
+  
+  systemThemeListener = handleSystemThemeChange;
+  mediaQuery.addListener(systemThemeListener);
+}
+
+/**
+ * Apply current theme based on mode and preferences
+ */
+async function applyCurrentTheme() {
+  let themeToApply;
+  
+  if (themeMode === 'auto') {
+    // Use system preference
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    themeToApply = prefersDark ? darkTheme : lightTheme;
+  } else if (themeMode === 'dark') {
+    themeToApply = darkTheme;
+  } else {
+    themeToApply = lightTheme;
+  }
+  
+  await applyTheme(themeToApply);
+}
+
+/**
+ * Set theme mode (auto, light, dark)
+ */
+async function setThemeMode(mode) {
+  themeMode = mode;
+  localStorage.setItem('themeMode', mode);
+  await applyCurrentTheme();
+}
+
+/**
+ * Set specific theme for light mode
+ */
+async function setLightTheme(themeId) {
+  lightTheme = themeId;
+  localStorage.setItem('lightTheme', themeId);
+  if (themeMode === 'light' || (themeMode === 'auto' && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    await applyCurrentTheme();
+  }
+}
+
+/**
+ * Set specific theme for dark mode
+ */
+async function setDarkTheme(themeId) {
+  darkTheme = themeId;
+  localStorage.setItem('darkTheme', themeId);
+  if (themeMode === 'dark' || (themeMode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    await applyCurrentTheme();
+  }
+}
+
+/**
+ * Get current theme configuration
+ */
+function getThemeConfiguration() {
+  return {
+    mode: themeMode,
+    lightTheme: lightTheme,
+    darkTheme: darkTheme,
+    currentTheme: currentTheme
+  };
 }
 
 // Export functions for global use
@@ -327,5 +496,9 @@ window.ThemeManager = {
   loadAvailableThemes,
   createThemeSelector,
   initializeThemeSystem,
+  setThemeMode,
+  setLightTheme,
+  setDarkTheme,
+  getThemeConfiguration,
   getCurrentTheme: () => currentTheme
 };

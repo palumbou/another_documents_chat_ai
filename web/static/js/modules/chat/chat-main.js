@@ -4,6 +4,8 @@
  * Acts as the central entry point for chat management
  */
 
+import { chatCore } from './chat-core.js';
+import { chatHistoryManager } from './chat-history.js';
 import { 
     addMessageToChat, 
     addThinkingBubble, 
@@ -33,6 +35,12 @@ let lastSentMessage = null;
  */
 export function initializeChat() {
     console.log('Initializing chat functionality...');
+    
+    // Initialize core chat functionality
+    chatCore.initialize();
+    
+    // Initialize chat history
+    chatHistoryManager.initialize();
     
     // Set up event listeners
     setupChatEventListeners();

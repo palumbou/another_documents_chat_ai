@@ -102,16 +102,19 @@ function setupSearchHandler() {
 /**
  * Handle manual refresh button click
  */
-export function refreshDocuments() {
+function refreshDocuments() {
     clearMessages();
     showMessage('Refreshing documents...', 'info');
     loadDocuments();
 }
 
+// Make function globally available
+window.refreshDocuments = refreshDocuments;
+
 /**
  * Handle manual upload button click
  */
-export function triggerFileUpload() {
+function triggerFileUpload() {
     const fileInput = document.getElementById('doc-file');
     if (fileInput) {
         fileInput.click();
@@ -121,7 +124,7 @@ export function triggerFileUpload() {
 /**
  * Cancel current upload if in progress
  */
-export function cancelUpload() {
+function cancelUpload() {
     const wasCancelled = cancelCurrentUpload();
     if (!wasCancelled) {
         showMessage('No upload in progress to cancel', 'info');
@@ -132,24 +135,30 @@ export function cancelUpload() {
  * Get current upload status
  * @returns {boolean} True if upload is in progress
  */
-export function getUploadStatus() {
+function getUploadStatus() {
     return isUploadInProgress();
 }
 
 /**
  * Clean up resources when leaving the page
  */
-export function cleanup() {
+function cleanup() {
     stopAutoRefresh();
     cancelCurrentUpload();
     console.log('Documents Management System cleaned up');
 }
 
+// Make functions globally available
+window.triggerFileUpload = triggerFileUpload;
+window.cancelUpload = cancelUpload;
+window.getUploadStatus = getUploadStatus;
+window.cleanup = cleanup;
+
 // Make functions available globally for HTML onclick handlers
 window.refreshDocuments = refreshDocuments;
 window.triggerFileUpload = triggerFileUpload;
 window.cancelUpload = cancelUpload;
-window.loadDocuments = loadDocuments;
+// Note: loadDocuments is made global by document-list.js module
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {

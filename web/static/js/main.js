@@ -53,8 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Make functions available globally for onclick handlers
-window.viewDocumentChunks = viewDocumentChunks;
-window.deleteDocument = deleteDocument;
+// Note: deleteDocument is made global by document-list.js module
 window.retryProcessing = retryProcessing;
 window.createProject = createProject;
 window.loadProjects = loadProjects;

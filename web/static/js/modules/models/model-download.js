@@ -261,22 +261,25 @@ function updatePullProgress(data) {
     if (!pullMsg) return;
     
     try {
-        if (data.status === 'downloading' && data.completed && data.total) {
-            // Calculate and display download progress
-            const percentage = Math.round((data.completed / data.total) * 100);
-            const completedMB = (data.completed / (1024 * 1024)).toFixed(1);
-            const totalMB = (data.total / (1024 * 1024)).toFixed(1);
+        // Check if we have progress data with percentage and sizes
+        if (data.progress_percent !== undefined && data.downloaded && data.total) {
+            const percentage = Math.round(data.progress_percent);
+            const downloadedMB = data.downloaded;
+            const totalMB = data.total;
             
             pullMsg.innerHTML = `
-                <span style="color: #3498db;">
-                    📥 Downloading: ${percentage}% (${completedMB}/${totalMB} MB)
-                </span>
+                <div style="color: #3498db; margin-bottom: 0.5rem;">
+                    📥 Downloading ${data.model_name}: ${percentage}% (${downloadedMB}/${totalMB})
+                </div>
+                <div style="background: #2d2d2d; border-radius: 4px; overflow: hidden; margin-bottom: 0.5rem;">
+                    <div style="background: #3498db; height: 20px; width: ${percentage}%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
+                        ${percentage}%
+                    </div>
+                </div>
+                <button onclick="cancelModelDownload()" style="background: #e74c3c; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                    ⏹️ Cancel Download
+                </button>
             `;
-            
-            // Stop animation when complete
-            if (percentage >= 100) {
-                pullMsg.style.animation = 'none';
-            }
         } else if (data.status) {
             // Provide user-friendly status messages
             let icon = '🔄';
@@ -307,7 +310,6 @@ function updatePullProgress(data) {
                     message = 'Download completed successfully!';
                     break;
                 default:
-                    // Add download icon for generic status
                     icon = '📥';
                     break;
             }
@@ -368,3 +370,6 @@ export function getCurrentDownload() {
         isActive: currentDownload.isActive
     };
 }
+
+// Make cancel function globally available for onclick handlers
+window.cancelModelDownload = cancelModelDownload;

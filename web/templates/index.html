@@ -86,7 +86,7 @@
       justify-content: space-between;
       padding: 1rem 1.5rem;
       border-bottom: 1px solid var(--border-color);
-      position: relative; /* Per permettere il posizionamento assoluto del pulsante */
+      position: relative;
     }
     
     .sidebar-header .header-content {
@@ -109,17 +109,16 @@
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
       cursor: pointer;
-      transition: all 0.2s ease;
-      position: absolute; /* Posizionamento assoluto */
-      right: 1.5rem; /* All'estremo destro */
-      top: 50%; /* Centro verticale */
-      transform: translateY(-50%); /* Perfetto allineamento verticale */
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
     }
     
     .settings-btn:hover {
       background: var(--primary-color);
       color: white;
-      transform: translateY(-1px);
+      transform: translateY(-50%);
     }
     
     @keyframes settingsModalIn {
@@ -203,6 +202,90 @@
       line-height: 1.3;
     }
     
+    /* Advanced Theme Selector Styles */
+    .theme-mode-section {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: var(--background-light);
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+    }
+    
+    .theme-mode-section label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .mode-description {
+      margin-top: 0.5rem;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.3;
+    }
+    
+    .theme-dropdown-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .theme-dropdown-wrapper .theme-dropdown {
+      flex: 1;
+    }
+    
+    .theme-info-btn {
+      padding: 0.5rem;
+      background: var(--background-light);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-info-btn:hover {
+      background: var(--accent-color);
+      color: white;
+    }
+    
+    .theme-status {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--success-color);
+      color: white;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    
+    .theme-preview-toast {
+      animation: toastSlideIn 0.3s ease-out;
+    }
+    
+    .toast-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    
+    .toast-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    @keyframes toastSlideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
     /* Quick Guide Styles */
     .quick-guide {
       margin-top: 1.5rem;
@@ -268,7 +351,7 @@
     
     .features-list {
       margin: 0;
-      padding-left: 1.2rem;
+      padding-left: 0;
       list-style-type: none;
     }
     
@@ -277,15 +360,7 @@
       color: var(--text-secondary);
       font-size: 0.9rem;
       line-height: 1.4;
-      position: relative;
-    }
-    
-    .features-list li::before {
-      content: "•";
-      color: var(--accent-color);
-      position: absolute;
-      left: -1rem;
-      font-weight: bold;
+      padding-left: 0.5rem;
     }
     
     .tips-section h4 {
@@ -296,7 +371,8 @@
     
     .tips-section ul {
       margin: 0;
-      padding-left: 1.2rem;
+      padding-left: 0;
+      list-style-type: none;
     }
     
     .tips-section li {
@@ -304,10 +380,43 @@
       color: var(--text-secondary);
       font-size: 0.9rem;
       line-height: 1.4;
+      padding-left: 0.5rem;
     }
     
     .tips-section strong {
       color: var(--text-primary);
+    }
+    
+    /* Welcome message styles */
+    .welcome-message {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .welcome-message h2 {
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+    
+    .welcome-message > p {
+      margin-bottom: 2rem;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+    
+    .quick-guide {
+      text-align: left;
+      margin-top: 2rem;
+    }
+    
+    .features-highlight {
+      text-align: left;
+    }
+    
+    .tips-section {
+      text-align: left;
     }
   </style>
 </head>
@@ -317,14 +426,20 @@
     <aside class="sidebar left-sidebar">
       <header class="sidebar-header">
         <div class="header-content">
-          <h1>Documents Chat AI</h1>
+          <h1>Another Documents Chat AI</h1>
         </div>
         <button id="toggle-settings" class="btn-icon settings-btn" title="Open settings">⚙️</button>
       </header>
       
       <!-- Project Management -->
       <section class="projects-section">
-        <h3>Projects</h3>
+        <div class="section-header">
+          <h3>Projects</h3>
+          <div class="project-controls">
+            <button id="new-project-btn" class="btn-small" title="Create new project">+</button>
+            <button id="delete-project-btn" class="btn-small btn-danger" title="Delete current project">🗑️</button>
+          </div>
+        </div>
         
         <div class="project-management">
           <div class="project-header">
@@ -332,8 +447,6 @@
             <select id="project-select" class="project-select">
               <option value="global">Global Documents</option>
             </select>
-            <button id="new-project-btn" class="btn-small" title="Create new project">+</button>
-            <button id="delete-project-btn" class="btn-small btn-danger" title="Delete current project">🗑️</button>
           </div>
           
           <!-- New Project Modal -->
@@ -397,7 +510,7 @@
       <!-- Chat History -->
       <section class="chats-section">
         <div class="section-header">
-          <h3>Chat History</h3>
+          <h3>💬 Chat History</h3>
           <div class="chat-controls">
             <div class="export-dropdown">
               <button id="export-chat-btn" class="btn-small" title="Export current chat">💾</button>
@@ -419,7 +532,7 @@
     <main class="chat-container">
       <div class="chat-messages" id="chat-messages">
         <div class="welcome-message">
-          <h2>📄 Welcome to Documents Chat AI</h2>
+          <h2>📄 Welcome to Another Documents Chat AI</h2>
           <p>Your intelligent document assistant powered by Ollama</p>
           
           <div class="quick-guide">
@@ -461,7 +574,7 @@
             <div class="features-highlight">
               <h4>✨ Key Features</h4>
               <ul class="features-list">
-                <li>📁 Multi-format support (.pdf, .docx, .txt, .log)</li>
+                <li>📁 Multi-format support (.pdf, .docx, .doc, .txt, .md, .log)</li>
                 <li>🔍 OCR for scanned documents</li>
                 <li>🧠 Intelligent document analysis</li>
                 <li>💬 Context-aware AI responses</li>
@@ -513,12 +626,12 @@
     <div class="settings-modal-content">
       <div class="settings-modal-header">
         <h3>⚙️ Settings</h3>
-        <button id="close-settings-modal" class="btn-icon" title="Close settings (ESC)">✕</button>
+        <button id="close-settings" class="btn-icon" title="Close settings (ESC)">✕</button>
       </div>
       <div class="settings-modal-body">
         <!-- Models Management -->
         <section class="models-section">
-          <h3>🤖 AI Models</h3>
+          <h3>AI Models</h3>
           <div class="model-control-row">
             <label for="remote-select">Available Models:</label>
             <div class="model-control-inline">
@@ -559,6 +672,16 @@
               <small class="option-help">Enable verbose debugging and console output</small>
             </div>
           </div>
+          
+          <!-- API Explorer -->
+          <div class="option-group">
+            <div class="option-item">
+              <button id="open-api-explorer" class="btn-primary" style="width: 100%; padding: 0.75rem; margin-top: 0.5rem;">
+                🐝 Open API Explorer
+              </button>
+              <small class="option-help">Explore and test all available API endpoints in a new tab</small>
+            </div>
+          </div>
         </section>
 
         <!-- System Status -->
@@ -570,7 +693,7 @@
               <span id="conn-status">🔴 Checking...</span>
             </div>
             <div class="status-item">
-              <span class="status-label">Engine:</span>
+              <span class="status-label">🤖 AI Engine:</span>
               <span id="engine-info">--</span>
             </div>
             <div class="status-item">
@@ -609,8 +732,7 @@
 
   <!-- Core JavaScript modules -->
   <script src="/static/js/themes.js"></script>
-  <script src="/static/js/chat.js"></script>
-  <script src="/static/js/chat-history.js"></script>
+  <script src="/static/js/documents-main.js"></script>
   
   <!-- Modular ES6 components -->
   <script type="module">

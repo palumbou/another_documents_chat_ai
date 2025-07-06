@@ -1613,3 +1613,10 @@ textarea:focus {
   max-height: 300px;
   overflow-y: auto;
 }
+
+/* Project controls */
+.project-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
